@@ -5,5 +5,5 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   // Base path for GitHub Pages - set to '/' for custom domain or '/<repo-name>/' for github.io
-  base: process.env.GITHUB_ACTIONS ? '/aiobs-frontend/' : '/',
+  base: process.env.GITHUB_ACTIONS ? '/shepherd/' : '/',
 })
