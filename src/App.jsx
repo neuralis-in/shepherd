@@ -263,15 +263,15 @@ function Header({ onOpenModal }) {
         <nav className="header__nav header__nav--desktop">
           <a href="#features" className="header__link">Features</a>
           <Link to="/pricing" className="header__link">Pricing</Link>
-          <Link to="/playground" className="header__link">Playground</Link>
+          <Link to="/dashboard" className="header__link">Dashboard</Link>
           <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer" className="header__link">
             Docs <ExternalLink size={12} />
           </a>
           <a href="https://github.com/neuralis-in/aiobs" target="_blank" rel="noopener noreferrer" className="header__link">
             <Github size={16} />
           </a>
-          <Link to="/dashboard" className="btn btn--secondary btn--sm">
-            Dashboard
+          <Link to="/playground" className="btn btn--secondary btn--sm">
+            Playground
           </Link>
           <button className="btn btn--primary btn--sm" onClick={onOpenModal}>Book a Demo</button>
         </nav>
@@ -303,7 +303,7 @@ function Header({ onOpenModal }) {
             >
               <a href="#features" className="header__mobile-link" onClick={closeMobileMenu}>Features</a>
               <Link to="/pricing" className="header__mobile-link" onClick={closeMobileMenu}>Pricing</Link>
-              <Link to="/playground" className="header__mobile-link" onClick={closeMobileMenu}>Playground</Link>
+              <Link to="/dashboard" className="header__mobile-link" onClick={closeMobileMenu}>Dashboard</Link>
               <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer" className="header__mobile-link">
                 Docs <ExternalLink size={14} />
               </a>
@@ -311,8 +311,8 @@ function Header({ onOpenModal }) {
                 <Github size={16} /> GitHub
               </a>
               <div className="header__mobile-actions">
-                <Link to="/dashboard" className="btn btn--secondary btn--sm btn--full" onClick={closeMobileMenu}>
-                  Dashboard
+                <Link to="/playground" className="btn btn--secondary btn--sm btn--full" onClick={closeMobileMenu}>
+                  Playground
                 </Link>
                 <button className="btn btn--primary btn--sm btn--full" onClick={() => { closeMobileMenu(); onOpenModal(); }}>
                   Book a Demo
