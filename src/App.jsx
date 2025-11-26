@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { 
@@ -979,10 +979,200 @@ function WorkflowDiagram() {
   )
 }
 
-// Developer Section
-function Developer() {
+// Syntax highlighting component - renders text with proper highlighting
+function HighlightedCode({ text }) {
+  if (!text) return null
+  
+  // Parse and render with syntax highlighting
+  const parts = []
+  let remaining = text
+  let key = 0
+  
+  while (remaining.length > 0) {
+    // Check for keywords
+    const keywordMatch = remaining.match(/^(from|import)\b/)
+    if (keywordMatch) {
+      parts.push(<span key={key++} className="keyword">{keywordMatch[1]}</span>)
+      remaining = remaining.slice(keywordMatch[1].length)
+      continue
+    }
+    
+    // Check for method calls
+    const methodMatch = remaining.match(/^\.(observe|end|flush|run)\(/)
+    if (methodMatch) {
+      parts.push(<span key={key++}>.</span>)
+      parts.push(<span key={key++} className="function">{methodMatch[1]}</span>)
+      parts.push(<span key={key++}>(</span>)
+      remaining = remaining.slice(methodMatch[0].length)
+      continue
+    }
+    
+    // Check for strings
+    const stringMatch = remaining.match(/^"([^"]*)"?/)
+    if (stringMatch) {
+      parts.push(<span key={key++} className="string">{stringMatch[0]}</span>)
+      remaining = remaining.slice(stringMatch[0].length)
+      continue
+    }
+    
+    // Regular character
+    parts.push(<span key={key++}>{remaining[0]}</span>)
+    remaining = remaining.slice(1)
+  }
+  
+  return <>{parts}</>
+}
+
+// Developer Section - Typing Animation Component
+function TypingCode({ lines, isVisible }) {
+  const [typingState, setTypingState] = useState({
+    lineIndex: 0,
+    charIndex: 0,
+    isComplete: false
+  })
+  const hasStarted = useRef(false)
+
+  useEffect(() => {
+    if (!isVisible || hasStarted.current) return
+    hasStarted.current = true
+
+    const interval = setInterval(() => {
+      setTypingState(prev => {
+        if (prev.isComplete) {
+          return prev
+        }
+        
+        const currentLine = lines[prev.lineIndex]
+        
+        if (!currentLine) {
+          return { ...prev, isComplete: true }
+        }
+
+        // For empty lines or context, skip quickly
+        if (currentLine.type === 'empty' || currentLine.type === 'context') {
+          if (prev.lineIndex < lines.length - 1) {
+            return { ...prev, lineIndex: prev.lineIndex + 1, charIndex: 0 }
+          }
+          return { ...prev, isComplete: true }
+        }
+
+        // Type next character
+        if (prev.charIndex < currentLine.text.length) {
+          return { ...prev, charIndex: prev.charIndex + 1 }
+        }
+
+        // Move to next line
+        if (prev.lineIndex < lines.length - 1) {
+          return { ...prev, lineIndex: prev.lineIndex + 1, charIndex: 0 }
+        }
+
+        return { ...prev, isComplete: true }
+      })
+    }, 40)
+
+    return () => clearInterval(interval)
+  }, [isVisible, lines])
+
+  const { lineIndex, charIndex, isComplete } = typingState
+
   return (
-    <section className="section developer">
+    <div className="code-diff__content">
+      {lines.map((line, index) => {
+        const isPastLine = index < lineIndex
+        const isCurrentLine = index === lineIndex
+        const isFutureLine = index > lineIndex
+        
+        // Don't show future lines
+        if (isFutureLine && !isComplete) {
+          return (
+            <div key={index} className="code-diff__line code-diff__line--future">
+              <span className="code-diff__gutter"></span>
+              <code>&nbsp;</code>
+            </div>
+          )
+        }
+
+        // Empty lines
+        if (line.type === 'empty') {
+          return (
+            <div key={index} className={`code-diff__line code-diff__line--empty${isPastLine || isCurrentLine || isComplete ? '' : ' code-diff__line--future'}`}>
+              <span className="code-diff__gutter"></span>
+              <code>&nbsp;</code>
+            </div>
+          )
+        }
+
+        // Context line (existing code)
+        if (line.type === 'context') {
+          const showContent = isPastLine || isCurrentLine || isComplete
+          return (
+            <div key={index} className={`code-diff__line code-diff__line--context${showContent ? '' : ' code-diff__line--future'}`}>
+              <span className="code-diff__gutter"></span>
+              <code>
+                {showContent ? <HighlightedCode text={line.text} /> : <>&nbsp;</>}
+              </code>
+            </div>
+          )
+        }
+
+        // Added lines with typing effect
+        const displayText = isPastLine || isComplete 
+          ? line.text 
+          : isCurrentLine 
+            ? line.text.slice(0, charIndex)
+            : ''
+
+        const showCursor = isCurrentLine && !isComplete
+
+        return (
+          <div key={index} className={`code-diff__line code-diff__line--added${showCursor ? ' code-diff__line--typing' : ''}`}>
+            <span className="code-diff__gutter">{(isPastLine || isCurrentLine || isComplete) ? '+' : ''}</span>
+            <code>
+              <HighlightedCode text={displayText} />
+              {showCursor && <span className="code-diff__cursor">|</span>}
+            </code>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function Developer() {
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef(null)
+
+  const codeLines = [
+    { type: 'added', text: 'from aiobs import observer' },
+    { type: 'empty', text: '' },
+    { type: 'added', text: 'observer.observe()' },
+    { type: 'empty', text: '' },
+    { type: 'context', text: 'result = agent.run("Plan a 3-day trip to Tokyo")' },
+    { type: 'empty', text: '' },
+    { type: 'added', text: 'observer.end()' },
+    { type: 'added', text: 'observer.flush()' },
+  ]
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <section className="section developer" ref={sectionRef}>
       <div className="container container--narrow">
         <motion.div 
           className="developer__content"
@@ -995,13 +1185,15 @@ function Developer() {
             Built for engineers shipping agents at scale.
           </motion.h2>
           
-          <motion.div className="code-block developer__code" variants={scaleIn}>
-            <div className="code-block__header">
-              <span className="code-block__title">agent.py</span>
+          <motion.div className="code-diff developer__code" variants={scaleIn}>
+            <div className="code-diff__header">
+              <span className="code-diff__title">agent.py</span>
+              <span className="code-diff__badge">
+                <span className="code-diff__badge-dot"></span>
+                patching...
+              </span>
             </div>
-            <div className="code-block__content">
-              <pre><code><span className="keyword">from</span> aiobs <span className="keyword">import</span> observer{'\n\n'}observer.<span className="function">observe</span>(){'\n\n'}result = agent.<span className="function">run</span>(<span className="string">"Plan a 3-day trip to Tokyo"</span>){'\n\n'}observer.<span className="function">end</span>(){'\n'}observer.<span className="function">flush</span>()</code></pre>
-            </div>
+            <TypingCode lines={codeLines} isVisible={isVisible} />
           </motion.div>
           
           <motion.p className="text-lg developer__subtitle" variants={fadeInUp}>
