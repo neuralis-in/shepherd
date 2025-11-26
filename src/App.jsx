@@ -31,7 +31,13 @@ import {
   Loader2,
   Check,
   Cloud,
-  Server
+  Server,
+  Bot,
+  Container,
+  HardDrive,
+  BarChart3,
+  TrendingUp,
+  PieChart
 } from 'lucide-react'
 import './App.css'
 
@@ -797,48 +803,178 @@ function HowItWorks() {
   )
 }
 
-// Workflow Diagram
+// Enhanced Architecture Diagram
 function WorkflowDiagram() {
+  const basePath = import.meta.env.BASE_URL
+  
+  const agents = [
+    { id: 1, label: 'Agent 1', platform: 'GKE', x: 60, y: 45 },
+    { id: 2, label: 'Agent 2', platform: 'EC2', x: 130, y: 120 },
+    { id: 3, label: 'Agent 3', platform: 'Cloud Run', x: 55, y: 200 },
+    { id: 4, label: 'Agent 4', platform: 'Lambda', x: 140, y: 280 },
+  ]
+
   return (
-    <div className="workflow-diagram">
-      <svg viewBox="0 0 800 120" className="workflow-diagram__svg">
-        <defs>
-          <marker id="arrowBlack" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-            <path d="M0,0 L0,8 L8,4 z" fill="#111" />
-          </marker>
-        </defs>
-        
-        {/* Boxes */}
-        <g className="workflow-box">
-          <rect x="20" y="40" width="120" height="50" rx="6" fill="white" stroke="#E5E5E5" />
-          <text x="80" y="70" textAnchor="middle" fontSize="12" fontWeight="500" fill="#111">Your Agent</text>
-        </g>
-        
-        <g className="workflow-box">
-          <rect x="200" y="40" width="120" height="50" rx="6" fill="#111" />
-          <text x="260" y="70" textAnchor="middle" fontSize="12" fontWeight="500" fill="white">Shepherd</text>
-        </g>
-        
-        <g className="workflow-box">
-          <rect x="380" y="40" width="120" height="50" rx="6" fill="white" stroke="#E5E5E5" />
-          <text x="440" y="70" textAnchor="middle" fontSize="12" fontWeight="500" fill="#111">LLM Provider</text>
-        </g>
-        
-        <g className="workflow-box">
-          <rect x="560" y="40" width="120" height="50" rx="6" fill="white" stroke="#E5E5E5" />
-          <text x="620" y="70" textAnchor="middle" fontSize="12" fontWeight="500" fill="#111">JSON Traces</text>
-        </g>
-        
-        {/* Arrows */}
-        <line x1="140" y1="65" x2="195" y2="65" stroke="#111" strokeWidth="1.5" markerEnd="url(#arrowBlack)" />
-        <line x1="320" y1="65" x2="375" y2="65" stroke="#111" strokeWidth="1.5" markerEnd="url(#arrowBlack)" />
-        <line x1="500" y1="65" x2="555" y2="65" stroke="#111" strokeWidth="1.5" markerEnd="url(#arrowBlack)" />
-        
-        {/* Labels */}
-        <text x="168" y="55" textAnchor="middle" fontSize="9" fill="#666">observe()</text>
-        <text x="348" y="55" textAnchor="middle" fontSize="9" fill="#666">intercept</text>
-        <text x="528" y="55" textAnchor="middle" fontSize="9" fill="#666">capture</text>
-      </svg>
+    <div className="architecture-diagram">
+      {/* Section: Agents on Cloud Platforms */}
+      <div className="arch-section arch-agents">
+        <div className="arch-section-label">Your AI Agents</div>
+        <div className="arch-agents-cloud">
+          {agents.map((agent, i) => (
+            <motion.div 
+              key={agent.id}
+              className="arch-agent-node"
+              initial={{ scale: 0, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.4, type: "spring" }}
+              style={{ '--delay': `${i * 0.5}s` }}
+            >
+              <div className="arch-agent-circle">
+                <Bot size={20} />
+              </div>
+              <span className="arch-agent-platform">{agent.platform}</span>
+            </motion.div>
+          ))}
+        </div>
+        <div className="arch-platforms-list">
+          <span>GKE</span>
+          <span>EC2</span>
+          <span>Cloud Run</span>
+          <span>Lambda</span>
+        </div>
+      </div>
+
+      {/* Animated Flow Lines */}
+      <div className="arch-flow arch-flow-1">
+        <div className="arch-flow-line">
+          <div className="arch-flow-particle"></div>
+        </div>
+        <span className="arch-flow-label">observe()</span>
+      </div>
+
+      {/* Section: Shepherd Layer */}
+      <motion.div 
+        className="arch-section arch-shepherd"
+        initial={{ scale: 0.9, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <div className="arch-shepherd-badge">
+          <img src={`${basePath}shepherd.svg`} alt="Shepherd" className="arch-shepherd-logo" />
+          <span>Shepherd</span>
+        </div>
+        <div className="arch-shepherd-features">
+          <div className="arch-shepherd-feature">
+            <Activity size={14} />
+            <span>Trace Capture</span>
+          </div>
+          <div className="arch-shepherd-feature">
+            <Layers size={14} />
+            <span>LLM Events</span>
+          </div>
+          <div className="arch-shepherd-feature">
+            <AlertCircle size={14} />
+            <span>Error Detection</span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Animated Flow Lines */}
+      <div className="arch-flow arch-flow-2">
+        <div className="arch-flow-line">
+          <div className="arch-flow-particle"></div>
+        </div>
+        <span className="arch-flow-label">flush()</span>
+      </div>
+
+      {/* Section: Cloud Storage */}
+      <motion.div 
+        className="arch-section arch-storage"
+        initial={{ scale: 0.9, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <div className="arch-section-label">Your Cloud</div>
+        <div className="arch-storage-icons">
+          <div className="arch-storage-item">
+            <div className="arch-storage-icon">
+              <HardDrive size={18} />
+            </div>
+            <span>S3 / GCS</span>
+          </div>
+          <div className="arch-storage-item">
+            <div className="arch-storage-icon">
+              <Database size={18} />
+            </div>
+            <span>BigQuery</span>
+          </div>
+          <div className="arch-storage-item">
+            <div className="arch-storage-icon">
+              <Container size={18} />
+            </div>
+            <span>Postgres</span>
+          </div>
+        </div>
+        <div className="arch-storage-badge">JSON Traces</div>
+      </motion.div>
+
+      {/* Animated Flow Lines */}
+      <div className="arch-flow arch-flow-3">
+        <div className="arch-flow-line">
+          <div className="arch-flow-particle"></div>
+        </div>
+        <span className="arch-flow-label">query</span>
+      </div>
+
+      {/* Section: Dashboard */}
+      <motion.div 
+        className="arch-section arch-dashboard"
+        initial={{ scale: 0.9, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.7, duration: 0.5 }}
+      >
+        <div className="arch-section-label">Insights</div>
+        <div className="arch-dashboard-preview">
+          <div className="arch-dashboard-header">
+            <div className="arch-dashboard-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span className="arch-dashboard-title">Dashboard</span>
+          </div>
+          <div className="arch-dashboard-content">
+            <div className="arch-dashboard-chart arch-chart-bar">
+              <BarChart3 size={16} />
+              <div className="arch-mini-bars">
+                <div className="arch-bar" style={{ height: '60%' }}></div>
+                <div className="arch-bar" style={{ height: '80%' }}></div>
+                <div className="arch-bar" style={{ height: '45%' }}></div>
+                <div className="arch-bar" style={{ height: '90%' }}></div>
+                <div className="arch-bar" style={{ height: '70%' }}></div>
+              </div>
+            </div>
+            <div className="arch-dashboard-chart arch-chart-line">
+              <TrendingUp size={16} />
+              <svg viewBox="0 0 60 30" className="arch-line-svg">
+                <path d="M0,25 Q15,20 25,15 T45,10 T60,5" fill="none" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            </div>
+            <div className="arch-dashboard-stats">
+              <div className="arch-stat">
+                <span className="arch-stat-value">2.4k</span>
+                <span className="arch-stat-label">Traces</span>
+              </div>
+              <div className="arch-stat">
+                <span className="arch-stat-value">12ms</span>
+                <span className="arch-stat-label">Avg Latency</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }
