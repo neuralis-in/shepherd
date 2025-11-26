@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
@@ -9,7 +9,6 @@ import {
   ChevronDown,
   Clock,
   Cpu,
-  Code,
   Box,
   CheckCircle,
   XCircle,
@@ -29,7 +28,14 @@ import {
   Gauge,
   Hash,
   Database,
-  HardDrive
+  HardDrive,
+  FolderOpen,
+  Files,
+  ChevronLeft,
+  Trash2,
+  Plus,
+  LineChart,
+  Circle
 } from 'lucide-react'
 import './Playground.css'
 
@@ -406,17 +412,15 @@ function UploadZone({ onUpload, onLoadSample, isDragging, setIsDragging, isLoadi
   const handleDrop = useCallback((e) => {
     e.preventDefault()
     setIsDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file && file.type === 'application/json') {
-      onUpload(file)
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/json' || f.name.endsWith('.json'))
+    if (files.length > 0) {
+      files.forEach(file => onUpload(file))
     }
   }, [onUpload, setIsDragging])
 
   const handleFileSelect = useCallback((e) => {
-    const file = e.target.files[0]
-    if (file) {
-      onUpload(file)
-    }
+    const files = Array.from(e.target.files)
+    files.forEach(file => onUpload(file))
   }, [onUpload])
 
   return (
@@ -435,16 +439,17 @@ function UploadZone({ onUpload, onLoadSample, isDragging, setIsDragging, isLoadi
         </div>
         <h2 className="upload-zone__title">Upload Observability Data</h2>
         <p className="upload-zone__desc">
-          Drag & drop your <code>llm_observability.json</code> file here, or click to browse
+          Drag & drop your <code>llm_observability.json</code> files here, or click to browse
         </p>
         <div className="upload-zone__actions">
           <label className="upload-zone__button">
             <Upload size={18} />
-            Select File
+            Select Files
             <input
               type="file"
               accept=".json,application/json"
               onChange={handleFileSelect}
+              multiple
               hidden
             />
           </label>
@@ -458,7 +463,7 @@ function UploadZone({ onUpload, onLoadSample, isDragging, setIsDragging, isLoadi
           </button>
         </div>
         <span className="upload-zone__hint">
-          Supports JSON files exported from aiobs
+          Supports multiple JSON files exported from aiobs
         </span>
       </div>
       <div className="upload-zone__pattern" />
@@ -469,7 +474,6 @@ function UploadZone({ onUpload, onLoadSample, isDragging, setIsDragging, isLoadi
 // Stats Bar Component
 function StatsBar({ data }) {
   const eventCount = (data.events?.length || 0) + (data.function_events?.length || 0)
-  const traceCount = data.trace_tree?.length || 0
 
   const totalDuration = data.events?.reduce((acc, e) => acc + (e.duration_ms || 0), 0) || 0
   const totalTokens = data.events?.reduce((acc, e) => acc + (e.response?.usage?.total_token_count || 0), 0) || 0
@@ -478,8 +482,8 @@ function StatsBar({ data }) {
     <div className="stats-bar">
       <div className="stats-bar__item">
         <Layers size={16} />
-        <span className="stats-bar__value">{traceCount || eventCount}</span>
-        <span className="stats-bar__label">{traceCount ? 'Traces' : 'Events'}</span>
+        <span className="stats-bar__value">{eventCount}</span>
+        <span className="stats-bar__label">Traces</span>
       </div>
       <div className="stats-bar__item">
         <Clock size={16} />
@@ -498,7 +502,7 @@ function StatsBar({ data }) {
 }
 
 // Expandable Prompt Card Component for Analytics
-function PromptCard({ event, index, variant = 'default', formatDuration }) {
+function PromptCard({ event, index, variant = 'default', formatDuration, sessionName }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const truncatePrompt = (prompt, maxLen = 50) => {
@@ -528,6 +532,9 @@ function PromptCard({ event, index, variant = 'default', formatDuration }) {
             )}
             {variant === 'tokens' && event.model && (
               <span className="prompt-item__model">{event.model}</span>
+            )}
+            {sessionName && (
+              <span className="prompt-item__session-tag">{sessionName}</span>
             )}
           </div>
         </div>
@@ -610,7 +617,7 @@ const MODEL_PRICING = {
 }
 
 // Helper function to extract all LLM events from trace tree
-function extractLLMEvents(traceTree, events = []) {
+function extractLLMEvents(traceTree, events = [], sessionName = null) {
   if (!traceTree) return events
   
   for (const node of traceTree) {
@@ -626,24 +633,53 @@ function extractLLMEvents(traceTree, events = []) {
         cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
         reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
         toolUseTokens: usage.tool_use_prompt_token_count || 0,
-        model: node.request?.model || 'unknown'
+        model: node.request?.model || 'unknown',
+        sessionName
       })
     }
     // Recursively process children
     if (node.children && node.children.length > 0) {
-      extractLLMEvents(node.children, events)
+      extractLLMEvents(node.children, events, sessionName)
     }
   }
   
   return events
 }
 
-// Analytics Component
-function Analytics({ data }) {
-  // Extract all LLM events from trace tree or use flat events
-  const llmEvents = data.trace_tree 
-    ? extractLLMEvents(data.trace_tree)
-    : (data.events || []).filter(e => e.provider !== 'function').map(e => {
+// Timeline Component
+function Timeline({ data, isAggregated = false, sessions = [] }) {
+  const [selectedMetric, setSelectedMetric] = useState('duration')
+  const [hoveredPoint, setHoveredPoint] = useState(null)
+
+  // Extract all events with timestamps
+  const timelineEvents = useMemo(() => {
+    let allEvents = []
+    
+    if (isAggregated && sessions.length > 0) {
+      sessions.forEach(session => {
+        const sessionName = session.data.sessions?.[0]?.name || session.fileName
+        if (session.data.trace_tree) {
+          extractLLMEvents(session.data.trace_tree, allEvents, sessionName)
+        } else {
+          const events = (session.data.events || []).filter(e => e.provider !== 'function').map(e => {
+            const usage = e.response?.usage || {}
+            return {
+              ...e,
+              prompt: e.request?.contents || 'N/A',
+              tokens: usage.total_token_count || 0,
+              inputTokens: usage.prompt_token_count || 0,
+              outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
+              model: e.request?.model || 'unknown',
+              sessionName
+            }
+          })
+          allEvents = [...allEvents, ...events]
+        }
+      })
+    } else if (data.trace_tree) {
+      allEvents = extractLLMEvents(data.trace_tree)
+    } else {
+      allEvents = (data.events || []).filter(e => e.provider !== 'function').map(e => {
         const usage = e.response?.usage || {}
         return {
           ...e,
@@ -651,12 +687,442 @@ function Analytics({ data }) {
           tokens: usage.total_token_count || 0,
           inputTokens: usage.prompt_token_count || 0,
           outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
-          cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
-          reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
-          toolUseTokens: usage.tool_use_prompt_token_count || 0,
           model: e.request?.model || 'unknown'
         }
       })
+    }
+
+    // Sort by start time
+    return allEvents.sort((a, b) => (a.started_at || 0) - (b.started_at || 0))
+  }, [data, isAggregated, sessions])
+
+  if (timelineEvents.length === 0) {
+    return (
+      <div className="analytics-empty">
+        <LineChart size={24} />
+        <p>No events found for timeline visualization.</p>
+      </div>
+    )
+  }
+
+  const formatDuration = (ms) => {
+    if (!ms) return '0ms'
+    if (ms < 1000) return `${ms.toFixed(0)}ms`
+    return `${(ms / 1000).toFixed(2)}s`
+  }
+
+  const formatTime = (timestamp) => {
+    if (!timestamp) return '—'
+    const date = new Date(timestamp * 1000)
+    return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  }
+
+  const formatDateTime = (timestamp) => {
+    if (!timestamp) return '—'
+    const date = new Date(timestamp * 1000)
+    return date.toLocaleString(undefined, { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit' 
+    })
+  }
+
+  // Cost calculation helper
+  const calculateEventCost = (event) => {
+    const model = event.model?.toLowerCase() || 'default'
+    const pricing = Object.entries(MODEL_PRICING).find(([key]) => model.includes(key))?.[1] || MODEL_PRICING.default
+    const inputCost = ((event.inputTokens || 0) / 1_000_000) * pricing.input
+    const outputCost = ((event.outputTokens || 0) / 1_000_000) * pricing.output
+    return inputCost + outputCost
+  }
+
+  // Calculate metrics for charts
+  const maxDuration = Math.max(...timelineEvents.map(e => e.duration_ms || 0))
+  const maxTokens = Math.max(...timelineEvents.map(e => e.tokens || 0))
+  const maxInputTokens = Math.max(...timelineEvents.map(e => e.inputTokens || 0))
+  const maxOutputTokens = Math.max(...timelineEvents.map(e => e.outputTokens || 0))
+  const maxCost = Math.max(...timelineEvents.map(e => calculateEventCost(e)))
+
+  // Cumulative data
+  const cumulativeData = timelineEvents.reduce((acc, event, index) => {
+    const prev = acc[index - 1] || { totalDuration: 0, totalTokens: 0, totalCost: 0, totalRequests: 0 }
+    acc.push({
+      ...event,
+      totalDuration: prev.totalDuration + (event.duration_ms || 0),
+      totalTokens: prev.totalTokens + (event.tokens || 0),
+      totalCost: prev.totalCost + calculateEventCost(event),
+      totalRequests: prev.totalRequests + 1,
+      index
+    })
+    return acc
+  }, [])
+
+  const totalDuration = cumulativeData[cumulativeData.length - 1]?.totalDuration || 0
+  const totalTokens = cumulativeData[cumulativeData.length - 1]?.totalTokens || 0
+  const totalCost = cumulativeData[cumulativeData.length - 1]?.totalCost || 0
+
+  // Get unique models for color coding
+  const models = [...new Set(timelineEvents.map(e => e.model))]
+  const modelColors = {
+    'gemini-2.5-pro': '#4285F4',
+    'gemini-2.0-flash': '#34A853',
+    'gemini-1.5-pro': '#FBBC05',
+    'gemini-1.5-flash': '#EA4335',
+    'gpt-4o': '#10A37F',
+    'gpt-4o-mini': '#74AA9C',
+    'gpt-4-turbo': '#00A67E',
+    'gpt-4': '#19C37D',
+    'gpt-3.5-turbo': '#5AB8A3',
+    'claude-3-opus': '#D97706',
+    'claude-3-sonnet': '#F59E0B',
+    'claude-3-haiku': '#FBBF24',
+    'unknown': '#9CA3AF'
+  }
+
+  const getModelColor = (model) => {
+    const key = Object.keys(modelColors).find(k => model?.toLowerCase().includes(k))
+    return modelColors[key] || modelColors.unknown
+  }
+
+  const metrics = [
+    { id: 'duration', label: 'Duration', icon: Timer },
+    { id: 'tokens', label: 'Total Tokens', icon: Hash },
+    { id: 'inputTokens', label: 'Input Tokens', icon: TrendingUp },
+    { id: 'outputTokens', label: 'Output Tokens', icon: TrendingDown },
+    { id: 'cost', label: 'Cost', icon: DollarSign },
+  ]
+
+  const getMetricValue = (event) => {
+    switch (selectedMetric) {
+      case 'duration': return event.duration_ms || 0
+      case 'tokens': return event.tokens || 0
+      case 'inputTokens': return event.inputTokens || 0
+      case 'outputTokens': return event.outputTokens || 0
+      case 'cost': return calculateEventCost(event)
+      default: return 0
+    }
+  }
+
+  const getMaxMetricValue = () => {
+    switch (selectedMetric) {
+      case 'duration': return maxDuration
+      case 'tokens': return maxTokens
+      case 'inputTokens': return maxInputTokens
+      case 'outputTokens': return maxOutputTokens
+      case 'cost': return maxCost
+      default: return 1
+    }
+  }
+
+  const formatMetricValue = (value) => {
+    if (selectedMetric === 'duration') return formatDuration(value)
+    if (selectedMetric === 'cost') return `$${value.toFixed(4)}`
+    return value.toLocaleString()
+  }
+
+  return (
+    <div className="timeline">
+      {/* Aggregated Banner */}
+      {isAggregated && (
+        <div className="analytics-banner">
+          <Files size={18} />
+          <span>Showing timeline across <strong>{sessions.length} sessions</strong></span>
+        </div>
+      )}
+
+      {/* Summary Stats */}
+      <div className="timeline-summary">
+        <div className="timeline-summary__item">
+          <span className="timeline-summary__label">Total Requests</span>
+          <span className="timeline-summary__value">{timelineEvents.length}</span>
+        </div>
+        <div className="timeline-summary__item">
+          <span className="timeline-summary__label">Total Duration</span>
+          <span className="timeline-summary__value">{formatDuration(totalDuration)}</span>
+        </div>
+        <div className="timeline-summary__item">
+          <span className="timeline-summary__label">Total Tokens</span>
+          <span className="timeline-summary__value">{totalTokens.toLocaleString()}</span>
+        </div>
+        <div className="timeline-summary__item">
+          <span className="timeline-summary__label">Total Cost</span>
+          <span className="timeline-summary__value timeline-summary__value--cost">${totalCost.toFixed(4)}</span>
+        </div>
+      </div>
+
+      {/* Metric Selector */}
+      <div className="timeline-controls">
+        <span className="timeline-controls__label">Metric:</span>
+        <div className="timeline-controls__options">
+          {metrics.map(metric => (
+            <button
+              key={metric.id}
+              className={`timeline-controls__btn ${selectedMetric === metric.id ? 'timeline-controls__btn--active' : ''}`}
+              onClick={() => setSelectedMetric(metric.id)}
+            >
+              <metric.icon size={14} />
+              {metric.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Bar Chart */}
+      <div className="timeline-section">
+        <h3 className="timeline-section__title">
+          <BarChart3 size={16} />
+          {metrics.find(m => m.id === selectedMetric)?.label} per Request
+        </h3>
+        <div className="timeline-chart">
+          <div className="timeline-chart__bars">
+            {timelineEvents.map((event, index) => {
+              const value = getMetricValue(event)
+              const maxValue = getMaxMetricValue()
+              const height = maxValue > 0 ? (value / maxValue) * 100 : 0
+              const isHovered = hoveredPoint === index
+
+              return (
+                <div
+                  key={index}
+                  className={`timeline-chart__bar-wrapper ${isHovered ? 'timeline-chart__bar-wrapper--hovered' : ''}`}
+                  onMouseEnter={() => setHoveredPoint(index)}
+                  onMouseLeave={() => setHoveredPoint(null)}
+                >
+                  <div
+                    className="timeline-chart__bar"
+                    style={{ 
+                      height: `${Math.max(height, 2)}%`,
+                      backgroundColor: getModelColor(event.model)
+                    }}
+                  />
+                  {isHovered && (
+                    <div className="timeline-chart__tooltip">
+                      <div className="timeline-chart__tooltip-header">
+                        <span className="timeline-chart__tooltip-model" style={{ color: getModelColor(event.model) }}>
+                          {event.model}
+                        </span>
+                        <span className="timeline-chart__tooltip-time">{formatTime(event.started_at)}</span>
+                      </div>
+                      <div className="timeline-chart__tooltip-value">
+                        {formatMetricValue(value)}
+                      </div>
+                      {event.sessionName && (
+                        <div className="timeline-chart__tooltip-session">{event.sessionName}</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          <div className="timeline-chart__axis">
+            <span>Request #{1}</span>
+            <span>Request #{timelineEvents.length}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Cumulative Chart */}
+      <div className="timeline-section">
+        <h3 className="timeline-section__title">
+          <TrendingUp size={16} />
+          Cumulative {selectedMetric === 'duration' ? 'Duration' : selectedMetric === 'cost' ? 'Cost' : 'Tokens'}
+        </h3>
+        <div className="timeline-cumulative">
+          <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="timeline-cumulative__svg">
+            {/* Grid lines */}
+            <line x1="0" y1="12.5" x2="100" y2="12.5" stroke="#E5E7EB" strokeWidth="0.5" />
+            <line x1="0" y1="25" x2="100" y2="25" stroke="#E5E7EB" strokeWidth="0.5" />
+            <line x1="0" y1="37.5" x2="100" y2="37.5" stroke="#E5E7EB" strokeWidth="0.5" />
+            
+            {/* Area */}
+            <path
+              d={`M 0 50 ${cumulativeData.map((d, i) => {
+                const x = cumulativeData.length > 1 ? (i / (cumulativeData.length - 1)) * 100 : 50
+                const maxCumulative = selectedMetric === 'duration' ? totalDuration : selectedMetric === 'cost' ? totalCost : totalTokens
+                const value = selectedMetric === 'duration' ? d.totalDuration : selectedMetric === 'cost' ? d.totalCost : d.totalTokens
+                const y = 50 - (maxCumulative > 0 ? (value / maxCumulative) * 45 : 0)
+                return `L ${x} ${y}`
+              }).join(' ')} L 100 50 Z`}
+              fill={selectedMetric === 'cost' ? 'url(#cumulativeGradientCost)' : 'url(#cumulativeGradient)'}
+            />
+            
+            {/* Line */}
+            <path
+              d={`M ${cumulativeData.map((d, i) => {
+                const x = cumulativeData.length > 1 ? (i / (cumulativeData.length - 1)) * 100 : 50
+                const maxCumulative = selectedMetric === 'duration' ? totalDuration : selectedMetric === 'cost' ? totalCost : totalTokens
+                const value = selectedMetric === 'duration' ? d.totalDuration : selectedMetric === 'cost' ? d.totalCost : d.totalTokens
+                const y = 50 - (maxCumulative > 0 ? (value / maxCumulative) * 45 : 0)
+                return `${i === 0 ? '' : 'L '}${x} ${y}`
+              }).join(' ')}`}
+              fill="none"
+              stroke={selectedMetric === 'cost' ? '#10B981' : '#6366F1'}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            
+            {/* Gradient definitions */}
+            <defs>
+              <linearGradient id="cumulativeGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#6366F1" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#6366F1" stopOpacity="0.05" />
+              </linearGradient>
+              <linearGradient id="cumulativeGradientCost" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10B981" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#10B981" stopOpacity="0.05" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div className="timeline-cumulative__labels">
+            <span>{selectedMetric === 'cost' ? '$0' : '0'}</span>
+            <span>
+              {selectedMetric === 'duration' 
+                ? formatDuration(totalDuration) 
+                : selectedMetric === 'cost' 
+                  ? `$${totalCost.toFixed(4)}`
+                  : totalTokens.toLocaleString()}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Model Distribution Over Time */}
+      <div className="timeline-section">
+        <h3 className="timeline-section__title">
+          <Layers size={16} />
+          Model Usage Timeline
+        </h3>
+        <div className="timeline-models">
+          <div className="timeline-models__legend">
+            {models.map(model => (
+              <div key={model} className="timeline-models__legend-item">
+                <span 
+                  className="timeline-models__legend-dot" 
+                  style={{ backgroundColor: getModelColor(model) }}
+                />
+                <span className="timeline-models__legend-label">{model}</span>
+              </div>
+            ))}
+          </div>
+          <div className="timeline-models__track">
+            {timelineEvents.map((event, index) => (
+              <div
+                key={index}
+                className="timeline-models__marker"
+                style={{ backgroundColor: getModelColor(event.model) }}
+                title={`${event.model} - ${formatTime(event.started_at)}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Event Timeline List */}
+      <div className="timeline-section">
+        <h3 className="timeline-section__title">
+          <Clock size={16} />
+          Request Timeline
+        </h3>
+        <div className="timeline-events">
+          {timelineEvents.map((event, index) => (
+            <motion.div
+              key={index}
+              className="timeline-event"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.02 }}
+            >
+              <div className="timeline-event__marker">
+                <div 
+                  className="timeline-event__dot"
+                  style={{ backgroundColor: getModelColor(event.model) }}
+                />
+                {index < timelineEvents.length - 1 && (
+                  <div className="timeline-event__line" />
+                )}
+              </div>
+              <div className="timeline-event__content">
+                <div className="timeline-event__header">
+                  <span className="timeline-event__time">{formatDateTime(event.started_at)}</span>
+                  <span className="timeline-event__model" style={{ color: getModelColor(event.model) }}>
+                    {event.model}
+                  </span>
+                </div>
+                <div className="timeline-event__stats">
+                  <span><Timer size={12} /> {formatDuration(event.duration_ms)}</span>
+                  <span><Hash size={12} /> {event.tokens?.toLocaleString()} tokens</span>
+                  {event.sessionName && (
+                    <span className="timeline-event__session">{event.sessionName}</span>
+                  )}
+                </div>
+                <div className="timeline-event__prompt">
+                  {(event.prompt || 'N/A').substring(0, 100)}{event.prompt?.length > 100 ? '...' : ''}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Analytics Component
+function Analytics({ data, isAggregated = false, sessions = [] }) {
+  // Extract all LLM events from trace tree or use flat events
+  const llmEvents = useMemo(() => {
+    if (isAggregated && sessions.length > 0) {
+      // Aggregate from all sessions
+      let allEvents = []
+      sessions.forEach(session => {
+        const sessionName = session.data.sessions?.[0]?.name || session.fileName
+        if (session.data.trace_tree) {
+          extractLLMEvents(session.data.trace_tree, allEvents, sessionName)
+        } else {
+          const events = (session.data.events || []).filter(e => e.provider !== 'function').map(e => {
+            const usage = e.response?.usage || {}
+            return {
+              ...e,
+              prompt: e.request?.contents || 'N/A',
+              tokens: usage.total_token_count || 0,
+              inputTokens: usage.prompt_token_count || 0,
+              outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
+              cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
+              reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
+              toolUseTokens: usage.tool_use_prompt_token_count || 0,
+              model: e.request?.model || 'unknown',
+              sessionName
+            }
+          })
+          allEvents = [...allEvents, ...events]
+        }
+      })
+      return allEvents
+    }
+
+    // Single session
+    if (data.trace_tree) {
+      return extractLLMEvents(data.trace_tree)
+    }
+    return (data.events || []).filter(e => e.provider !== 'function').map(e => {
+      const usage = e.response?.usage || {}
+      return {
+        ...e,
+        prompt: e.request?.contents || 'N/A',
+        tokens: usage.total_token_count || 0,
+        inputTokens: usage.prompt_token_count || 0,
+        outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
+        cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
+        reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
+        toolUseTokens: usage.tool_use_prompt_token_count || 0,
+        model: e.request?.model || 'unknown'
+      }
+    })
+  }, [data, isAggregated, sessions])
 
   if (llmEvents.length === 0) {
     return (
@@ -734,6 +1200,14 @@ function Analytics({ data }) {
 
   return (
     <div className="analytics">
+      {/* Aggregated Banner */}
+      {isAggregated && (
+        <div className="analytics-banner">
+          <Files size={18} />
+          <span>Showing aggregated analytics across <strong>{sessions.length} sessions</strong></span>
+        </div>
+      )}
+
       {/* Overview Stats - Full Width Row */}
       <div className="analytics-section analytics-section--full">
         <h3 className="analytics-section__title">
@@ -983,6 +1457,7 @@ function Analytics({ data }) {
                 index={i}
                 variant="tokens"
                 formatDuration={formatDuration}
+                sessionName={isAggregated ? event.sessionName : null}
               />
             ))}
           </div>
@@ -1004,6 +1479,7 @@ function Analytics({ data }) {
                 index={i}
                 variant="fast"
                 formatDuration={formatDuration}
+                sessionName={isAggregated ? event.sessionName : null}
               />
             ))}
           </div>
@@ -1022,6 +1498,7 @@ function Analytics({ data }) {
                 index={i}
                 variant="slow"
                 formatDuration={formatDuration}
+                sessionName={isAggregated ? event.sessionName : null}
               />
             ))}
           </div>
@@ -1124,34 +1601,188 @@ function Analytics({ data }) {
   )
 }
 
+// Session List Sidebar Component
+function SessionSidebar({ sessions, selectedSession, onSelectSession, onRemoveSession, onUpload, isDragging, setIsDragging }) {
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '—'
+    const date = new Date(timestamp * 1000)
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  }
+
+  const getSessionStats = (session) => {
+    const data = session.data
+    const eventCount = (data.events?.length || 0) + (data.trace_tree?.length || 0)
+    const totalTokens = data.events?.reduce((acc, e) => acc + (e.response?.usage?.total_token_count || 0), 0) || 0
+    return { eventCount, totalTokens }
+  }
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }, [setIsDragging])
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }, [setIsDragging])
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/json' || f.name.endsWith('.json'))
+    if (files.length > 0) {
+      files.forEach(file => onUpload(file))
+    }
+  }, [onUpload, setIsDragging])
+
+  const handleFileSelect = useCallback((e) => {
+    const files = Array.from(e.target.files)
+    files.forEach(file => onUpload(file))
+  }, [onUpload])
+
+  return (
+    <div className="session-sidebar">
+      <div className="session-sidebar__header">
+        <h3>
+          <FolderOpen size={16} />
+          Sessions
+        </h3>
+        <span className="session-sidebar__count">{sessions.length}</span>
+      </div>
+
+      <div className="session-sidebar__list">
+        {/* Overview Item */}
+        <motion.div
+          className={`session-sidebar__item ${selectedSession === null ? 'session-sidebar__item--active' : ''}`}
+          onClick={() => onSelectSession(null)}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <div className="session-sidebar__item-icon session-sidebar__item-icon--overview">
+            <BarChart3 size={16} />
+          </div>
+          <div className="session-sidebar__item-info">
+            <span className="session-sidebar__item-name">All Sessions Overview</span>
+            <span className="session-sidebar__item-meta">Aggregated analytics</span>
+          </div>
+        </motion.div>
+
+        <div className="session-sidebar__divider" />
+
+        {/* Session Items */}
+        {sessions.map((session, index) => {
+          const sessionInfo = session.data.sessions?.[0]
+          const stats = getSessionStats(session)
+          const isSelected = selectedSession === session.id
+
+          return (
+            <motion.div
+              key={session.id}
+              className={`session-sidebar__item ${isSelected ? 'session-sidebar__item--active' : ''}`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <div 
+                className="session-sidebar__item-content"
+                onClick={() => onSelectSession(session.id)}
+              >
+                <div className="session-sidebar__item-icon">
+                  <FileJson size={16} />
+                </div>
+                <div className="session-sidebar__item-info">
+                  <span className="session-sidebar__item-name">
+                    {sessionInfo?.name || session.fileName}
+                  </span>
+                  <span className="session-sidebar__item-meta">
+                    {stats.eventCount} events • {stats.totalTokens.toLocaleString()} tokens
+                  </span>
+                  {sessionInfo?.started_at && (
+                    <span className="session-sidebar__item-date">
+                      {formatDate(sessionInfo.started_at)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                className="session-sidebar__item-remove"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemoveSession(session.id)
+                }}
+                title="Remove session"
+              >
+                <X size={14} />
+              </button>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      {/* Add More Sessions */}
+      <div 
+        className={`session-sidebar__add ${isDragging ? 'session-sidebar__add--dragging' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <label className="session-sidebar__add-btn">
+          <Plus size={16} />
+          <span>Add Sessions</span>
+          <input
+            type="file"
+            accept=".json,application/json"
+            onChange={handleFileSelect}
+            multiple
+            hidden
+          />
+        </label>
+      </div>
+    </div>
+  )
+}
+
 // Main Playground Component
 export default function Playground() {
-  const [data, setData] = useState(null)
+  const [sessions, setSessions] = useState([])
+  const [selectedSessionId, setSelectedSessionId] = useState(null)
   const [error, setError] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
-  const [viewMode, setViewMode] = useState('tree') // 'tree', 'list', or 'analytics'
+  const [viewMode, setViewMode] = useState('analytics') // 'tree', 'list', or 'analytics'
   const [isLoadingSample, setIsLoadingSample] = useState(false)
+
+  const selectedSession = useMemo(() => {
+    if (selectedSessionId === null) return null
+    return sessions.find(s => s.id === selectedSessionId)
+  }, [sessions, selectedSessionId])
+
+  const currentData = selectedSession?.data || null
 
   const handleUpload = useCallback((file) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
         const parsed = JSON.parse(e.target.result)
-        setData(parsed)
+        const newSession = {
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          fileName: file.name,
+          data: parsed,
+          uploadedAt: Date.now()
+        }
+        setSessions(prev => [...prev, newSession])
         setError(null)
-        // Set view mode based on data
-        if (parsed.trace_tree && parsed.trace_tree.length > 0) {
-          setViewMode('tree')
-        } else {
-          setViewMode('list')
+        
+        // If this is the first session or no session is selected, show overview
+        if (sessions.length === 0) {
+          setSelectedSessionId(null)
+          setViewMode('analytics')
         }
       } catch (err) {
-        setError('Invalid JSON file. Please upload a valid llm_observability.json file.')
-        setData(null)
+        setError(`Invalid JSON file: ${file.name}. Please upload valid llm_observability.json files.`)
       }
     }
     reader.readAsText(file)
-  }, [])
+  }, [sessions.length])
 
   const handleLoadSample = useCallback(async () => {
     setIsLoadingSample(true)
@@ -1162,29 +1793,40 @@ export default function Playground() {
         throw new Error('Failed to load sample data')
       }
       const parsed = await response.json()
-      setData(parsed)
-      // Set view mode based on data
-      if (parsed.trace_tree && parsed.trace_tree.length > 0) {
-        setViewMode('tree')
-      } else {
-        setViewMode('list')
+      const newSession = {
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        fileName: 'sample_observability.json',
+        data: parsed,
+        uploadedAt: Date.now()
       }
+      setSessions([newSession])
+      setSelectedSessionId(null)
+      setViewMode('analytics')
     } catch (err) {
       setError('Failed to load sample data. Please try again.')
-      setData(null)
     } finally {
       setIsLoadingSample(false)
     }
   }, [])
 
-  const handleClear = () => {
-    setData(null)
+  const handleRemoveSession = useCallback((sessionId) => {
+    setSessions(prev => prev.filter(s => s.id !== sessionId))
+    if (selectedSessionId === sessionId) {
+      setSelectedSessionId(null)
+    }
+  }, [selectedSessionId])
+
+  const handleClearAll = () => {
+    setSessions([])
+    setSelectedSessionId(null)
     setError(null)
   }
 
-  const session = data?.sessions?.[0]
-  const hasTraceTree = data?.trace_tree && data.trace_tree.length > 0
-  const hasEvents = (data?.events && data.events.length > 0) || (data?.function_events && data.function_events.length > 0)
+  const hasData = sessions.length > 0
+  const isOverviewMode = selectedSessionId === null && hasData
+  const hasTraceTree = currentData?.trace_tree && currentData.trace_tree.length > 0
+  const hasEvents = (currentData?.events && currentData.events.length > 0) || (currentData?.function_events && currentData.function_events.length > 0)
+  const session = currentData?.sessions?.[0]
 
   return (
     <div className="playground">
@@ -1195,28 +1837,37 @@ export default function Playground() {
           </Link>
           <div className="playground-header__title">
             <h1>Playground</h1>
-            <span className="playground-header__subtitle">Visualize LLM Observability Data</span>
+            <span className="playground-header__subtitle">
+              {isOverviewMode 
+                ? `Analyzing ${sessions.length} session${sessions.length > 1 ? 's' : ''}`
+                : 'Visualize LLM Observability Data'
+              }
+            </span>
           </div>
         </div>
-        {data && (
+        {hasData && (
           <div className="playground-header__right">
             <div className="playground-header__view-toggle">
-              <button
-                className={`view-toggle__btn ${viewMode === 'tree' ? 'view-toggle__btn--active' : ''}`}
-                onClick={() => setViewMode('tree')}
-                disabled={!hasTraceTree}
-              >
-                <Layers size={14} />
-                <span>Tree</span>
-              </button>
-              <button
-                className={`view-toggle__btn ${viewMode === 'list' ? 'view-toggle__btn--active' : ''}`}
-                onClick={() => setViewMode('list')}
-                disabled={!hasEvents}
-              >
-                <Activity size={14} />
-                <span>List</span>
-              </button>
+              {!isOverviewMode && (
+                <>
+                  <button
+                    className={`view-toggle__btn ${viewMode === 'tree' ? 'view-toggle__btn--active' : ''}`}
+                    onClick={() => setViewMode('tree')}
+                    disabled={!hasTraceTree}
+                  >
+                    <Layers size={14} />
+                    <span>Tree</span>
+                  </button>
+                  <button
+                    className={`view-toggle__btn ${viewMode === 'list' ? 'view-toggle__btn--active' : ''}`}
+                    onClick={() => setViewMode('list')}
+                    disabled={!hasEvents}
+                  >
+                    <Activity size={14} />
+                    <span>List</span>
+                  </button>
+                </>
+              )}
               <button
                 className={`view-toggle__btn ${viewMode === 'analytics' ? 'view-toggle__btn--active' : ''}`}
                 onClick={() => setViewMode('analytics')}
@@ -1224,110 +1875,166 @@ export default function Playground() {
                 <BarChart3 size={14} />
                 <span>Analytics</span>
               </button>
+              <button
+                className={`view-toggle__btn ${viewMode === 'timeline' ? 'view-toggle__btn--active' : ''}`}
+                onClick={() => setViewMode('timeline')}
+              >
+                <LineChart size={14} />
+                <span>Timeline</span>
+              </button>
             </div>
-            <button className="playground-btn playground-btn--ghost" onClick={handleClear}>
-              <X size={14} />
-              <span>Clear</span>
+            <button className="playground-btn playground-btn--ghost" onClick={handleClearAll}>
+              <Trash2 size={14} />
+              <span>Clear All</span>
             </button>
           </div>
         )}
       </header>
 
       <main className="playground-main">
-        <div className="playground-container">
-          {!data ? (
-            <>
-              <UploadZone
-                onUpload={handleUpload}
-                onLoadSample={handleLoadSample}
-                isDragging={isDragging}
-                setIsDragging={setIsDragging}
-                isLoadingSample={isLoadingSample}
-              />
-              {error && (
-                <motion.div
-                  className="playground-error"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <AlertCircle size={18} />
-                  {error}
-                </motion.div>
-              )}
-            </>
-          ) : (
-            <motion.div
-              className="playground-content"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <SessionInfo session={session} />
-              <StatsBar data={data} />
+        {!hasData ? (
+          <div className="playground-container">
+            <UploadZone
+              onUpload={handleUpload}
+              onLoadSample={handleLoadSample}
+              isDragging={isDragging}
+              setIsDragging={setIsDragging}
+              isLoadingSample={isLoadingSample}
+            />
+            {error && (
+              <motion.div
+                className="playground-error"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <AlertCircle size={18} />
+                {error}
+              </motion.div>
+            )}
+          </div>
+        ) : (
+          <div className="playground-layout">
+            {/* Session Sidebar */}
+            <SessionSidebar
+              sessions={sessions}
+              selectedSession={selectedSessionId}
+              onSelectSession={setSelectedSessionId}
+              onRemoveSession={handleRemoveSession}
+              onUpload={handleUpload}
+              isDragging={isDragging}
+              setIsDragging={setIsDragging}
+            />
 
-              <div className="playground-viewer">
-                {viewMode === 'analytics' ? (
-                  <Analytics data={data} />
-                ) : viewMode === 'tree' && hasTraceTree ? (
-                  <div className="trace-tree">
-                    <div className="trace-tree__header">
-                      <h3>
-                        <Layers size={16} />
-                        Trace Tree
-                      </h3>
-                      <span className="trace-tree__count">
-                        {data.trace_tree.length} root {data.trace_tree.length === 1 ? 'trace' : 'traces'}
-                      </span>
-                    </div>
-                    <div className="trace-tree__body">
-                      {data.trace_tree.map((trace, i) => (
-                        <TreeNode key={trace.span_id || i} node={trace} index={i} />
-                      ))}
-                    </div>
-                  </div>
-                ) : viewMode === 'list' && hasEvents ? (
-                  <div className="events-list">
-                    {data.events && data.events.length > 0 && (
-                      <div className="events-section">
-                        <h3 className="events-section__title">
-                          <Cpu size={16} />
-                          Provider Events
-                          <span className="events-section__count">{data.events.length}</span>
-                        </h3>
-                        <div className="events-section__body">
-                          {data.events.map((event, i) => (
-                            <EventCard key={event.span_id || i} event={event} index={i} />
-                          ))}
-                        </div>
+            {/* Main Content */}
+            <div className="playground-content-area">
+              <motion.div
+                className="playground-content"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                {isOverviewMode ? (
+                  <>
+                    {/* Aggregated Overview */}
+                    <div className="overview-header">
+                      <div className="overview-header__info">
+                        <h2>
+                          <Files size={20} />
+                          All Sessions Overview
+                        </h2>
+                        <p>Aggregated {viewMode === 'timeline' ? 'timeline' : 'analytics'} across {sessions.length} uploaded session{sessions.length > 1 ? 's' : ''}</p>
                       </div>
-                    )}
+                    </div>
 
-                    {data.function_events && data.function_events.length > 0 && (
-                      <div className="events-section">
-                        <h3 className="events-section__title">
-                          <Terminal size={16} />
-                          Function Events
-                          <span className="events-section__count">{data.function_events.length}</span>
-                        </h3>
-                        <div className="events-section__body">
-                          {data.function_events.map((event, i) => (
-                            <EventCard key={event.span_id || i} event={event} index={i} />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    <div className="playground-viewer">
+                      {viewMode === 'timeline' ? (
+                        <Timeline 
+                          data={{}} 
+                          isAggregated={true} 
+                          sessions={sessions}
+                        />
+                      ) : (
+                        <Analytics 
+                          data={{}} 
+                          isAggregated={true} 
+                          sessions={sessions}
+                        />
+                      )}
+                    </div>
+                  </>
                 ) : (
-                  <div className="playground-empty">
-                    <AlertCircle size={24} />
-                    <p>No trace data available in this file.</p>
-                  </div>
+                  <>
+                    {/* Single Session View */}
+                    <SessionInfo session={session} />
+                    <StatsBar data={currentData} />
+
+                    <div className="playground-viewer">
+                      {viewMode === 'timeline' ? (
+                        <Timeline data={currentData} />
+                      ) : viewMode === 'analytics' ? (
+                        <Analytics data={currentData} />
+                      ) : viewMode === 'tree' && hasTraceTree ? (
+                        <div className="trace-tree">
+                          <div className="trace-tree__header">
+                            <h3>
+                              <Layers size={16} />
+                              Trace Tree
+                            </h3>
+                            <span className="trace-tree__count">
+                              {currentData.trace_tree.length} root {currentData.trace_tree.length === 1 ? 'trace' : 'traces'}
+                            </span>
+                          </div>
+                          <div className="trace-tree__body">
+                            {currentData.trace_tree.map((trace, i) => (
+                              <TreeNode key={trace.span_id || i} node={trace} index={i} />
+                            ))}
+                          </div>
+                        </div>
+                      ) : viewMode === 'list' && hasEvents ? (
+                        <div className="events-list">
+                          {currentData.events && currentData.events.length > 0 && (
+                            <div className="events-section">
+                              <h3 className="events-section__title">
+                                <Cpu size={16} />
+                                Provider Events
+                                <span className="events-section__count">{currentData.events.length}</span>
+                              </h3>
+                              <div className="events-section__body">
+                                {currentData.events.map((event, i) => (
+                                  <EventCard key={event.span_id || i} event={event} index={i} />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {currentData.function_events && currentData.function_events.length > 0 && (
+                            <div className="events-section">
+                              <h3 className="events-section__title">
+                                <Terminal size={16} />
+                                Function Events
+                                <span className="events-section__count">{currentData.function_events.length}</span>
+                              </h3>
+                              <div className="events-section__body">
+                                {currentData.function_events.map((event, i) => (
+                                  <EventCard key={event.span_id || i} event={event} index={i} />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="playground-empty">
+                          <AlertCircle size={24} />
+                          <p>No trace data available in this file.</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
-              </div>
-            </motion.div>
-          )}
-        </div>
+              </motion.div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
 }
-
