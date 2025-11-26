@@ -29,7 +29,9 @@ import {
   Mail,
   User,
   Loader2,
-  Check
+  Check,
+  Cloud,
+  Server
 } from 'lucide-react'
 import './App.css'
 
@@ -713,6 +715,7 @@ function AiobsSection() {
 
 // How It Works Section
 function HowItWorks() {
+  const basePath = import.meta.env.BASE_URL
   const steps = [
     {
       icon: <Terminal size={24} />,
@@ -728,7 +731,19 @@ function HowItWorks() {
       icon: <Search size={24} />,
       title: "Debug instantly",
       description: "Identify exactly where loops, failures, or wrong tool calls happened."
+    },
+    {
+      icon: <Cloud size={24} />,
+      title: "Stream to cloud",
+      description: "Push traces to GCP, AWS, Azure, or on-prem for continuous monitoring."
     }
+  ]
+
+  const providers = [
+    { name: 'GCP', icon: `${basePath}gcp.png`, type: 'image' },
+    { name: 'AWS', icon: `${basePath}aws.png`, type: 'image' },
+    { name: 'Azure', icon: `${basePath}azure.svg`, type: 'image' },
+    { name: 'On-Prem', icon: <Server size={20} />, type: 'icon' },
   ]
 
   return (
@@ -744,7 +759,7 @@ function HowItWorks() {
             How Shepherd Works
           </motion.h2>
           
-          <motion.div className="how-it-works__grid" variants={fadeInUp}>
+          <motion.div className="how-it-works__grid how-it-works__grid--four" variants={fadeInUp}>
             {steps.map((step, i) => (
               <motion.div key={i} className="how-it-works__step" variants={fadeInUp}>
                 <div className="how-it-works__step-number">{i + 1}</div>
@@ -757,6 +772,24 @@ function HowItWorks() {
           
           <motion.div className="how-it-works__flow" variants={scaleIn}>
             <WorkflowDiagram />
+          </motion.div>
+
+          <motion.div className="how-it-works__cloud" variants={fadeInUp}>
+            <div className="how-it-works__cloud-providers">
+              {providers.map((provider, i) => (
+                <div key={i} className="how-it-works__cloud-provider">
+                  {provider.type === 'image' ? (
+                    <img src={provider.icon} alt={provider.name} className="how-it-works__cloud-provider-img" />
+                  ) : (
+                    <div className="how-it-works__cloud-provider-icon">{provider.icon}</div>
+                  )}
+                  <span>{provider.name}</span>
+                </div>
+              ))}
+            </div>
+            <Link to="/integrations" className="how-it-works__cloud-link">
+              Learn more about integrations <ArrowRight size={14} />
+            </Link>
           </motion.div>
         </motion.div>
       </div>
@@ -1006,6 +1039,7 @@ function Footer() {
         </div>
         <nav className="footer__links">
           <Link to="/pricing">Pricing</Link>
+          <Link to="/integrations">Integrations</Link>
           <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer">Docs</a>
           <a href="https://github.com/neuralis-in/aiobs" target="_blank" rel="noopener noreferrer">GitHub</a>
           <a href="#">Privacy</a>
