@@ -201,6 +201,17 @@ code, pre {
   background: var(--color-bg-subtle);
 }
 
+.btn--highlight {
+  background: #fff;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn--highlight:hover {
+  background: var(--color-bg-subtle);
+  border-color: var(--color-text-muted);
+}
+
 /* Code Blocks */
 .code-block {
   background: var(--color-bg-code);

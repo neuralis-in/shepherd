@@ -269,21 +269,26 @@ function Header({ onOpenModal }) {
         
         {/* Desktop Navigation */}
         <nav className="header__nav header__nav--desktop">
-          <a href="#features" className="header__link">Features</a>
-          <Link to="/pricing" className="header__link">Pricing</Link>
-          <Link to="/integrations" className="header__link">Integrations</Link>
-          <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer" className="header__link">
-            Docs <ExternalLink size={12} />
-          </a>
-          <a href="https://github.com/neuralis-in/aiobs" target="_blank" rel="noopener noreferrer" className="header__link">
-            <Github size={16} />
-          </a>
-          <Link to="/api-keys" className="btn btn--secondary btn--sm">
-            API Keys
-          </Link>
-          <Link to="/playground" className="btn btn--secondary btn--sm">
-            Playground
-          </Link>
+          <div className="header__nav-links">
+            <a href="#features" className="header__link">Features</a>
+            <Link to="/pricing" className="header__link">Pricing</Link>
+            <Link to="/integrations" className="header__link">Integrations</Link>
+            <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer" className="header__link">
+              Docs <ExternalLink size={12} />
+            </a>
+          </div>
+          <div className="header__nav-divider"></div>
+          <div className="header__nav-actions">
+            <a href="https://github.com/neuralis-in/aiobs" target="_blank" rel="noopener noreferrer" className="header__icon-link" aria-label="GitHub">
+              <Github size={18} />
+            </a>
+            <Link to="/api-keys" className="header__link">
+              API Keys
+            </Link>
+            <Link to="/playground" className="header__link header__link--highlight">
+              Playground
+            </Link>
+          </div>
           <button className="btn btn--primary btn--sm" onClick={onOpenModal}>Book a Demo</button>
         </nav>
 
@@ -325,7 +330,7 @@ function Header({ onOpenModal }) {
                 <Link to="/api-keys" className="btn btn--secondary btn--sm btn--full" onClick={closeMobileMenu}>
                   API Keys
                 </Link>
-                <Link to="/playground" className="btn btn--secondary btn--sm btn--full" onClick={closeMobileMenu}>
+                <Link to="/playground" className="btn btn--highlight btn--sm btn--full" onClick={closeMobileMenu}>
                   Playground
                 </Link>
                 <button className="btn btn--primary btn--sm btn--full" onClick={() => { closeMobileMenu(); onOpenModal(); }}>
@@ -366,12 +371,18 @@ function Hero({ onOpenModal }) {
             turning opaque agent pipelines into deterministic, debuggable timelines.
           </motion.p>
           <motion.div className="hero__actions" variants={fadeInUp}>
-            <button className="btn btn--primary" onClick={onOpenModal}>
-              Book a Demo <ArrowRight size={16} />
-            </button>
-            <Link to="/playground" className="btn btn--secondary">
-              <Play size={16} /> Try Playground
-            </Link>
+            <div className="hero__action-group">
+              <button className="btn btn--primary" onClick={onOpenModal}>
+                Book a Demo <ArrowRight size={16} />
+              </button>
+              <span className="hero__action-note">For teams & companies</span>
+            </div>
+            <div className="hero__action-group">
+              <Link to="/api-keys" className="btn btn--secondary">
+                Start for Free <ArrowRight size={16} />
+              </Link>
+              <span className="hero__action-note">For individual developers</span>
+            </div>
           </motion.div>
         </motion.div>
       </div>
@@ -1151,7 +1162,7 @@ function Developer() {
   const codeLines = [
     { type: 'added', text: 'from aiobs import observer' },
     { type: 'empty', text: '' },
-    { type: 'added', text: 'observer.observe()' },
+    { type: 'added', text: 'observer.observe(api_key="aiobs_sk_369•••••••••••")' },
     { type: 'empty', text: '' },
     { type: 'context', text: 'result = agent.run("Plan a 3-day trip to Tokyo")' },
     { type: 'empty', text: '' },
@@ -1191,15 +1202,20 @@ function Developer() {
             Built for engineers shipping agents at scale.
           </motion.h2>
           
-          <motion.div className="code-diff developer__code" variants={scaleIn}>
-            <div className="code-diff__header">
-              <span className="code-diff__title">agent.py</span>
-              <span className="code-diff__badge">
-                <span className="code-diff__badge-dot"></span>
+          <motion.div className="developer__code-wrapper" variants={scaleIn}>
+            <div className="developer__code-header">
+              <span className="developer__code-title">Quick Start</span>
+              <span className="developer__code-badge">
+                <span className="developer__code-badge-dot"></span>
                 patching...
               </span>
             </div>
-            <TypingCode lines={codeLines} isVisible={isVisible} />
+            <div className="code-diff">
+              <div className="code-diff__header">
+                <span className="code-diff__title">agent.py</span>
+              </div>
+              <TypingCode lines={codeLines} isVisible={isVisible} />
+            </div>
           </motion.div>
           
           <motion.p className="text-lg developer__subtitle" variants={fadeInUp}>

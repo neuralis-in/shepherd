@@ -245,8 +245,7 @@ function QuickStartSection({ userApiKey }) {
   const codeLines = [
     { type: 'added', text: 'from aiobs import observer' },
     { type: 'empty', text: '' },
-    { type: 'added', text: `observer.configure(api_key="${userApiKey || 'your-api-key-here'}")` },
-    { type: 'added', text: 'observer.observe()' },
+    { type: 'added', text: `observer.observe(api_key="${userApiKey || 'your-api-key-here'}")` },
     { type: 'empty', text: '' },
     { type: 'context', text: '# your LLM calls here' },
     { type: 'empty', text: '' },
