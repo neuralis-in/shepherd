@@ -42,7 +42,8 @@ import {
   Key,
   Loader2,
   Check,
-  CloudOff
+  CloudOff,
+  Download
 } from 'lucide-react'
 import './Playground.css'
 
@@ -2586,8 +2587,1123 @@ export default function Playground() {
     setError(null)
   }
 
+  // Computed values needed before handleExportHTML
   const hasData = sessions.length > 0
   const isOverviewMode = selectedSessionId === null && hasData
+
+  const handleExportHTML = useCallback(() => {
+    // Helper functions
+    const formatDuration = (ms) => {
+      if (!ms) return '—'
+      if (ms < 1000) return `${ms.toFixed(0)}ms`
+      return `${(ms / 1000).toFixed(2)}s`
+    }
+
+    const formatTimestamp = (ts) => {
+      if (!ts) return '—'
+      return new Date(ts * 1000).toLocaleString()
+    }
+
+    const formatNumber = (num) => {
+      if (num === undefined || num === null) return '0'
+      return num.toLocaleString()
+    }
+
+    const escapeHtml = (str) => {
+      if (!str) return ''
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+    }
+
+    // Determine what to export based on current view
+    const exportingSessions = isOverviewMode ? sessions : (selectedSession ? [selectedSession] : sessions)
+    const exportingSessionName = isOverviewMode 
+      ? `All Sessions (${sessions.length})`
+      : (selectedSession?.data?.sessions?.[0]?.name || selectedSession?.fileName || 'Session')
+    
+    // Collect all events from selected sessions
+    const llmEvents = []
+    const functionEvents = []
+    let allSessionsData = []
+
+    exportingSessions.forEach(session => {
+      const data = session.data
+      const sessionName = data.sessions?.[0]?.name || session.fileName
+      
+      if (data.sessions) {
+        allSessionsData.push(...data.sessions.map(s => ({ ...s, fileName: session.fileName })))
+      }
+      
+      if (data.events) {
+        data.events.forEach(event => {
+          const usage = event.response?.usage || {}
+          if (event.provider !== 'function') {
+            llmEvents.push({
+              ...event,
+              sessionFileName: session.fileName,
+              sessionName,
+              prompt: event.request?.contents || 'N/A',
+              tokens: usage.total_token_count || 0,
+              inputTokens: usage.prompt_token_count || 0,
+              outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
+              cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
+              reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
+              model: event.request?.model || 'unknown'
+            })
+          } else {
+            functionEvents.push({ ...event, sessionFileName: session.fileName, sessionName })
+          }
+        })
+      }
+      if (data.function_events) {
+        data.function_events.forEach(event => {
+          functionEvents.push({ ...event, sessionFileName: session.fileName, sessionName })
+        })
+      }
+    })
+
+    // Calculate analytics metrics
+    const durations = llmEvents.map(e => e.duration_ms).filter(d => d > 0).sort((a, b) => a - b)
+    const totalDuration = durations.reduce((a, b) => a + b, 0)
+    const avgDuration = durations.length > 0 ? totalDuration / durations.length : 0
+    const p50 = durations[Math.floor(durations.length * 0.5)] || 0
+    const p90 = durations[Math.floor(durations.length * 0.9)] || 0
+    const p99 = durations[Math.floor(durations.length * 0.99)] || 0
+    const maxDuration = durations[durations.length - 1] || 0
+
+    // Token stats
+    const totalTokens = llmEvents.reduce((acc, e) => acc + (e.tokens || 0), 0)
+    const totalInputTokens = llmEvents.reduce((acc, e) => acc + (e.inputTokens || 0), 0)
+    const totalOutputTokens = llmEvents.reduce((acc, e) => acc + (e.outputTokens || 0), 0)
+    const totalCachedTokens = llmEvents.reduce((acc, e) => acc + (e.cachedTokens || 0), 0)
+    const totalReasoningTokens = llmEvents.reduce((acc, e) => acc + (e.reasoningTokens || 0), 0)
+    const cacheHitRate = totalInputTokens > 0 ? (totalCachedTokens / totalInputTokens) * 100 : 0
+
+    // Cost calculation
+    const calculateCost = (event) => {
+      const model = event.model?.toLowerCase() || 'default'
+      const pricing = { input: 0.15, output: 0.60 } // Default pricing per 1M tokens
+      if (model.includes('gpt-4o')) { return ((event.inputTokens / 1_000_000) * 2.50) + ((event.outputTokens / 1_000_000) * 10.00) }
+      if (model.includes('gpt-4')) { return ((event.inputTokens / 1_000_000) * 30.00) + ((event.outputTokens / 1_000_000) * 60.00) }
+      if (model.includes('gpt-3.5')) { return ((event.inputTokens / 1_000_000) * 0.50) + ((event.outputTokens / 1_000_000) * 1.50) }
+      if (model.includes('gemini-2.5-pro')) { return ((event.inputTokens / 1_000_000) * 1.25) + ((event.outputTokens / 1_000_000) * 10.00) }
+      if (model.includes('gemini-2.5-flash')) { return ((event.inputTokens / 1_000_000) * 0.15) + ((event.outputTokens / 1_000_000) * 0.60) }
+      if (model.includes('gemini-2.0')) { return ((event.inputTokens / 1_000_000) * 0.10) + ((event.outputTokens / 1_000_000) * 0.40) }
+      if (model.includes('gemini-1.5-pro')) { return ((event.inputTokens / 1_000_000) * 1.25) + ((event.outputTokens / 1_000_000) * 5.00) }
+      if (model.includes('gemini-1.5-flash')) { return ((event.inputTokens / 1_000_000) * 0.075) + ((event.outputTokens / 1_000_000) * 0.30) }
+      return ((event.inputTokens / 1_000_000) * pricing.input) + ((event.outputTokens / 1_000_000) * pricing.output)
+    }
+    const totalCost = llmEvents.reduce((acc, e) => acc + calculateCost(e), 0)
+    
+    // Cost by model
+    const costByModel = llmEvents.reduce((acc, e) => {
+      const model = e.model || 'unknown'
+      if (!acc[model]) acc[model] = { cost: 0, count: 0, tokens: 0 }
+      acc[model].cost += calculateCost(e)
+      acc[model].count += 1
+      acc[model].tokens += e.tokens || 0
+      return acc
+    }, {})
+
+    // Sorted prompts for fastest/slowest
+    const sortedByDuration = [...llmEvents].sort((a, b) => (a.duration_ms || 0) - (b.duration_ms || 0))
+    const fastest = sortedByDuration.slice(0, 3)
+    const slowest = sortedByDuration.slice(-3).reverse()
+    const sortedByTokens = [...llmEvents].sort((a, b) => (b.tokens || 0) - (a.tokens || 0)).slice(0, 3)
+
+    // Generate events HTML for list/tree view
+    const generateEventsHtml = () => {
+      const allEvents = [...llmEvents, ...functionEvents]
+      return allEvents.map((event) => {
+        const isFunction = event.provider === 'function' || functionEvents.includes(event)
+        const usage = event.response?.usage || {}
+        
+        return `
+          <div class="event-card">
+            <div class="event-header">
+              <div class="event-icon ${isFunction ? 'event-icon--function' : 'event-icon--llm'}">
+                ${isFunction ? '⚡' : '🤖'}
+              </div>
+              <div class="event-info">
+                <span class="event-api">${escapeHtml(event.name || event.api || 'Unknown')}</span>
+                <span class="event-model">${escapeHtml(event.request?.model || event.module || '—')}</span>
+              </div>
+              <div class="event-meta">
+                ${event.duration_ms ? `<span class="event-duration">⏱ ${formatDuration(event.duration_ms)}</span>` : ''}
+                <span class="event-status ${event.error ? 'event-status--error' : 'event-status--success'}">${event.error ? '✗' : '✓'}</span>
+              </div>
+            </div>
+            ${event.request?.contents || event.prompt ? `
+              <div class="event-section">
+                <h4>Prompt</h4>
+                <div class="event-text">${escapeHtml(event.request?.contents || event.prompt)}</div>
+              </div>
+            ` : ''}
+            ${event.response?.text ? `
+              <div class="event-section">
+                <h4>Response</h4>
+                <div class="event-text event-text--output">${escapeHtml(event.response.text)}</div>
+              </div>
+            ` : ''}
+            ${event.result ? `
+              <div class="event-section">
+                <h4>Result</h4>
+                <div class="event-text event-text--output">${escapeHtml(typeof event.result === 'string' ? event.result : JSON.stringify(event.result, null, 2))}</div>
+              </div>
+            ` : ''}
+            ${event.error ? `
+              <div class="event-section event-section--error">
+                <h4>Error</h4>
+                <div class="event-text event-text--error">${escapeHtml(typeof event.error === 'string' ? event.error : JSON.stringify(event.error, null, 2))}</div>
+              </div>
+            ` : ''}
+            ${usage.total_token_count || event.tokens ? `
+              <div class="event-usage">
+                <span class="usage-item"><span class="usage-label">Input:</span> ${formatNumber(usage.prompt_token_count || event.inputTokens || 0)}</span>
+                <span class="usage-item"><span class="usage-label">Output:</span> ${formatNumber(usage.candidates_token_count || event.outputTokens || 0)}</span>
+                <span class="usage-item"><span class="usage-label">Total:</span> ${formatNumber(usage.total_token_count || event.tokens || 0)}</span>
+                ${(usage.thoughts_token_count || event.reasoningTokens) ? `<span class="usage-item"><span class="usage-label">Thinking:</span> ${formatNumber(usage.thoughts_token_count || event.reasoningTokens)}</span>` : ''}
+              </div>
+            ` : ''}
+            ${isOverviewMode && event.sessionName ? `
+              <div class="event-footer">
+                <span class="event-source">${escapeHtml(event.sessionName)}</span>
+              </div>
+            ` : ''}
+          </div>
+        `
+      }).join('')
+    }
+
+    // Generate analytics HTML
+    const generateAnalyticsHtml = () => `
+      <div class="analytics">
+        <!-- Overview Stats -->
+        <div class="analytics-section analytics-section--full">
+          <h3 class="section-title">📊 Performance Overview</h3>
+          <div class="analytics-stats-grid">
+            <div class="analytics-stat">
+              <span class="analytics-stat__label">Total Requests</span>
+              <span class="analytics-stat__value">${llmEvents.length}</span>
+            </div>
+            <div class="analytics-stat">
+              <span class="analytics-stat__label">Avg Duration</span>
+              <span class="analytics-stat__value">${formatDuration(avgDuration)}</span>
+            </div>
+            <div class="analytics-stat">
+              <span class="analytics-stat__label">P50 Latency</span>
+              <span class="analytics-stat__value">${formatDuration(p50)}</span>
+            </div>
+            <div class="analytics-stat">
+              <span class="analytics-stat__label">P90 Latency</span>
+              <span class="analytics-stat__value">${formatDuration(p90)}</span>
+            </div>
+            <div class="analytics-stat analytics-stat--highlight">
+              <span class="analytics-stat__label">P99 Latency</span>
+              <span class="analytics-stat__value">${formatDuration(p99)}</span>
+            </div>
+            <div class="analytics-stat">
+              <span class="analytics-stat__label">Total Duration</span>
+              <span class="analytics-stat__value">${formatDuration(totalDuration)}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="analytics-row">
+          <!-- Latency Percentiles -->
+          <div class="analytics-section">
+            <h3 class="section-title">⏱️ Latency Percentiles</h3>
+            <div class="latency-bars">
+              <div class="latency-bar-item">
+                <span class="latency-bar-item__label">P50</span>
+                <div class="latency-bar-item__bar">
+                  <div class="latency-bar-item__fill" style="width: ${maxDuration > 0 ? (p50 / maxDuration) * 100 : 0}%"></div>
+                </div>
+                <span class="latency-bar-item__value">${formatDuration(p50)}</span>
+              </div>
+              <div class="latency-bar-item">
+                <span class="latency-bar-item__label">P90</span>
+                <div class="latency-bar-item__bar">
+                  <div class="latency-bar-item__fill latency-bar-item__fill--warning" style="width: ${maxDuration > 0 ? (p90 / maxDuration) * 100 : 0}%"></div>
+                </div>
+                <span class="latency-bar-item__value">${formatDuration(p90)}</span>
+              </div>
+              <div class="latency-bar-item">
+                <span class="latency-bar-item__label">P99</span>
+                <div class="latency-bar-item__bar">
+                  <div class="latency-bar-item__fill latency-bar-item__fill--critical" style="width: ${maxDuration > 0 ? (p99 / maxDuration) * 100 : 0}%"></div>
+                </div>
+                <span class="latency-bar-item__value">${formatDuration(p99)}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cost Analysis -->
+          <div class="analytics-section">
+            <h3 class="section-title">💰 Cost Analysis (Estimated)</h3>
+            <div class="cost-analysis">
+              <div class="cost-total">
+                <span class="cost-total__label">Total Estimated Cost</span>
+                <span class="cost-total__value">$${totalCost.toFixed(4)}</span>
+              </div>
+              <div class="cost-by-model">
+                ${Object.entries(costByModel).map(([model, data]) => `
+                  <div class="cost-model-item">
+                    <div class="cost-model-item__info">
+                      <span class="cost-model-item__name">${escapeHtml(model)}</span>
+                      <span class="cost-model-item__count">${data.count} calls • ${data.tokens.toLocaleString()} tokens</span>
+                    </div>
+                    <span class="cost-model-item__cost">$${data.cost.toFixed(4)}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Token Analysis Row -->
+        <div class="analytics-row">
+          <div class="analytics-section">
+            <h3 class="section-title"># Token Analysis</h3>
+            <div class="token-analysis">
+              <div class="token-stats-grid">
+                <div class="token-stat token-stat--primary">
+                  <span class="token-stat__label">Total Tokens</span>
+                  <span class="token-stat__value">${totalTokens.toLocaleString()}</span>
+                </div>
+                <div class="token-stat">
+                  <span class="token-stat__label">Input</span>
+                  <span class="token-stat__value token-stat__value--input">${totalInputTokens.toLocaleString()}</span>
+                </div>
+                <div class="token-stat">
+                  <span class="token-stat__label">Output</span>
+                  <span class="token-stat__value token-stat__value--output">${totalOutputTokens.toLocaleString()}</span>
+                </div>
+                <div class="token-stat">
+                  <span class="token-stat__label">Cached</span>
+                  <span class="token-stat__value token-stat__value--cached">${totalCachedTokens.toLocaleString()}</span>
+                </div>
+                ${totalReasoningTokens > 0 ? `
+                  <div class="token-stat">
+                    <span class="token-stat__label">Reasoning</span>
+                    <span class="token-stat__value token-stat__value--reasoning">${totalReasoningTokens.toLocaleString()}</span>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <!-- Token Distribution Bar -->
+              <div class="token-bar-container">
+                <div class="token-bar-label">Token Distribution</div>
+                <div class="token-bar">
+                  ${totalInputTokens > 0 ? `<div class="token-segment token-segment--input" style="width: ${(totalInputTokens / totalTokens) * 100}%">${(totalInputTokens / totalTokens) * 100 > 12 ? 'Input' : ''}</div>` : ''}
+                  ${totalOutputTokens > 0 ? `<div class="token-segment token-segment--output" style="width: ${(totalOutputTokens / totalTokens) * 100}%">${(totalOutputTokens / totalTokens) * 100 > 12 ? 'Output' : ''}</div>` : ''}
+                  ${totalCachedTokens > 0 ? `<div class="token-segment token-segment--cached" style="width: ${(totalCachedTokens / totalTokens) * 100}%">${(totalCachedTokens / totalTokens) * 100 > 12 ? 'Cached' : ''}</div>` : ''}
+                  ${totalReasoningTokens > 0 ? `<div class="token-segment token-segment--reasoning" style="width: ${(totalReasoningTokens / totalTokens) * 100}%">${(totalReasoningTokens / totalTokens) * 100 > 12 ? 'Reasoning' : ''}</div>` : ''}
+                </div>
+                <div class="token-legend">
+                  <span class="legend-item legend-item--input"><span class="legend-dot"></span>Input (${Math.round((totalInputTokens / totalTokens) * 100) || 0}%)</span>
+                  <span class="legend-item legend-item--output"><span class="legend-dot"></span>Output (${Math.round((totalOutputTokens / totalTokens) * 100) || 0}%)</span>
+                  ${totalCachedTokens > 0 ? `<span class="legend-item legend-item--cached"><span class="legend-dot"></span>Cached (${Math.round((totalCachedTokens / totalTokens) * 100)}%)</span>` : ''}
+                  ${totalReasoningTokens > 0 ? `<span class="legend-item legend-item--reasoning"><span class="legend-dot"></span>Reasoning (${Math.round((totalReasoningTokens / totalTokens) * 100)}%)</span>` : ''}
+                </div>
+              </div>
+
+              <!-- Cache Performance -->
+              <div class="cache-section">
+                <div class="cache-header">
+                  <span class="cache-label">Cache Performance</span>
+                  <span class="cache-rate">${cacheHitRate.toFixed(1)}% hit rate</span>
+                </div>
+                <div class="cache-bar">
+                  <div class="cache-fill" style="width: ${cacheHitRate}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Highest Token Usage -->
+          <div class="analytics-section">
+            <h3 class="section-title">📈 Highest Token Usage</h3>
+            <div class="prompt-list">
+              ${sortedByTokens.map((event, i) => `
+                <div class="prompt-item prompt-item--tokens">
+                  <div class="prompt-item__header">
+                    <span class="prompt-item__rank">${i + 1}</span>
+                    <div class="prompt-item__content">
+                      <span class="prompt-item__text">${escapeHtml(event.prompt?.substring(0, 60) || 'N/A')}${event.prompt?.length > 60 ? '...' : ''}</span>
+                      <div class="prompt-item__meta">
+                        <span class="prompt-item__tokens-highlight">${formatNumber(event.tokens)} tokens</span>
+                        <span class="prompt-item__duration">${formatDuration(event.duration_ms)}</span>
+                        <span class="prompt-item__model">${escapeHtml(event.model)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Fastest / Slowest -->
+        <div class="analytics-row">
+          <div class="analytics-section">
+            <h3 class="section-title">🚀 Fastest Responses</h3>
+            <div class="prompt-list">
+              ${fastest.map((event, i) => `
+                <div class="prompt-item prompt-item--fast">
+                  <div class="prompt-item__header">
+                    <span class="prompt-item__rank">${i + 1}</span>
+                    <div class="prompt-item__content">
+                      <span class="prompt-item__text">${escapeHtml(event.prompt?.substring(0, 60) || 'N/A')}${event.prompt?.length > 60 ? '...' : ''}</span>
+                      <div class="prompt-item__meta">
+                        <span class="prompt-item__duration prompt-item__duration--fast">${formatDuration(event.duration_ms)}</span>
+                        <span class="prompt-item__tokens">${formatNumber(event.tokens)} tokens</span>
+                        <span class="prompt-item__model">${escapeHtml(event.model)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="analytics-section">
+            <h3 class="section-title">🐢 Slowest Responses</h3>
+            <div class="prompt-list">
+              ${slowest.map((event, i) => `
+                <div class="prompt-item prompt-item--slow">
+                  <div class="prompt-item__header">
+                    <span class="prompt-item__rank">${i + 1}</span>
+                    <div class="prompt-item__content">
+                      <span class="prompt-item__text">${escapeHtml(event.prompt?.substring(0, 60) || 'N/A')}${event.prompt?.length > 60 ? '...' : ''}</span>
+                      <div class="prompt-item__meta">
+                        <span class="prompt-item__duration prompt-item__duration--slow">${formatDuration(event.duration_ms)}</span>
+                        <span class="prompt-item__tokens">${formatNumber(event.tokens)} tokens</span>
+                        <span class="prompt-item__model">${escapeHtml(event.model)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+    // Generate sessions HTML
+    const generateSessionsHtml = () => allSessionsData.map(session => `
+      <div class="session-item">
+        <div class="session-name">${escapeHtml(session.name || 'Unnamed Session')}</div>
+        <div class="session-meta">
+          <span>ID: ${escapeHtml(session.id?.substring(0, 12))}...</span>
+          ${session.started_at ? `<span>Started: ${formatTimestamp(session.started_at)}</span>` : ''}
+          ${session.ended_at ? `<span>Ended: ${formatTimestamp(session.ended_at)}</span>` : ''}
+        </div>
+        <div class="session-file">${escapeHtml(session.fileName)}</div>
+      </div>
+    `).join('')
+
+    // Determine content based on view mode
+    let mainContent = ''
+    const viewTitle = viewMode === 'analytics' ? 'Analytics' : viewMode === 'timeline' ? 'Timeline' : viewMode === 'tree' ? 'Trace Tree' : 'Events'
+    
+    if (viewMode === 'analytics' || viewMode === 'timeline') {
+      mainContent = generateAnalyticsHtml()
+    } else {
+      mainContent = `
+        <section class="section">
+          <h2 class="section-title">📋 ${llmEvents.length + functionEvents.length} Events</h2>
+          <div class="events-list">
+            ${generateEventsHtml() || '<div class="empty-state">No events found</div>'}
+          </div>
+        </section>
+      `
+    }
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shepherd - ${escapeHtml(exportingSessionName)} - ${viewTitle}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg: #FAFAFA;
+      --color-bg-subtle: #F5F5F5;
+      --color-surface: #FFFFFF;
+      --color-border: #E5E5E5;
+      --color-border-light: #EFEFEF;
+      --color-text: #111111;
+      --color-text-secondary: #4A4A4A;
+      --color-text-muted: #888888;
+      --color-accent: #111111;
+      --color-accent-light: #6366F1;
+      --color-success: #10B981;
+      --color-error: #EF4444;
+      --color-warning: #F59E0B;
+      --color-info: #3B82F6;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      padding: 24px;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding: 20px 24px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header h1::before { content: '🐑'; font-size: 1.25rem; }
+    .header-meta {
+      text-align: right;
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+    }
+    .header-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border: 1px solid #C7D2FE;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #4338CA;
+      margin-bottom: 4px;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-bg-subtle);
+      border-radius: 10px;
+      font-size: 1.25rem;
+    }
+    .stat-content { flex: 1; }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .stat-label {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+    }
+
+    /* Sessions */
+    .sessions-section { margin-bottom: 24px; }
+    .sessions-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+    }
+    .session-item {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .session-name { font-weight: 600; font-size: 0.9375rem; margin-bottom: 8px; }
+    .session-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+    .session-file {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--color-text-secondary);
+      margin-top: 8px;
+      padding: 4px 8px;
+      background: var(--color-bg-subtle);
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    /* Section Title */
+    .section { margin-bottom: 24px; }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text);
+    }
+
+    /* Analytics */
+    .analytics { display: flex; flex-direction: column; gap: 16px; }
+    .analytics-section {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .analytics-section--full { width: 100%; }
+    .analytics-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .analytics-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+    }
+    .analytics-stat {
+      padding: 14px;
+      background: var(--color-bg-subtle);
+      border-radius: 8px;
+      text-align: center;
+    }
+    .analytics-stat--highlight {
+      background: #FFF7ED;
+      border: 1px solid #FDBA74;
+    }
+    .analytics-stat__label {
+      display: block;
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      margin-bottom: 4px;
+    }
+    .analytics-stat__value {
+      font-family: var(--font-mono);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    /* Latency Bars */
+    .latency-bars { display: flex; flex-direction: column; gap: 12px; }
+    .latency-bar-item {
+      display: grid;
+      grid-template-columns: 40px 1fr 70px;
+      align-items: center;
+      gap: 12px;
+    }
+    .latency-bar-item__label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+    .latency-bar-item__bar {
+      height: 10px;
+      background: var(--color-bg-subtle);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .latency-bar-item__fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366F1 0%, #4F46E5 100%);
+      border-radius: 5px;
+      transition: width 0.5s ease;
+    }
+    .latency-bar-item__fill--warning {
+      background: linear-gradient(90deg, #F59E0B 0%, #D97706 100%);
+    }
+    .latency-bar-item__fill--critical {
+      background: linear-gradient(90deg, #EF4444 0%, #DC2626 100%);
+    }
+    .latency-bar-item__value {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--color-text);
+      text-align: right;
+    }
+
+    /* Cost Analysis */
+    .cost-analysis { display: flex; flex-direction: column; gap: 12px; }
+    .cost-total {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--color-accent);
+      border-radius: 10px;
+      color: white;
+    }
+    .cost-total__label { font-size: 0.875rem; font-weight: 500; }
+    .cost-total__value {
+      font-family: var(--font-mono);
+      font-size: 1.375rem;
+      font-weight: 700;
+    }
+    .cost-by-model { display: flex; flex-direction: column; gap: 8px; }
+    .cost-model-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--color-bg-subtle);
+      border-radius: 8px;
+    }
+    .cost-model-item__info { display: flex; flex-direction: column; gap: 2px; }
+    .cost-model-item__name {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--color-text);
+    }
+    .cost-model-item__count {
+      font-size: 0.6875rem;
+      color: var(--color-text-muted);
+    }
+    .cost-model-item__cost {
+      font-family: var(--font-mono);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--color-success);
+    }
+
+    /* Token Analysis */
+    .token-analysis { display: flex; flex-direction: column; gap: 16px; }
+    .token-stats-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .token-stat {
+      flex: 1;
+      min-width: 80px;
+      padding: 12px 14px;
+      background: var(--color-bg-subtle);
+      border-radius: 8px;
+      text-align: center;
+    }
+    .token-stat--primary {
+      flex: 1.5;
+      background: var(--color-accent);
+    }
+    .token-stat--primary .token-stat__label { color: rgba(255,255,255,0.7); }
+    .token-stat--primary .token-stat__value { color: white; }
+    .token-stat__label {
+      display: block;
+      font-size: 0.5625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      margin-bottom: 4px;
+    }
+    .token-stat__value {
+      font-family: var(--font-mono);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .token-stat__value--input { color: #3B82F6; }
+    .token-stat__value--output { color: #10B981; }
+    .token-stat__value--cached { color: #F59E0B; }
+    .token-stat__value--reasoning { color: #8B5CF6; }
+
+    /* Token Bar */
+    .token-bar-container { display: flex; flex-direction: column; gap: 8px; }
+    .token-bar-label {
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+    }
+    .token-bar {
+      display: flex;
+      height: 32px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--color-bg-subtle);
+      font-size: 0.625rem;
+      font-weight: 600;
+    }
+    .token-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .token-segment--input { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+    .token-segment--output { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+    .token-segment--cached { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
+    .token-segment--reasoning { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); }
+    .token-legend { display: flex; flex-wrap: wrap; gap: 12px; }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.6875rem;
+      color: var(--color-text-secondary);
+    }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+    .legend-item--input .legend-dot { background: #3B82F6; }
+    .legend-item--output .legend-dot { background: #10B981; }
+    .legend-item--cached .legend-dot { background: #F59E0B; }
+    .legend-item--reasoning .legend-dot { background: #8B5CF6; }
+
+    /* Cache Section */
+    .cache-section {
+      padding: 14px;
+      background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+      border-radius: 8px;
+      border: 1px solid #FDE68A;
+    }
+    .cache-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .cache-label {
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #92400E;
+      font-weight: 600;
+    }
+    .cache-rate {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #D97706;
+    }
+    .cache-bar {
+      height: 8px;
+      background: rgba(251, 191, 36, 0.3);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .cache-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #F59E0B 0%, #D97706 100%);
+      border-radius: 4px;
+    }
+
+    /* Prompt List */
+    .prompt-list { display: flex; flex-direction: column; gap: 8px; }
+    .prompt-item {
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+      overflow: hidden;
+    }
+    .prompt-item--fast { background: #ECFDF5; border-left-color: #10B981; }
+    .prompt-item--slow { background: #FEF2F2; border-left-color: #EF4444; }
+    .prompt-item--tokens { background: #EEF2FF; border-left-color: #6366F1; }
+    .prompt-item__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+    }
+    .prompt-item__rank {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      background: var(--color-accent);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .prompt-item__content { flex: 1; min-width: 0; }
+    .prompt-item__text {
+      font-size: 0.8125rem;
+      color: var(--color-text);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .prompt-item__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.6875rem;
+      color: var(--color-text-muted);
+    }
+    .prompt-item__duration { font-family: var(--font-mono); font-weight: 500; }
+    .prompt-item__duration--fast { color: #10B981; }
+    .prompt-item__duration--slow { color: #EF4444; }
+    .prompt-item__tokens { font-family: var(--font-mono); }
+    .prompt-item__tokens-highlight { font-family: var(--font-mono); font-weight: 600; color: #6366F1; }
+    .prompt-item__model { font-family: var(--font-mono); color: var(--color-text-secondary); }
+
+    /* Events */
+    .events-list { display: flex; flex-direction: column; gap: 16px; }
+    .event-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .event-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      background: var(--color-bg-subtle);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .event-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .event-icon--llm { background: #EEF2FF; }
+    .event-icon--function { background: #ECFDF5; }
+    .event-info { flex: 1; min-width: 0; }
+    .event-api { display: block; font-weight: 600; font-size: 0.9375rem; }
+    .event-model {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+    .event-meta { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .event-duration {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
+    }
+    .event-status { font-size: 1.125rem; }
+    .event-status--success { color: var(--color-success); }
+    .event-status--error { color: var(--color-error); }
+    .event-section { padding: 16px 20px; border-bottom: 1px solid var(--color-border-light); }
+    .event-section:last-child { border-bottom: none; }
+    .event-section h4 {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      margin-bottom: 10px;
+    }
+    .event-section--error h4 { color: var(--color-error); }
+    .event-text {
+      font-size: 0.875rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--color-bg);
+      padding: 14px 16px;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .event-text--output { border-left: 3px solid var(--color-accent); }
+    .event-text--error {
+      background: #FEF2F2;
+      border-left: 3px solid var(--color-error);
+      color: #991B1B;
+    }
+    .event-usage {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 14px 20px;
+      background: var(--color-bg-subtle);
+      font-size: 0.8125rem;
+      font-family: var(--font-mono);
+    }
+    .usage-item { display: flex; gap: 6px; }
+    .usage-label { color: var(--color-text-muted); }
+    .event-footer {
+      padding: 10px 20px;
+      background: var(--color-bg);
+      border-top: 1px solid var(--color-border-light);
+    }
+    .event-source {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--color-accent-light);
+      background: #EEF2FF;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--color-text-muted);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      margin-top: 32px;
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      font-size: 0.8125rem;
+    }
+    .footer a { color: var(--color-accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .analytics-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      body { padding: 16px; }
+      .header { flex-direction: column; gap: 16px; text-align: center; }
+      .header-meta { text-align: center; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .sessions-list { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .event-text { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1>${escapeHtml(exportingSessionName)}</h1>
+        <span class="header-badge">${viewTitle} View</span>
+      </div>
+      <div class="header-meta">
+        Generated on ${new Date().toLocaleString()}<br>
+        ${exportingSessions.length} session${exportingSessions.length > 1 ? 's' : ''} • ${llmEvents.length + functionEvents.length} events
+      </div>
+    </header>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-value">${llmEvents.length}</div>
+          <div class="stat-label">LLM Calls</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-content">
+          <div class="stat-value">${functionEvents.length}</div>
+          <div class="stat-label">Function Calls</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">#️⃣</div>
+        <div class="stat-content">
+          <div class="stat-value">${formatNumber(totalTokens)}</div>
+          <div class="stat-label">Total Tokens</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-content">
+          <div class="stat-value">${formatDuration(totalDuration)}</div>
+          <div class="stat-label">Total Duration</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <div class="stat-value">$${totalCost.toFixed(4)}</div>
+          <div class="stat-label">Est. Cost</div>
+        </div>
+      </div>
+    </div>
+
+    ${isOverviewMode ? `
+      <section class="section sessions-section">
+        <h2 class="section-title">📁 Sessions (${allSessionsData.length})</h2>
+        <div class="sessions-list">
+          ${generateSessionsHtml() || '<div class="empty-state">No sessions found</div>'}
+        </div>
+      </section>
+    ` : ''}
+
+    ${mainContent}
+
+    <footer class="footer">
+      Generated by <a href="https://neuralis.ai" target="_blank">Shepherd</a> - LLM Observability Platform<br>
+      <small>Powered by aiobs</small>
+    </footer>
+  </div>
+</body>
+</html>`
+
+    // Create and download the file
+    const blob = new Blob([htmlContent], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const fileName = isOverviewMode 
+      ? `shepherd-all-sessions-${viewMode}-${new Date().toISOString().split('T')[0]}.html`
+      : `shepherd-${(selectedSession?.fileName || 'session').replace('.json', '')}-${viewMode}-${new Date().toISOString().split('T')[0]}.html`
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, [sessions, selectedSession, viewMode, isOverviewMode])
+
   const hasTraceTree = currentData?.trace_tree && currentData.trace_tree.length > 0
   const hasEvents = (currentData?.events && currentData.events.length > 0) || (currentData?.function_events && currentData.function_events.length > 0)
   const session = currentData?.sessions?.[0]
@@ -2694,6 +3810,10 @@ export default function Playground() {
                 <span>Timeline</span>
               </button>
             </div>
+            <button className="playground-btn playground-btn--ghost" onClick={handleExportHTML}>
+              <Download size={14} />
+              <span>Export HTML</span>
+            </button>
             <button className="playground-btn playground-btn--ghost" onClick={handleClearAll}>
               <Trash2 size={14} />
               <span>Clear All</span>
