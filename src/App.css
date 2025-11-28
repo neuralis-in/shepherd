@@ -263,6 +263,48 @@
   animation: pulse 2s infinite;
 }
 
+.hero__title-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.hero__coming-soon-ribbon {
+  position: absolute;
+  top: -8px;
+  right: -50px;
+  background: var(--color-accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 5px 14px;
+  border-radius: 100px;
+  transform: rotate(12deg);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--color-border);
+}
+
+.hero__coming-soon-ribbon:hover {
+  background: var(--color-accent-hover);
+  transform: rotate(12deg) translateY(-2px);
+}
+
+.hero__ribbon-dot {
+  width: 5px;
+  height: 5px;
+  background: #10B981;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
 .hero__title {
   margin-bottom: var(--spacing-md);
 }
@@ -319,6 +361,18 @@
   .hero__action-group .btn {
     width: 100%;
     height: 48px;
+  }
+  
+  .hero__coming-soon-ribbon {
+    position: relative;
+    top: 0;
+    right: 0;
+    transform: none;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .hero__coming-soon-ribbon:hover {
+    transform: translateY(-2px);
   }
 }
 

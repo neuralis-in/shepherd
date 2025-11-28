@@ -366,9 +366,15 @@ function Hero({ onOpenModal }) {
             <span className="hero__badge-dot"></span>
             Built on aiobs — open-source Python SDK
           </motion.div>
-          <motion.h1 className="heading-xl hero__title" variants={fadeInUp}>
-            Shepherd traces AI agents<br />so they don't fail.
-          </motion.h1>
+          <motion.div className="hero__title-wrapper" variants={fadeInUp}>
+            <span className="hero__coming-soon-ribbon">
+              <span className="hero__ribbon-dot"></span>
+              prompt-enhancer coming soon
+            </span>
+            <h1 className="heading-xl hero__title">
+              Shepherd traces AI agents<br />so they don't fail.
+            </h1>
+          </motion.div>
           <motion.p className="text-lg hero__subtitle" variants={fadeInUp}>
             Wrap your agent code with observer calls to trace every LLM step, tool call, and decision — 
             turning opaque agent pipelines into deterministic, debuggable timelines.
