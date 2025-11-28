@@ -664,8 +664,22 @@ function ApiKeyCard({ apiKey, onRevoke }) {
   )
 }
 
+// Calculate enterprise cost based on traces
+function calculateEnterpriseCost(tracesUsed) {
+  const freeTraces = 10000
+  if (tracesUsed <= freeTraces) return 0
+  const billableTraces = tracesUsed - freeTraces
+  // Every 2,000 traces after free tier costs $10
+  const billableBlocks = Math.ceil(billableTraces / 2000)
+  return billableBlocks * 10
+}
+
 // User Header Component
 function UserHeader({ user, onLogout }) {
+  const isEnterprise = user.tier === 'enterprise' || user.tier === 'Enterprise'
+  const tracesUsed = user.traces_used || 0
+  const currentCost = isEnterprise ? calculateEnterpriseCost(tracesUsed) : 0
+  
   return (
     <div className="apikeys-user">
       <div className="apikeys-user__info">
@@ -685,9 +699,20 @@ function UserHeader({ user, onLogout }) {
         <span className={`apikeys-tier apikeys-tier--${user.tier}`}>
           {user.tier === 'free' ? 'Free Tier' : user.tier}
         </span>
-        <span className="apikeys-user__usage">
-          {(user.traces_used || 0).toLocaleString()} / 10,000 traces
-        </span>
+        {isEnterprise ? (
+          <div className="apikeys-user__enterprise-usage">
+            <span className="apikeys-user__traces">
+              {tracesUsed.toLocaleString()} traces
+            </span>
+            <span className="apikeys-user__cost">
+              Current cost: <strong>${currentCost.toLocaleString()}</strong>
+            </span>
+          </div>
+        ) : (
+          <span className="apikeys-user__usage">
+            {tracesUsed.toLocaleString()} / 10,000 traces
+          </span>
+        )}
       </div>
       <button className="apikeys-user__logout" onClick={onLogout}>
         <LogOut size={16} />

@@ -293,6 +293,29 @@
   font-variant-numeric: tabular-nums;
 }
 
+.apikeys-user__enterprise-usage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.apikeys-user__traces {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.apikeys-user__cost {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+}
+
+.apikeys-user__cost strong {
+  color: #059669;
+  font-weight: 600;
+}
+
 .apikeys-user__logout {
   display: flex;
   align-items: center;
