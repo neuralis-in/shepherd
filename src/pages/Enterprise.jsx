@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -118,6 +118,7 @@ function PaymentForm({ clientId, price, onSuccess }) {
   const [error, setError] = useState(null)
   const [processing, setProcessing] = useState(false)
   const [succeeded, setSucceeded] = useState(false)
+  const [subscriptionResult, setSubscriptionResult] = useState(null)
   const [billingDetails, setBillingDetails] = useState({
     name: '',
     email: '',
@@ -189,15 +190,16 @@ function PaymentForm({ clientId, price, onSuccess }) {
         handler: async function (response) {
           // Verify payment on backend
           try {
-            await api.verifySubscription({
+            const result = await api.verifySubscription({
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_subscription_id: response.razorpay_subscription_id,
               razorpay_signature: response.razorpay_signature,
             })
+            setSubscriptionResult(result)
             setSucceeded(true)
-            if (onSuccess) onSuccess(response)
+            if (onSuccess) onSuccess(result)
           } catch (err) {
-            setError('Payment verification failed. Please contact support.')
+            setError(err.message || 'Payment verification failed. Please contact support.')
             setProcessing(false)
           }
         },
@@ -237,6 +239,15 @@ function PaymentForm({ clientId, price, onSuccess }) {
   }
 
   if (succeeded) {
+    // Format the valid_until date from subscription result
+    const validUntil = subscriptionResult?.valid_until
+      ? new Date(subscriptionResult.valid_until).toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        })
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN')
+
     return (
       <motion.div 
         className="payment-success"
@@ -258,8 +269,8 @@ function PaymentForm({ clientId, price, onSuccess }) {
             <strong>{formatINR(price)}/month</strong>
           </div>
           <div className="payment-success__detail">
-            <span>Next billing</span>
-            <strong>{new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN')}</strong>
+            <span>Valid until</span>
+            <strong>{validUntil}</strong>
           </div>
         </div>
         <div className="payment-success__actions">

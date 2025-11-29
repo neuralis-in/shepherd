@@ -213,26 +213,37 @@ const api = {
   // Razorpay Subscriptions
   // ========================================
   
-  async createSubscriptionOrder({ clientId, amount, planId, billingDetails }) {
+  /**
+   * Create a new subscription
+   * @param {Object} params
+   * @param {string} params.clientId - Unique client identifier
+   * @param {number} params.amount - Amount in INR (e.g., 4999)
+   * @param {Object} params.billingDetails - Billing information
+   * @param {string} params.billingDetails.name - Full name
+   * @param {string} params.billingDetails.email - Email address
+   * @param {string} params.billingDetails.phone - Phone number
+   * @param {string} [params.billingDetails.company] - Company name (optional)
+   * @returns {Promise<{subscription_id: string, status: string, short_url: string}>}
+   */
+  async createSubscriptionOrder({ clientId, amount, billingDetails }) {
     const response = await fetch(`${API_URL}/v1/subscriptions/create`, {
       method: 'POST',
       headers: {
-        ...this.headers(),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         client_id: clientId,
         amount: amount,
-        plan_id: planId,
-        billing_details: billingDetails
+        billing_details: {
+          name: billingDetails.name,
+          email: billingDetails.email,
+          phone: billingDetails.phone,
+          company: billingDetails.company || ''
+        }
       })
     });
     
     if (!response.ok) {
-      if (response.status === 401) {
-        this.clearSession();
-        throw new Error('Not authenticated');
-      }
       const error = await response.json().catch(() => ({}));
       throw new Error(error.detail || 'Failed to create subscription');
     }
@@ -240,11 +251,18 @@ const api = {
     return response.json();
   },
   
+  /**
+   * Verify payment after Razorpay checkout
+   * @param {Object} razorpayResponse - Response from Razorpay handler
+   * @param {string} razorpayResponse.razorpay_payment_id
+   * @param {string} razorpayResponse.razorpay_subscription_id
+   * @param {string} razorpayResponse.razorpay_signature
+   * @returns {Promise<{status: string, subscription_id: string, client_id: string, valid_until: string}>}
+   */
   async verifySubscription({ razorpay_payment_id, razorpay_subscription_id, razorpay_signature }) {
     const response = await fetch(`${API_URL}/v1/subscriptions/verify`, {
       method: 'POST',
       headers: {
-        ...this.headers(),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -255,10 +273,6 @@ const api = {
     });
     
     if (!response.ok) {
-      if (response.status === 401) {
-        this.clearSession();
-        throw new Error('Not authenticated');
-      }
       const error = await response.json().catch(() => ({}));
       throw new Error(error.detail || 'Payment verification failed');
     }
@@ -266,18 +280,29 @@ const api = {
     return response.json();
   },
   
-  async getSubscription() {
-    const response = await fetch(`${API_URL}/v1/subscriptions/current`, {
+  /**
+   * Get current subscription for a client
+   * @param {string} clientId - Client identifier
+   * @returns {Promise<Object|null>} Subscription object or null if not found
+   */
+  async getSubscription(clientId) {
+    const url = new URL(`${API_URL}/v1/subscriptions/current`);
+    if (clientId) {
+      url.searchParams.set('client_id', clientId);
+    }
+    
+    const response = await fetch(url.toString(), {
       headers: this.headers()
     });
+    
+    if (response.status === 404) {
+      return null; // No active subscription
+    }
     
     if (!response.ok) {
       if (response.status === 401) {
         this.clearSession();
         throw new Error('Not authenticated');
-      }
-      if (response.status === 404) {
-        return null; // No active subscription
       }
       throw new Error('Failed to fetch subscription');
     }
@@ -285,8 +310,20 @@ const api = {
     return response.json();
   },
   
-  async cancelSubscription() {
-    const response = await fetch(`${API_URL}/v1/subscriptions/current/cancel`, {
+  /**
+   * Cancel subscription
+   * @param {string} clientId - Client identifier
+   * @param {boolean} [cancelAtCycleEnd=true] - If true, cancel at end of billing period
+   * @returns {Promise<{status: string, effective_date: string}>}
+   */
+  async cancelSubscription(clientId, cancelAtCycleEnd = true) {
+    const url = new URL(`${API_URL}/v1/subscriptions/current/cancel`);
+    if (clientId) {
+      url.searchParams.set('client_id', clientId);
+    }
+    url.searchParams.set('cancel_at_cycle_end', cancelAtCycleEnd.toString());
+    
+    const response = await fetch(url.toString(), {
       method: 'POST',
       headers: this.headers()
     });
@@ -296,14 +333,27 @@ const api = {
         this.clearSession();
         throw new Error('Not authenticated');
       }
-      throw new Error('Failed to cancel subscription');
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Failed to cancel subscription');
     }
     
     return response.json();
   },
   
-  async getBillingHistory() {
-    const response = await fetch(`${API_URL}/v1/billing/history`, {
+  /**
+   * Get billing/payment history
+   * @param {string} clientId - Client identifier
+   * @param {number} [limit=10] - Maximum number of records to return
+   * @returns {Promise<{client_id: string, payments: Array}>}
+   */
+  async getBillingHistory(clientId, limit = 10) {
+    const url = new URL(`${API_URL}/v1/billing/history`);
+    if (clientId) {
+      url.searchParams.set('client_id', clientId);
+    }
+    url.searchParams.set('limit', limit.toString());
+    
+    const response = await fetch(url.toString(), {
       headers: this.headers()
     });
     
