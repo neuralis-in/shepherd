@@ -11,6 +11,8 @@ import ApiKeys from './pages/ApiKeys.jsx'
 import AuthCallback from './pages/AuthCallback.jsx'
 import Enterprise from './pages/Enterprise.jsx'
 import IntraintelEnterprise from './pages/IntraintelEnterprise.jsx'
+import Contact from './pages/Contact.jsx'
+import Privacy from './pages/Privacy.jsx'
 
 // ScrollToTop component - scrolls to top on route change
 function ScrollToTop() {
@@ -40,6 +42,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/enterprise" element={<Enterprise />} />
         <Route path="/enterprise/intraintel.ai" element={<IntraintelEnterprise />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

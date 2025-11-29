@@ -505,6 +505,8 @@ export default function Enterprise() {
             <Link to="/">Home</Link>
             <Link to="/pricing">Pricing</Link>
             <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer">Docs</a>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/contact">Contact</Link>
           </div>
         </div>
       </footer>

@@ -511,6 +511,8 @@ export default function Pricing() {
             <Link to="/">Home</Link>
             <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer">Docs</a>
             <a href="https://github.com/neuralis-in/aiobs" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/contact">Contact</Link>
           </div>
         </div>
       </footer>
