@@ -170,20 +170,22 @@ function EnhancePromptTraceItem({ trace, index }) {
                 </div>
               )}
 
-              {/* Children traces */}
-              {trace.children && trace.children.length > 0 && (
+              {/* Children traces - exclude embeddings.create */}
+              {trace.children && trace.children.filter(c => c.api !== 'embeddings.create').length > 0 && (
                 <div className="enhance-trace-item__children">
                   <div className="enhance-trace-item__children-label">
                     <Layers size={12} />
-                    Child Traces ({trace.children.length})
+                    Child Traces ({trace.children.filter(c => c.api !== 'embeddings.create').length})
                   </div>
-                  {trace.children.map((child, i) => (
-                    <EnhancePromptTraceItem 
-                      key={child.span_id || i} 
-                      trace={child} 
-                      index={i} 
-                    />
-                  ))}
+                  {trace.children
+                    .filter(child => child.api !== 'embeddings.create')
+                    .map((child, i) => (
+                      <EnhancePromptTraceItem 
+                        key={child.span_id || i} 
+                        trace={child} 
+                        index={i} 
+                      />
+                    ))}
                 </div>
               )}
             </div>
@@ -362,28 +364,31 @@ export default function EnhancePrompts({ data, isAggregated = false, sessions = 
     }
     
     // Collect all child traces from all traces in the group
+    // Exclude embeddings.create calls - they're not prompts to enhance
     selectedGroup.traces.forEach((parentTrace, parentIndex) => {
       if (parentTrace.children && parentTrace.children.length > 0) {
-        parentTrace.children.forEach(childTrace => {
-          const signature = getPromptSignature(childTrace)
-          
-          if (!promptMap.has(signature)) {
-            const info = getPromptInfo(childTrace)
-            promptMap.set(signature, {
-              id: signature,
-              ...info,
-              instances: []
+        parentTrace.children
+          .filter(childTrace => childTrace.api !== 'embeddings.create')
+          .forEach(childTrace => {
+            const signature = getPromptSignature(childTrace)
+            
+            if (!promptMap.has(signature)) {
+              const info = getPromptInfo(childTrace)
+              promptMap.set(signature, {
+                id: signature,
+                ...info,
+                instances: []
+              })
+            }
+            
+            promptMap.get(signature).instances.push({
+              parentIndex,
+              sessionName: parentTrace.sessionName,
+              trace: childTrace,
+              input: getPromptInfo(childTrace).userPromptTemplate,
+              output: childTrace.response?.text || ''
             })
-          }
-          
-          promptMap.get(signature).instances.push({
-            parentIndex,
-            sessionName: parentTrace.sessionName,
-            trace: childTrace,
-            input: getPromptInfo(childTrace).userPromptTemplate,
-            output: childTrace.response?.text || ''
           })
-        })
       }
     })
     

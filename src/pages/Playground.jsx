@@ -199,10 +199,17 @@ function NodeDetails({ node, depth }) {
             {node.request && (
               <div className="node-details__section">
                 <h4>Request</h4>
-                {node.request.contents && (
+                {/* Handle different input formats: contents (Gemini), messages (OpenAI chat), input (OpenAI embeddings) */}
+                {(node.request.contents || node.request.messages || node.request.input) && (
                   <div className="node-details__field">
-                    <span className="node-details__field-label">Prompt:</span>
-                    <p className="node-details__field-value">{node.request.contents}</p>
+                    <span className="node-details__field-label">
+                      {node.api === 'embeddings.create' ? 'Input Text:' : 'Prompt:'}
+                    </span>
+                    <p className="node-details__field-value">
+                      {node.request.contents || 
+                       (node.request.messages && node.request.messages.map(m => `[${m.role}]: ${m.content}`).join('\n')) ||
+                       (node.request.input && (Array.isArray(node.request.input) ? node.request.input.join(' | ') : node.request.input))}
+                    </p>
                   </div>
                 )}
                 {node.request.model && (
@@ -233,19 +240,30 @@ function NodeDetails({ node, depth }) {
                     </p>
                   </div>
                 )}
+                {/* For embeddings, show dimensions instead of output text */}
+                {node.api === 'embeddings.create' && node.response.embedding_dimensions && (
+                  <div className="node-details__field">
+                    <span className="node-details__field-label">Embedding Output:</span>
+                    <p className="node-details__field-value node-details__field-value--output">
+                      {node.response.data?.length || 1} embedding(s) with {node.response.embedding_dimensions} dimensions
+                    </p>
+                  </div>
+                )}
                 {node.response.usage && (
                   <div className="node-details__usage">
                     <div className="node-details__usage-item">
                       <span>Input tokens</span>
-                      <strong>{node.response.usage.prompt_token_count || 0}</strong>
+                      <strong>{node.response.usage.prompt_tokens || node.response.usage.prompt_token_count || 0}</strong>
                     </div>
-                    <div className="node-details__usage-item">
-                      <span>Output tokens</span>
-                      <strong>{node.response.usage.candidates_token_count || 0}</strong>
-                    </div>
+                    {node.api !== 'embeddings.create' && (
+                      <div className="node-details__usage-item">
+                        <span>Output tokens</span>
+                        <strong>{node.response.usage.completion_tokens || node.response.usage.candidates_token_count || 0}</strong>
+                      </div>
+                    )}
                     <div className="node-details__usage-item">
                       <span>Total tokens</span>
-                      <strong>{node.response.usage.total_token_count || 0}</strong>
+                      <strong>{node.response.usage.total_tokens || node.response.usage.total_token_count || 0}</strong>
                     </div>
                   </div>
                 )}
@@ -331,16 +349,30 @@ function EventCard({ event, index }) {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
           >
-            {event.request?.contents && (
+            {/* Handle different input formats: contents (Gemini), messages (OpenAI chat), input (OpenAI embeddings) */}
+            {(event.request?.contents || event.request?.messages || event.request?.input) && (
               <div className="event-card__section">
                 <h4>Input</h4>
-                <p className="event-card__text">{event.request.contents}</p>
+                <p className="event-card__text">
+                  {event.request?.contents || 
+                   (event.request?.messages && event.request.messages.map(m => `[${m.role}]: ${m.content}`).join('\n')) ||
+                   (event.request?.input && (Array.isArray(event.request.input) ? event.request.input.join(' | ') : event.request.input))}
+                </p>
               </div>
             )}
             {event.response?.text && (
               <div className="event-card__section">
                 <h4>Output</h4>
                 <p className="event-card__text event-card__text--output">{event.response.text}</p>
+              </div>
+            )}
+            {/* For embeddings, show dimensions instead of output text */}
+            {event.api === 'embeddings.create' && event.response?.embedding_dimensions && (
+              <div className="event-card__section">
+                <h4>Embedding Output</h4>
+                <p className="event-card__text event-card__text--output">
+                  {event.response.data?.length || 1} embedding(s) with {event.response.embedding_dimensions} dimensions
+                </p>
               </div>
             )}
             {event.result && (
@@ -353,7 +385,7 @@ function EventCard({ event, index }) {
             )}
             {event.response?.usage && (
               <div className="event-card__usage">
-                <span>Tokens: {event.response.usage.total_token_count || 0}</span>
+                <span>Tokens: {event.response.usage.total_tokens || event.response.usage.total_token_count || 0}</span>
               </div>
             )}
           </motion.div>
@@ -1095,7 +1127,12 @@ function StatsBar({ data }) {
   const eventCount = (data.events?.length || 0) + (data.function_events?.length || 0)
 
   const totalDuration = data.events?.reduce((acc, e) => acc + (e.duration_ms || 0), 0) || 0
-  const totalTokens = data.events?.reduce((acc, e) => acc + (e.response?.usage?.total_token_count || 0), 0) || 0
+  // Support both OpenAI (total_tokens) and Gemini (total_token_count) formats
+  // Exclude embeddings.create from token counts
+  const totalTokens = data.events?.reduce((acc, e) => {
+    if (e.api === 'embeddings.create') return acc
+    return acc + (e.response?.usage?.total_tokens || e.response?.usage?.total_token_count || 0)
+  }, 0) || 0
 
   return (
     <div className="stats-bar">
@@ -1232,7 +1269,30 @@ const MODEL_PRICING = {
   'claude-3-opus': { input: 15.00, output: 75.00 },
   'claude-3-sonnet': { input: 3.00, output: 15.00 },
   'claude-3-haiku': { input: 0.25, output: 1.25 },
+  // Embedding models (input only, no output)
+  'text-embedding-3-large': { input: 0.13, output: 0 },
+  'text-embedding-3-small': { input: 0.02, output: 0 },
+  'text-embedding-ada-002': { input: 0.10, output: 0 },
   'default': { input: 1.00, output: 3.00 }
+}
+
+// Helper function to get prompt/input text from various API formats
+function getPromptText(request, api) {
+  if (!request) return 'N/A'
+  // For embeddings.create, input is an array of strings
+  if (api === 'embeddings.create' && request.input) {
+    return Array.isArray(request.input) ? request.input.join(' | ') : request.input
+  }
+  // For chat.completions.create, messages is an array
+  if (request.messages && Array.isArray(request.messages)) {
+    const lastUserMsg = request.messages.filter(m => m.role === 'user').pop()
+    return lastUserMsg?.content || request.messages[0]?.content || 'N/A'
+  }
+  // Gemini format uses contents
+  if (request.contents) {
+    return request.contents
+  }
+  return 'N/A'
 }
 
 // Helper function to extract all LLM events from trace tree
@@ -1243,16 +1303,23 @@ function extractLLMEvents(traceTree, events = [], sessionName = null) {
     // Check if this is an LLM call (has provider and response)
     if (node.provider && node.provider !== 'function' && node.duration_ms) {
       const usage = node.response?.usage || {}
+      const api = node.api || 'unknown'
+      const isEmbedding = api === 'embeddings.create'
       events.push({
         ...node,
-        prompt: node.request?.contents || node.request?.messages?.[0]?.content || 'N/A',
-        tokens: usage.total_token_count || 0,
-        inputTokens: usage.prompt_token_count || 0,
-        outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
+        api,
+        prompt: getPromptText(node.request, api),
+        // Support both OpenAI (total_tokens) and Gemini (total_token_count) formats
+        tokens: usage.total_tokens || usage.total_token_count || 0,
+        inputTokens: usage.prompt_tokens || usage.prompt_token_count || 0,
+        // Embeddings don't have output tokens
+        outputTokens: isEmbedding ? 0 : (usage.completion_tokens || usage.candidates_token_count || 0),
         cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
         reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
         toolUseTokens: usage.tool_use_prompt_token_count || 0,
         model: node.request?.model || 'unknown',
+        // Embedding-specific fields
+        embeddingDimensions: isEmbedding ? node.response?.embedding_dimensions : null,
         sessionName
       })
     }
@@ -1272,6 +1339,27 @@ function Timeline({ data, isAggregated = false, sessions = [] }) {
 
   // Extract all events with timestamps
   const timelineEvents = useMemo(() => {
+    // Helper to transform a single event
+    const transformEvent = (e, sessionName = null) => {
+      const usage = e.response?.usage || {}
+      const api = e.api || 'unknown'
+      const isEmbedding = api === 'embeddings.create'
+      return {
+        ...e,
+        api,
+        prompt: getPromptText(e.request, api),
+        // Support both OpenAI (total_tokens) and Gemini (total_token_count) formats
+        tokens: usage.total_tokens || usage.total_token_count || 0,
+        inputTokens: usage.prompt_tokens || usage.prompt_token_count || 0,
+        // Embeddings don't have output tokens
+        outputTokens: isEmbedding ? 0 : (usage.completion_tokens || usage.candidates_token_count || 0),
+        model: e.request?.model || 'unknown',
+        // Embedding-specific fields
+        embeddingDimensions: isEmbedding ? e.response?.embedding_dimensions : null,
+        sessionName
+      }
+    }
+
     let allEvents = []
     
     if (isAggregated && sessions.length > 0) {
@@ -1280,35 +1368,14 @@ function Timeline({ data, isAggregated = false, sessions = [] }) {
         if (session.data.trace_tree) {
           extractLLMEvents(session.data.trace_tree, allEvents, sessionName)
         } else {
-          const events = (session.data.events || []).filter(e => e.provider !== 'function').map(e => {
-            const usage = e.response?.usage || {}
-            return {
-              ...e,
-              prompt: e.request?.contents || 'N/A',
-              tokens: usage.total_token_count || 0,
-              inputTokens: usage.prompt_token_count || 0,
-              outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
-              model: e.request?.model || 'unknown',
-              sessionName
-            }
-          })
+          const events = (session.data.events || []).filter(e => e.provider !== 'function').map(e => transformEvent(e, sessionName))
           allEvents = [...allEvents, ...events]
         }
       })
     } else if (data.trace_tree) {
       allEvents = extractLLMEvents(data.trace_tree)
     } else {
-      allEvents = (data.events || []).filter(e => e.provider !== 'function').map(e => {
-        const usage = e.response?.usage || {}
-        return {
-          ...e,
-          prompt: e.request?.contents || 'N/A',
-          tokens: usage.total_token_count || 0,
-          inputTokens: usage.prompt_token_count || 0,
-          outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
-          model: e.request?.model || 'unknown'
-        }
-      })
+      allEvents = (data.events || []).filter(e => e.provider !== 'function').map(e => transformEvent(e))
     }
 
     // Sort by start time
@@ -1397,6 +1464,10 @@ function Timeline({ data, isAggregated = false, sessions = [] }) {
     'claude-3-opus': '#D97706',
     'claude-3-sonnet': '#F59E0B',
     'claude-3-haiku': '#FBBF24',
+    // Embedding models
+    'text-embedding-3-large': '#6366F1',
+    'text-embedding-3-small': '#8B5CF6',
+    'text-embedding-ada': '#A78BFA',
     'unknown': '#9CA3AF'
   }
 
@@ -1694,7 +1765,8 @@ function Timeline({ data, isAggregated = false, sessions = [] }) {
 const getProviderFromModel = (model) => {
   if (!model) return 'other'
   const modelLower = model.toLowerCase()
-  if (modelLower.includes('gpt') || modelLower.includes('o1') || modelLower.includes('o3')) return 'openai'
+  // OpenAI models include GPT, o1, o3, and embedding models
+  if (modelLower.includes('gpt') || modelLower.includes('o1') || modelLower.includes('o3') || modelLower.includes('text-embedding')) return 'openai'
   if (modelLower.includes('gemini')) return 'gemini'
   if (modelLower.includes('claude')) return 'anthropic'
   return 'other'
@@ -1706,6 +1778,30 @@ function Analytics({ data, isAggregated = false, sessions = [] }) {
   
   // Extract all LLM events from trace tree or use flat events
   const llmEvents = useMemo(() => {
+    // Helper to transform a single event
+    const transformEvent = (e, sessionName = null) => {
+      const usage = e.response?.usage || {}
+      const api = e.api || 'unknown'
+      const isEmbedding = api === 'embeddings.create'
+      return {
+        ...e,
+        api,
+        prompt: getPromptText(e.request, api),
+        // Support both OpenAI (total_tokens) and Gemini (total_token_count) formats
+        tokens: usage.total_tokens || usage.total_token_count || 0,
+        inputTokens: usage.prompt_tokens || usage.prompt_token_count || 0,
+        // Embeddings don't have output tokens
+        outputTokens: isEmbedding ? 0 : (usage.completion_tokens || usage.candidates_token_count || 0),
+        cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
+        reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
+        toolUseTokens: usage.tool_use_prompt_token_count || 0,
+        model: e.request?.model || 'unknown',
+        // Embedding-specific fields
+        embeddingDimensions: isEmbedding ? e.response?.embedding_dimensions : null,
+        sessionName
+      }
+    }
+
     if (isAggregated && sessions.length > 0) {
       // Aggregate from all sessions
       let allEvents = []
@@ -1714,21 +1810,7 @@ function Analytics({ data, isAggregated = false, sessions = [] }) {
         if (session.data.trace_tree) {
           extractLLMEvents(session.data.trace_tree, allEvents, sessionName)
         } else {
-          const events = (session.data.events || []).filter(e => e.provider !== 'function').map(e => {
-            const usage = e.response?.usage || {}
-            return {
-              ...e,
-              prompt: e.request?.contents || 'N/A',
-              tokens: usage.total_token_count || 0,
-              inputTokens: usage.prompt_token_count || 0,
-              outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
-              cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
-              reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
-              toolUseTokens: usage.tool_use_prompt_token_count || 0,
-              model: e.request?.model || 'unknown',
-              sessionName
-            }
-          })
+          const events = (session.data.events || []).filter(e => e.provider !== 'function').map(e => transformEvent(e, sessionName))
           allEvents = [...allEvents, ...events]
         }
       })
@@ -1739,20 +1821,7 @@ function Analytics({ data, isAggregated = false, sessions = [] }) {
     if (data.trace_tree) {
       return extractLLMEvents(data.trace_tree)
     }
-    return (data.events || []).filter(e => e.provider !== 'function').map(e => {
-      const usage = e.response?.usage || {}
-      return {
-        ...e,
-        prompt: e.request?.contents || 'N/A',
-        tokens: usage.total_token_count || 0,
-        inputTokens: usage.prompt_token_count || 0,
-        outputTokens: usage.candidates_token_count || usage.completion_tokens || 0,
-        cachedTokens: usage.cached_content_token_count || usage.cached_tokens || 0,
-        reasoningTokens: usage.thoughts_token_count || usage.reasoning_tokens || 0,
-        toolUseTokens: usage.tool_use_prompt_token_count || 0,
-        model: e.request?.model || 'unknown'
-      }
-    })
+    return (data.events || []).filter(e => e.provider !== 'function').map(e => transformEvent(e))
   }, [data, isAggregated, sessions])
 
   if (llmEvents.length === 0) {
@@ -1764,7 +1833,12 @@ function Analytics({ data, isAggregated = false, sessions = [] }) {
     )
   }
 
-  // Calculate metrics
+  // Separate chat/completion events from embedding events
+  // Embeddings only contribute to cost and duration, not prompt/token analysis
+  const chatEvents = llmEvents.filter(e => e.api !== 'embeddings.create')
+  const embeddingEvents = llmEvents.filter(e => e.api === 'embeddings.create')
+
+  // Calculate duration metrics (includes all events)
   const durations = llmEvents.map(e => e.duration_ms).filter(d => d > 0).sort((a, b) => a - b)
   const totalDuration = durations.reduce((a, b) => a + b, 0)
   const avgDuration = durations.length > 0 ? totalDuration / durations.length : 0
@@ -1777,25 +1851,25 @@ function Analytics({ data, isAggregated = false, sessions = [] }) {
   const minDuration = durations[0] || 0
   const maxDuration = durations[durations.length - 1] || 0
 
-  // Sort by duration for fastest/slowest
-  const sortedByDuration = [...llmEvents].sort((a, b) => (a.duration_ms || 0) - (b.duration_ms || 0))
+  // Sort by duration for fastest/slowest (chat events only - prompts with responses)
+  const sortedByDuration = [...chatEvents].sort((a, b) => (a.duration_ms || 0) - (b.duration_ms || 0))
   const fastest = sortedByDuration.slice(0, 3)
   const slowest = sortedByDuration.slice(-3).reverse()
 
-  // Sort by tokens for max tokens
-  const sortedByTokens = [...llmEvents].sort((a, b) => (b.tokens || 0) - (a.tokens || 0))
+  // Sort by tokens for max tokens (chat events only)
+  const sortedByTokens = [...chatEvents].sort((a, b) => (b.tokens || 0) - (a.tokens || 0))
   const maxTokenPrompts = sortedByTokens.slice(0, 3)
 
-  // Token stats
-  const totalTokens = llmEvents.reduce((acc, e) => acc + (e.tokens || 0), 0)
-  const totalInputTokens = llmEvents.reduce((acc, e) => acc + (e.inputTokens || 0), 0)
-  const totalOutputTokens = llmEvents.reduce((acc, e) => acc + (e.outputTokens || 0), 0)
-  const totalCachedTokens = llmEvents.reduce((acc, e) => acc + (e.cachedTokens || 0), 0)
-  const totalReasoningTokens = llmEvents.reduce((acc, e) => acc + (e.reasoningTokens || 0), 0)
-  const totalToolUseTokens = llmEvents.reduce((acc, e) => acc + (e.toolUseTokens || 0), 0)
-  const avgTokens = llmEvents.length > 0 ? totalTokens / llmEvents.length : 0
-  
-  // Calculate cache hit rate
+  // Token stats (chat events only - embeddings don't have output tokens)
+  const totalTokens = chatEvents.reduce((acc, e) => acc + (e.tokens || 0), 0)
+  const totalInputTokens = chatEvents.reduce((acc, e) => acc + (e.inputTokens || 0), 0)
+  const totalOutputTokens = chatEvents.reduce((acc, e) => acc + (e.outputTokens || 0), 0)
+  const totalCachedTokens = chatEvents.reduce((acc, e) => acc + (e.cachedTokens || 0), 0)
+  const totalReasoningTokens = chatEvents.reduce((acc, e) => acc + (e.reasoningTokens || 0), 0)
+  const totalToolUseTokens = chatEvents.reduce((acc, e) => acc + (e.toolUseTokens || 0), 0)
+  const avgTokens = chatEvents.length > 0 ? totalTokens / chatEvents.length : 0
+
+  // Calculate cache hit rate (chat events only)
   const cacheHitRate = totalInputTokens > 0 ? (totalCachedTokens / totalInputTokens) * 100 : 0
 
   // Cost analysis
@@ -1853,7 +1927,14 @@ function Analytics({ data, isAggregated = false, sessions = [] }) {
         <div className="analytics-stats-grid">
           <div className="analytics-stat">
             <span className="analytics-stat__label">Total Requests</span>
-            <span className="analytics-stat__value">{llmEvents.length}</span>
+            <span className="analytics-stat__value">
+              {llmEvents.length}
+              {embeddingEvents.length > 0 && (
+                <span style={{ fontSize: '0.7em', opacity: 0.7, marginLeft: '4px' }}>
+                  ({chatEvents.length} chat, {embeddingEvents.length} embed)
+                </span>
+              )}
+            </span>
           </div>
           <div className="analytics-stat">
             <span className="analytics-stat__label">Avg Duration</span>
@@ -2178,13 +2259,13 @@ function Analytics({ data, isAggregated = false, sessions = [] }) {
 
       {/* Row 5: Prompt Caching */}
       {totalCachedTokens > 0 && (() => {
-        const cachedEvents = llmEvents
+        const cachedEvents = chatEvents
           .filter(e => e.cachedTokens > 0)
           .sort((a, b) => b.cachedTokens - a.cachedTokens)
           .slice(0, 5)
         
         const cacheHits = cachedEvents.length
-        const cacheMisses = llmEvents.length - cacheHits
+        const cacheMisses = chatEvents.length - cacheHits
         const tokensSaved = totalCachedTokens
         const avgCostPerToken = totalCost / totalTokens || 0
         const costSaved = tokensSaved * avgCostPerToken
@@ -2284,7 +2365,11 @@ function SessionSidebar({ sessions, selectedSession, onSelectSession, onRemoveSe
   const getSessionStats = (session) => {
     const data = session.data
     const eventCount = (data.events?.length || 0) + (data.trace_tree?.length || 0)
-    const totalTokens = data.events?.reduce((acc, e) => acc + (e.response?.usage?.total_token_count || 0), 0) || 0
+    // Exclude embeddings.create from token counts
+    const totalTokens = data.events?.reduce((acc, e) => {
+      if (e.api === 'embeddings.create') return acc
+      return acc + (e.response?.usage?.total_tokens || e.response?.usage?.total_token_count || 0)
+    }, 0) || 0
     return { eventCount, totalTokens }
   }
 
