@@ -13,6 +13,7 @@ import Enterprise from './pages/Enterprise.jsx'
 import IntraintelEnterprise from './pages/IntraintelEnterprise.jsx'
 import Contact from './pages/Contact.jsx'
 import Privacy from './pages/Privacy.jsx'
+import Blog from './pages/Blog.jsx'
 
 // ScrollToTop component - scrolls to top on route change
 function ScrollToTop() {
@@ -44,6 +45,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/enterprise/intraintel.ai" element={<IntraintelEnterprise />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/self-healing-prompts" element={<Blog />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
