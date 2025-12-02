@@ -6,7 +6,8 @@ import {
   FileJson,
   ChevronRight,
   Play,
-  Cloud
+  Cloud,
+  Database
 } from 'lucide-react'
 import './UploadZone.css'
 
@@ -19,7 +20,8 @@ export default function UploadZone({
   isDragging, 
   setIsDragging, 
   isLoadingSample, 
-  onOpenGCPModal 
+  onOpenGCPModal,
+  onOpenYourTracesModal
 }) {
   const handleDragOver = useCallback((e) => {
     e.preventDefault()
@@ -90,9 +92,17 @@ export default function UploadZone({
 
         <div className="upload-zone__cloud-section">
           <div className="upload-zone__cloud-divider">
-            <span>or connect to cloud storage</span>
+            <span>or fetch from your account</span>
           </div>
           <div className="upload-zone__cloud-options">
+            <button className="upload-zone__cloud-btn upload-zone__cloud-btn--traces" onClick={onOpenYourTracesModal}>
+              <Database size={20} className="upload-zone__cloud-btn-icon upload-zone__cloud-btn-icon--traces" />
+              <div className="upload-zone__cloud-btn-text">
+                <span className="upload-zone__cloud-btn-title">Your Traces</span>
+                <span className="upload-zone__cloud-btn-desc">Fetch sessions with your API key</span>
+              </div>
+              <ChevronRight size={16} className="upload-zone__cloud-btn-arrow" />
+            </button>
             <button className="upload-zone__cloud-btn upload-zone__cloud-btn--gcp" onClick={onOpenGCPModal}>
               <img src={`${import.meta.env.BASE_URL}gcp.png`} alt="GCP" className="upload-zone__cloud-logo" />
               <div className="upload-zone__cloud-btn-text">

@@ -280,6 +280,14 @@
   object-fit: contain;
 }
 
+.session-sidebar__add-menu-item--traces svg {
+  color: var(--color-text-secondary);
+}
+
+.session-sidebar__add-menu-item--traces:hover {
+  background: var(--color-bg-subtle);
+}
+
 /* ========================================
    RESPONSIVE
    ======================================== */

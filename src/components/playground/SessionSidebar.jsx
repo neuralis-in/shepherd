@@ -7,7 +7,8 @@ import {
   X,
   Plus,
   ChevronDown,
-  Upload
+  Upload,
+  Database
 } from 'lucide-react'
 import './SessionSidebar.css'
 
@@ -20,6 +21,7 @@ function SessionSidebar({
   isDragging, 
   setIsDragging, 
   onOpenGCPModal,
+  onOpenYourTracesModal,
   basePath = '' 
 }) {
   const [showAddMenu, setShowAddMenu] = useState(false)
@@ -180,6 +182,16 @@ function SessionSidebar({
                   hidden
                 />
               </label>
+              <button 
+                className="session-sidebar__add-menu-item session-sidebar__add-menu-item--traces"
+                onClick={() => {
+                  onOpenYourTracesModal()
+                  setShowAddMenu(false)
+                }}
+              >
+                <Database size={16} />
+                <span>Your Traces</span>
+              </button>
               <button 
                 className="session-sidebar__add-menu-item"
                 onClick={() => {

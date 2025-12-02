@@ -366,6 +366,38 @@ const api = {
     }
     
     return response.json();
+  },
+
+  // ========================================
+  // Observability / Traces
+  // ========================================
+
+  /**
+   * Fetch user's sessions and traces using API key
+   * @param {string} apiKey - The user's API key (e.g., sk_live_xxxxx)
+   * @returns {Promise<{sessions: Array}>} Sessions with trace trees
+   */
+  async fetchUserSessions(apiKey) {
+    const response = await fetch(`${API_URL}/v1/sessions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ api_key: apiKey })
+    });
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Invalid API key');
+      }
+      if (response.status === 404) {
+        throw new Error('No sessions found');
+      }
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Failed to fetch sessions');
+    }
+    
+    return response.json();
   }
 };
 

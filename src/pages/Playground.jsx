@@ -26,6 +26,7 @@ import {
   Analytics,
   UploadZone,
   GCPConnectionModal,
+  YourTracesModal,
   SessionSidebar,
   PlaygroundFilters,
   SearchBar,
@@ -45,6 +46,7 @@ export default function Playground() {
   const [isLoadingSample, setIsLoadingSample] = useState(false)
   const [validationError, setValidationError] = useState(null)
   const [isGCPModalOpen, setIsGCPModalOpen] = useState(false)
+  const [isYourTracesModalOpen, setIsYourTracesModalOpen] = useState(false)
   const [activeFilters, setActiveFilters] = useState({})
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -234,6 +236,17 @@ export default function Playground() {
     }
   }, [sessions.length])
 
+  const handleYourTracesImport = useCallback((importedSessions) => {
+    setSessions(prev => [...prev, ...importedSessions])
+    setError(null)
+    setValidationError(null)
+    
+    if (sessions.length === 0) {
+      setSelectedSessionId(null)
+      setViewMode('analytics')
+    }
+  }, [sessions.length])
+
   const handleRemoveSession = useCallback((sessionId) => {
     setSessions(prev => prev.filter(s => s.id !== sessionId))
     if (selectedSessionId === sessionId) {
@@ -300,6 +313,17 @@ export default function Playground() {
             isOpen={isGCPModalOpen}
             onClose={() => setIsGCPModalOpen(false)}
             onImportFiles={handleGCPImport}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Your Traces Modal */}
+      <AnimatePresence>
+        {isYourTracesModalOpen && (
+          <YourTracesModal
+            isOpen={isYourTracesModalOpen}
+            onClose={() => setIsYourTracesModalOpen(false)}
+            onImportSessions={handleYourTracesImport}
           />
         )}
       </AnimatePresence>
@@ -391,6 +415,7 @@ export default function Playground() {
               setIsDragging={setIsDragging}
               isLoadingSample={isLoadingSample}
               onOpenGCPModal={() => setIsGCPModalOpen(true)}
+              onOpenYourTracesModal={() => setIsYourTracesModalOpen(true)}
             />
             {error && (
               <motion.div
@@ -424,6 +449,7 @@ export default function Playground() {
                 isDragging={isDragging}
                 setIsDragging={setIsDragging}
                 onOpenGCPModal={() => setIsGCPModalOpen(true)}
+                onOpenYourTracesModal={() => setIsYourTracesModalOpen(true)}
               />
             </div>
 

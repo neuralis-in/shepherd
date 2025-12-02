@@ -1,0 +1,413 @@
+/* ========================================
+   YOUR TRACES MODAL
+   ======================================== */
+
+.your-traces-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.your-traces-modal {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  max-width: 480px;
+  width: 100%;
+  max-height: calc(100vh - 40px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+}
+
+.your-traces-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 150ms ease;
+  z-index: 1;
+}
+
+.your-traces-modal__close:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+.your-traces-modal__header {
+  padding: 32px 24px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.your-traces-modal__icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.your-traces-modal__header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.your-traces-modal__header p {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.your-traces-modal__content {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.your-traces-modal__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.your-traces-modal__input-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.your-traces-modal__input-group label svg {
+  color: var(--color-text-muted);
+}
+
+.your-traces-modal__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.your-traces-modal__input-wrapper input {
+  width: 100%;
+  padding: 12px 44px 12px 14px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  transition: all 150ms ease;
+}
+
+.your-traces-modal__input-wrapper input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.your-traces-modal__input-wrapper input:focus {
+  outline: none;
+  border-color: var(--color-text-muted);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.05);
+}
+
+.your-traces-modal__input-wrapper input:disabled {
+  background: var(--color-bg-subtle);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.your-traces-modal__toggle-visibility {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  padding: 8px;
+  cursor: pointer;
+  transition: color 150ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.your-traces-modal__toggle-visibility:hover {
+  color: var(--color-text);
+  background: var(--color-bg-subtle);
+}
+
+.your-traces-modal__hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.your-traces-modal__hint a {
+  color: var(--color-text);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.your-traces-modal__hint a:hover {
+  text-decoration: underline;
+}
+
+.your-traces-modal__error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  color: #DC2626;
+  font-size: 0.8125rem;
+}
+
+.your-traces-modal__preview {
+  margin-top: 20px;
+  padding: 16px;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  border-radius: 12px;
+}
+
+.your-traces-modal__preview-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 14px;
+}
+
+.your-traces-modal__preview-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.your-traces-modal__stat {
+  background: white;
+  border: 1px solid #D1FAE5;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.your-traces-modal__stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.your-traces-modal__stat-label {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.your-traces-modal__preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.your-traces-modal__preview-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #D1FAE5;
+  border-radius: 8px;
+}
+
+.your-traces-modal__preview-item-name {
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
+.your-traces-modal__preview-item-meta {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.your-traces-modal__preview-more {
+  font-size: 0.75rem;
+  color: #059669;
+  text-align: center;
+  padding: 8px;
+  font-weight: 500;
+}
+
+.your-traces-modal__actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+}
+
+.your-traces-modal__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.your-traces-modal__btn--primary {
+  background: var(--color-accent);
+  border: none;
+  color: white;
+}
+
+.your-traces-modal__btn--primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(17, 17, 17, 0.15);
+}
+
+.your-traces-modal__btn--primary:disabled {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.your-traces-modal__btn--secondary {
+  background: white;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.your-traces-modal__btn--secondary:hover {
+  background: var(--color-bg-subtle);
+  border-color: var(--color-text-muted);
+}
+
+.your-traces-modal__spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Scrollbar for preview list */
+.your-traces-modal__preview-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.your-traces-modal__preview-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.your-traces-modal__preview-list::-webkit-scrollbar-thumb {
+  background: #D1FAE5;
+  border-radius: 3px;
+}
+
+.your-traces-modal__preview-list::-webkit-scrollbar-thumb:hover {
+  background: #A7F3D0;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 640px) {
+  .your-traces-modal {
+    max-width: 100%;
+    border-radius: 16px;
+    margin: 10px;
+  }
+
+  .your-traces-modal__header {
+    padding: 24px 16px 20px;
+  }
+
+  .your-traces-modal__icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+
+  .your-traces-modal__header h2 {
+    font-size: 1.125rem;
+  }
+
+  .your-traces-modal__header p {
+    font-size: 0.8125rem;
+  }
+
+  .your-traces-modal__content {
+    padding: 16px;
+  }
+
+  .your-traces-modal__actions {
+    padding: 12px 16px;
+  }
+
+  .your-traces-modal__btn {
+    padding: 10px 16px;
+    font-size: 0.8125rem;
+  }
+
+  .your-traces-modal__preview-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .your-traces-modal__preview-item-name {
+    max-width: 180px;
+  }
+}
