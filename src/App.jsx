@@ -1113,9 +1113,14 @@ function AiobsSection() {
           variants={staggerContainer}
         >
           <motion.div className="aiobs__header" variants={fadeInUp}>
-            <div className="aiobs__badge">
-              <Github size={14} />
-              Open Source
+            <div className="aiobs__badges">
+              <div className="aiobs__badge">
+                <Github size={14} />
+                Open Source
+              </div>
+              <div className="aiobs__badge aiobs__badge--gsoc">
+                🎓 Applying for GSoC 2026
+              </div>
             </div>
             <h2 className="heading-lg">
               Built on aiobs — an open-source Python observability SDK.
