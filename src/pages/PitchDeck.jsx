@@ -7,6 +7,7 @@ import {
   ArrowDown,
   Layers,
   AlertTriangle,
+  AlertCircle,
   Zap,
   Target,
   TrendingUp,
@@ -24,7 +25,11 @@ import {
   Clock,
   BarChart3,
   Rocket,
-  CircleDot
+  CircleDot,
+  Bot,
+  HardDrive,
+  Database,
+  Container
 } from 'lucide-react'
 import './PitchDeck.css'
 
@@ -55,6 +60,7 @@ const slides = [
   { id: 'market', title: 'Market' },
   { id: 'business-model', title: 'Business Model' },
   { id: 'traction', title: 'Traction' },
+  { id: 'partnerships', title: 'Partnerships' },
   { id: 'roadmap', title: 'Roadmap' },
   { id: 'team', title: 'Team' },
   { id: 'ask', title: 'The Ask' },
@@ -173,7 +179,6 @@ function CoverSlide() {
       
       <motion.div className="pitch-scroll-hint" variants={fadeInUp}>
         <ArrowDown size={20} />
-        <span>Scroll or use arrows to navigate</span>
       </motion.div>
     </motion.div>
   )
@@ -237,11 +242,15 @@ function ProblemSlide() {
         </motion.div>
 
         <motion.div className="pitch-problem-stat" variants={fadeInUp}>
-          <span className="pitch-problem-stat__value">73%</span>
+          <span className="pitch-problem-stat__value">74%</span>
           <span className="pitch-problem-stat__label">
-            of AI projects fail to reach production due to observability challenges
+            of companies struggle to achieve and scale value from AI Agents
           </span>
         </motion.div>
+
+        <motion.p className="pitch-problem-source" variants={fadeInUp}>
+          Source: <a href="https://www.bcg.com/press/24october2024-ai-adoption-in-2024-74-of-companies-struggle-to-achieve-and-scale-value" target="_blank" rel="noopener noreferrer">BCG 2024</a>
+        </motion.p>
       </div>
     </motion.div>
   )
@@ -313,34 +322,173 @@ function SolutionSlide() {
   )
 }
 
-function HowItWorksSlide() {
-  const steps = [
-    {
-      number: '01',
-      title: 'Instrument',
-      description: 'Add 3 lines to your agent code. No rewrites needed.',
-      icon: <Cpu size={24} />
-    },
-    {
-      number: '02',
-      title: 'Capture',
-      description: 'Shepherd traces every LLM call, tool use, and decision.',
-      icon: <Activity size={24} />
-    },
-    {
-      number: '03',
-      title: 'Store',
-      description: 'Traces stream to your cloud (GCP, AWS, Azure, or on-prem).',
-      icon: <Layers size={24} />
-    },
-    {
-      number: '04',
-      title: 'Analyze',
-      description: 'Debug, replay, and optimize agent behavior.',
-      icon: <BarChart3 size={24} />
-    }
+// Architecture Diagram Component (from landing page)
+function PitchWorkflowDiagram() {
+  const basePath = import.meta.env.BASE_URL
+  
+  const agents = [
+    { id: 1, platform: 'GKE' },
+    { id: 2, platform: 'EC2' },
+    { id: 3, platform: 'Cloud Run' },
+    { id: 4, platform: 'Lambda' },
   ]
 
+  return (
+    <div className="architecture-diagram">
+      {/* Section: Agents on Cloud Platforms */}
+      <div className="arch-section arch-agents">
+        <div className="arch-section-label">Your AI Agents</div>
+        <div className="arch-agents-cloud">
+          {agents.map((agent, i) => (
+            <motion.div 
+              key={agent.id}
+              className="arch-agent-node"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: i * 0.1, duration: 0.4, type: "spring" }}
+              style={{ '--delay': `${i * 0.5}s` }}
+            >
+              <div className="arch-agent-circle">
+                <Bot size={20} />
+              </div>
+              <span className="arch-agent-platform">{agent.platform}</span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Animated Flow Lines */}
+      <div className="arch-flow arch-flow-1">
+        <div className="arch-flow-line">
+          <div className="arch-flow-particle"></div>
+        </div>
+        <span className="arch-flow-label">observe()</span>
+      </div>
+
+      {/* Section: Shepherd Layer */}
+      <motion.div 
+        className="arch-section arch-shepherd"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <div className="arch-shepherd-badge">
+          <img src={`${basePath}shepherd.svg`} alt="Shepherd" className="arch-shepherd-logo" />
+          <span>Shepherd</span>
+        </div>
+        <div className="arch-shepherd-features">
+          <div className="arch-shepherd-feature">
+            <Activity size={14} />
+            <span>Trace Capture</span>
+          </div>
+          <div className="arch-shepherd-feature">
+            <Layers size={14} />
+            <span>LLM Events</span>
+          </div>
+          <div className="arch-shepherd-feature">
+            <AlertCircle size={14} />
+            <span>Error Detection</span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Animated Flow Lines */}
+      <div className="arch-flow arch-flow-2">
+        <div className="arch-flow-line">
+          <div className="arch-flow-particle"></div>
+        </div>
+        <span className="arch-flow-label">flush()</span>
+      </div>
+
+      {/* Section: Cloud Storage */}
+      <motion.div 
+        className="arch-section arch-storage"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <div className="arch-section-label">Your Cloud</div>
+        <div className="arch-storage-icons">
+          <div className="arch-storage-item">
+            <div className="arch-storage-icon">
+              <HardDrive size={18} />
+            </div>
+            <span>S3 / GCS</span>
+          </div>
+          <div className="arch-storage-item">
+            <div className="arch-storage-icon">
+              <Database size={18} />
+            </div>
+            <span>BigQuery</span>
+          </div>
+          <div className="arch-storage-item">
+            <div className="arch-storage-icon">
+              <Container size={18} />
+            </div>
+            <span>Postgres</span>
+          </div>
+        </div>
+        <div className="arch-storage-badge">JSON Traces</div>
+      </motion.div>
+
+      {/* Animated Flow Lines */}
+      <div className="arch-flow arch-flow-3">
+        <div className="arch-flow-line">
+          <div className="arch-flow-particle"></div>
+        </div>
+        <span className="arch-flow-label">query</span>
+      </div>
+
+      {/* Section: Dashboard */}
+      <motion.div 
+        className="arch-section arch-dashboard"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.7, duration: 0.5 }}
+      >
+        <div className="arch-section-label">Insights</div>
+        <div className="arch-dashboard-preview">
+          <div className="arch-dashboard-header">
+            <div className="arch-dashboard-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span className="arch-dashboard-title">Dashboard</span>
+          </div>
+          <div className="arch-dashboard-content">
+            <div className="arch-dashboard-chart arch-chart-bar">
+              <BarChart3 size={16} />
+              <div className="arch-mini-bars">
+                <div className="arch-bar" style={{ height: '60%' }}></div>
+                <div className="arch-bar" style={{ height: '80%' }}></div>
+                <div className="arch-bar" style={{ height: '45%' }}></div>
+                <div className="arch-bar" style={{ height: '90%' }}></div>
+                <div className="arch-bar" style={{ height: '70%' }}></div>
+              </div>
+            </div>
+            <div className="arch-dashboard-chart arch-chart-line">
+              <TrendingUp size={16} />
+              <svg viewBox="0 0 60 30" className="arch-line-svg">
+                <path d="M0,25 Q15,20 25,15 T45,10 T60,5" fill="none" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            </div>
+            <div className="arch-dashboard-stats">
+              <div className="arch-stat">
+                <span className="arch-stat-value">2.4k</span>
+                <span className="arch-stat-label">Traces</span>
+              </div>
+              <div className="arch-stat">
+                <span className="arch-stat-value">12ms</span>
+                <span className="arch-stat-label">Avg Latency</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+function HowItWorksSlide() {
   return (
     <motion.div 
       className="pitch-slide pitch-slide--how"
@@ -355,20 +503,12 @@ function HowItWorksSlide() {
           Simple integration, powerful insights
         </motion.h2>
 
-        <motion.div className="pitch-how-steps" variants={fadeInUp}>
-          {steps.map((step, i) => (
-            <motion.div 
-              key={i} 
-              className="pitch-how-step"
-              variants={fadeInUp}
-            >
-              <div className="pitch-how-step__icon">{step.icon}</div>
-              <span className="pitch-how-step__number">{step.number}</span>
-              <h4 className="pitch-how-step__title">{step.title}</h4>
-              <p className="pitch-how-step__desc">{step.description}</p>
-              {i < steps.length - 1 && <div className="pitch-how-step__connector" />}
-            </motion.div>
-          ))}
+        <motion.p className="pitch-slide__subtitle" variants={fadeInUp}>
+          Shepherd seamlessly instruments your agents and streams traces to your infrastructure.
+        </motion.p>
+
+        <motion.div className="pitch-how-diagram" variants={scaleIn}>
+          <PitchWorkflowDiagram />
         </motion.div>
       </div>
     </motion.div>
@@ -376,6 +516,13 @@ function HowItWorksSlide() {
 }
 
 function MarketSlide() {
+  const marketData = [
+    { year: '2024', value: 5.7, height: 30 },
+    { year: '2026', value: 12.0, height: 60 },
+    { year: '2028', value: 26.8, height: 110 },
+    { year: '2030', value: 52.1, height: 160 },
+  ]
+
   return (
     <motion.div 
       className="pitch-slide pitch-slide--market"
@@ -387,44 +534,84 @@ function MarketSlide() {
         <motion.span className="pitch-slide__label" variants={fadeInUp}>Market Opportunity</motion.span>
         
         <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
-          The AI agent market is exploding
+          AI agents are the next platform shift
         </motion.h2>
 
-        <motion.div className="pitch-market-stats" variants={fadeInUp}>
-          <div className="pitch-market-stat pitch-market-stat--hero">
-            <span className="pitch-market-stat__value">$47B</span>
-            <span className="pitch-market-stat__label">AI Agent Market by 2030</span>
-            <span className="pitch-market-stat__growth">44% CAGR</span>
+        <motion.div className="pitch-market-chart-section" variants={fadeInUp}>
+          <div className="pitch-market-chart">
+            <div className="pitch-market-chart__header">
+              <h4>AI Agent Market Size</h4>
+              <span className="pitch-market-chart__cagr">45% CAGR</span>
+            </div>
+            <div className="pitch-market-chart__container">
+              {marketData.map((item, i) => (
+                <div key={item.year} className="pitch-market-chart__bar-group">
+                  <motion.span 
+                    className="pitch-market-chart__value"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 + i * 0.15 }}
+                    style={{ bottom: item.height + 8 }}
+                  >
+                    ${item.value}B
+                  </motion.span>
+                  <motion.div 
+                    className="pitch-market-chart__bar"
+                    initial={{ height: 0 }}
+                    animate={{ height: item.height }}
+                    transition={{ delay: 0.3 + i * 0.15, duration: 0.8, ease: "easeOut" }}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="pitch-market-chart__years">
+              {marketData.map((item) => (
+                <span key={item.year} className="pitch-market-chart__year">{item.year}</span>
+              ))}
+            </div>
           </div>
-          
-          <div className="pitch-market-stat">
-            <span className="pitch-market-stat__value">$28B</span>
-            <span className="pitch-market-stat__label">Observability Market 2024</span>
-          </div>
-          
-          <div className="pitch-market-stat">
-            <span className="pitch-market-stat__value">80%</span>
-            <span className="pitch-market-stat__label">Enterprises planning AI agents by 2026</span>
+
+          <div className="pitch-market-stats-side">
+            <div className="pitch-market-stat-mini">
+              <span className="pitch-market-stat-mini__value">$109.1B</span>
+              <span className="pitch-market-stat-mini__label">U.S. Private AI Investment (2024)</span>
+            </div>
+            <div className="pitch-market-stat-mini">
+              <span className="pitch-market-stat-mini__value">78%</span>
+              <span className="pitch-market-stat-mini__label">Organizations using AI in 2024</span>
+            </div>
+            <div className="pitch-market-stat-mini">
+              <span className="pitch-market-stat-mini__value">90%</span>
+              <span className="pitch-market-stat-mini__label">AI models from industry (2024)</span>
+            </div>
           </div>
         </motion.div>
 
-        <motion.div className="pitch-market-position" variants={fadeInUp}>
-          <h4>Why Now?</h4>
-          <div className="pitch-market-reasons">
-            <div className="pitch-market-reason">
-              <Target size={20} />
-              <span>LLM costs dropping rapidly, making agents economically viable</span>
+        <motion.div className="pitch-market-usecases" variants={fadeInUp}>
+          <h4>AI Agents Already Delivering ROI</h4>
+          <div className="pitch-market-usecases__grid">
+            <div className="pitch-market-usecase">
+              <span className="pitch-market-usecase__stat">95%</span>
+              <span className="pitch-market-usecase__label">Cost reduction in content marketing</span>
             </div>
-            <div className="pitch-market-reason">
-              <Rocket size={20} />
-              <span>OpenAI, Anthropic, Google all pushing agentic capabilities</span>
+            <div className="pitch-market-usecase">
+              <span className="pitch-market-usecase__stat">10×</span>
+              <span className="pitch-market-usecase__label">Cheaper customer service ops</span>
             </div>
-            <div className="pitch-market-reason">
-              <Shield size={20} />
-              <span>Regulatory pressure for AI explainability (EU AI Act)</span>
+            <div className="pitch-market-usecase">
+              <span className="pitch-market-usecase__stat">40%</span>
+              <span className="pitch-market-usecase__label">Productivity boost in IT</span>
+            </div>
+            <div className="pitch-market-usecase">
+              <span className="pitch-market-usecase__stat">25%</span>
+              <span className="pitch-market-usecase__label">Faster R&D cycles</span>
             </div>
           </div>
         </motion.div>
+
+        <motion.p className="pitch-market-source" variants={fadeInUp}>
+          Sources: <a href="https://hai.stanford.edu/ai-index/2025-ai-index-report" target="_blank" rel="noopener noreferrer">Stanford HAI 2025</a>, <a href="https://www.bcg.com/capabilities/artificial-intelligence/ai-agents" target="_blank" rel="noopener noreferrer">BCG AI Agents</a>
+        </motion.p>
       </div>
     </motion.div>
   )
@@ -507,10 +694,11 @@ function BusinessModelSlide() {
 
 function TractionSlide() {
   const milestones = [
-    { date: 'Q4 2024', event: 'aiobs SDK launched on GitHub' },
-    { date: 'Q1 2025', event: 'First enterprise pilot discussions' },
-    { date: 'Q1 2025', event: 'GSoC 2026 application submitted' },
-    { date: 'Q2 2025', event: 'Shepherd platform launch' },
+    { icon: '🚀', title: 'aiobs SDK', desc: 'Open source SDK launched', date: 'Nov 2025' },
+    { icon: '⚡', title: 'Shepherd', desc: 'Platform ready', date: 'Nov 2025' },
+    { icon: '🤝', title: 'Intraintel.ai', desc: 'Pilot talks advanced', date: 'Dec 2025' },
+    { icon: '🔧', title: 'Verifast.ai', desc: 'PoC in development', date: 'Dec 2025' },
+    { icon: '🔬', title: 'Exosphere.host', desc: 'Research collaboration', date: 'Dec 2025' },
   ]
 
   return (
@@ -524,35 +712,127 @@ function TractionSlide() {
         <motion.span className="pitch-slide__label" variants={fadeInUp}>Early Traction</motion.span>
         
         <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
-          Building momentum
+          Real conversations, real momentum
         </motion.h2>
 
         <motion.div className="pitch-traction-metrics" variants={fadeInUp}>
           <div className="pitch-traction-metric">
-            <span className="pitch-traction-metric__value">Open Source</span>
-            <span className="pitch-traction-metric__label">aiobs SDK (MIT)</span>
+            <span className="pitch-traction-metric__value">1</span>
+            <span className="pitch-traction-metric__label">Pilot in Advanced Talks</span>
           </div>
           <div className="pitch-traction-metric">
-            <span className="pitch-traction-metric__value">2</span>
-            <span className="pitch-traction-metric__label">LLM Providers</span>
+            <span className="pitch-traction-metric__value">1</span>
+            <span className="pitch-traction-metric__label">PoC in Development</span>
           </div>
           <div className="pitch-traction-metric">
-            <span className="pitch-traction-metric__value">GSoC</span>
-            <span className="pitch-traction-metric__label">2026 Applicant</span>
+            <span className="pitch-traction-metric__value">1</span>
+            <span className="pitch-traction-metric__label">Research Partnership</span>
           </div>
         </motion.div>
 
-        <motion.div className="pitch-traction-timeline" variants={fadeInUp}>
-          <h4>Key Milestones</h4>
-          <div className="pitch-timeline">
-            {milestones.map((milestone, i) => (
-              <div key={i} className="pitch-timeline__item">
-                <span className="pitch-timeline__date">{milestone.date}</span>
-                <div className="pitch-timeline__dot" />
-                <span className="pitch-timeline__event">{milestone.event}</span>
-              </div>
+        <motion.div className="pitch-horizontal-timeline" variants={fadeInUp}>
+          <h4>Journey So Far</h4>
+          
+          <div className="pitch-h-timeline">
+            <div className="pitch-h-timeline__line" />
+            {milestones.map((m, i) => (
+              <motion.div 
+                key={i}
+                className="pitch-h-timeline__item"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.15 }}
+              >
+                <div className="pitch-h-timeline__dot" />
+                <div className="pitch-h-timeline__card">
+                  <span className="pitch-h-timeline__icon">{m.icon}</span>
+                  <span className="pitch-h-timeline__title">{m.title}</span>
+                  <span className="pitch-h-timeline__desc">{m.desc}</span>
+                  <span className="pitch-h-timeline__date">{m.date}</span>
+                </div>
+              </motion.div>
             ))}
           </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+function PartnershipsSlide() {
+  const partnerships = [
+    {
+      company: 'Intraintel.ai',
+      logo: `${import.meta.env.BASE_URL}intraintel.jpeg`,
+      status: 'Pilot Signing',
+      statusColor: '#10B981',
+      description: 'AI-powered enterprise solutions company. Advanced discussions for pilot deployment of Shepherd for their agent infrastructure.',
+      useCase: 'Enterprise Agent Observability'
+    },
+    {
+      company: 'Verifast.ai',
+      logo: `${import.meta.env.BASE_URL}verifast_tech_logo.jpeg`,
+      status: 'PoC In Progress',
+      statusColor: '#F59E0B',
+      description: 'Building proof-of-concept for self-healing prompts — automatically detecting and fixing failing prompts in production.',
+      useCase: 'Self-Healing Prompts'
+    },
+    {
+      company: 'Exosphere.host',
+      logo: `${import.meta.env.BASE_URL}exosphere.jpg`,
+      status: 'Research Collab',
+      statusColor: '#6366F1',
+      description: 'Joint research initiative to understand why AI agents fail in production environments and how observability can prevent failures.',
+      useCase: 'AI Agent Failure Research'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--partnerships"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Partnerships & Pilots</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Early adopters validating the vision
+        </motion.h2>
+
+        <motion.div className="pitch-partnerships-grid" variants={fadeInUp}>
+          {partnerships.map((partner, i) => (
+            <motion.div 
+              key={partner.company}
+              className="pitch-partnership-card"
+              variants={fadeInUp}
+              transition={{ delay: i * 0.1 }}
+            >
+              <div className="pitch-partnership-card__header">
+                <img src={partner.logo} alt={partner.company} className="pitch-partnership-card__logo" />
+                <div className="pitch-partnership-card__info">
+                  <h4 className="pitch-partnership-card__company">{partner.company}</h4>
+                  <span 
+                    className="pitch-partnership-card__status"
+                    style={{ background: `${partner.statusColor}20`, color: partner.statusColor }}
+                  >
+                    {partner.status}
+                  </span>
+                </div>
+              </div>
+              <p className="pitch-partnership-card__desc">{partner.description}</p>
+              <div className="pitch-partnership-card__usecase">
+                <Target size={14} />
+                <span>{partner.useCase}</span>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="pitch-partnerships-quote" variants={fadeInUp}>
+          <p>"Understanding agent behavior in production is the #1 challenge for enterprise AI adoption."</p>
+          <span>— Common theme from pilot conversations</span>
         </motion.div>
       </div>
     </motion.div>
@@ -562,24 +842,29 @@ function TractionSlide() {
 function RoadmapSlide() {
   const roadmap = [
     {
-      quarter: 'Q2 2025',
-      title: 'Platform Launch',
-      items: ['Public beta launch', 'GCP/AWS integrations', 'Analytics dashboard']
+      quarter: '1',
+      title: 'Shepherd',
+      items: ['Mature playground', 'Cloud integrations', 'Enhanced analytics']
     },
     {
-      quarter: 'Q3 2025',
-      title: 'Enterprise Features',
-      items: ['SSO & RBAC', 'On-premise deployment', 'Advanced alerting']
+      quarter: '2',
+      title: 'aiobs SDK',
+      items: ['Setup evals framework', 'Multi-LLM providers', 'GSoC 2026 application']
     },
     {
-      quarter: 'Q4 2025',
-      title: 'Self-Healing',
-      items: ['Self-healing prompts', 'Auto-optimization', 'A/B testing']
+      quarter: '3',
+      title: 'Self-Healing + CLI',
+      items: ['shepherd-cli launch', 'Prompt optimizer', 'Auto-fix implementation']
     },
     {
-      quarter: '2026',
+      quarter: '4',
+      title: 'Traction',
+      items: ['Research partnerships', 'Client pitches', 'Pilot conversions']
+    },
+    {
+      quarter: '5',
       title: 'Scale',
-      items: ['Agent marketplace', 'Multi-agent support', 'Global expansion']
+      items: ['Enterprise features', 'Multi-agent support', 'Global expansion']
     }
   ]
 
@@ -636,17 +921,18 @@ function TeamSlide() {
               <Users size={32} />
             </div>
             <h4 className="pitch-team__name">Pranav Goswami</h4>
-            <span className="pitch-team__role">Founder & CEO</span>
+            <span className="pitch-team__role">Founder</span>
             <p className="pitch-team__bio">
-              Full-stack engineer with experience in distributed systems 
-              and AI/ML infrastructure. Previously built developer tools at scale.
+              Machine Learning Engineer at Warner Bros. Discovery. 
+              Maintainer at LFortran — open-source Fortran compiler. 
+              Previously led teams to develop agentic solutions.
             </p>
           </div>
         </motion.div>
 
         <motion.div className="pitch-team-hiring" variants={fadeInUp}>
-          <h4>We're hiring!</h4>
-          <p>Looking for founding engineers passionate about AI infrastructure.</p>
+          <h4>We need people!</h4>
+          <p>"Every Dream Needs a Team" — Mercedes AMG Petronas Formula 1</p>
         </motion.div>
       </div>
     </motion.div>
@@ -665,12 +951,12 @@ function AskSlide() {
         <motion.span className="pitch-slide__label" variants={fadeInUp}>The Ask</motion.span>
         
         <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
-          Join us in making AI agents trustworthy
+          Help us in making AI agents trustworthy
         </motion.h2>
 
         <motion.div className="pitch-ask-details" variants={fadeInUp}>
           <div className="pitch-ask-amount">
-            <span className="pitch-ask-amount__value">$500K</span>
+            <span className="pitch-ask-amount__value">$150K - $450K</span>
             <span className="pitch-ask-amount__label">Pre-Seed Round</span>
           </div>
 
@@ -678,7 +964,7 @@ function AskSlide() {
             <h4>Use of Funds</h4>
             <div className="pitch-ask-use__grid">
               <div className="pitch-ask-use__item">
-                <span className="pitch-ask-use__percent">50%</span>
+                <span className="pitch-ask-use__percent">40%</span>
                 <span className="pitch-ask-use__label">Engineering</span>
               </div>
               <div className="pitch-ask-use__item">
@@ -691,13 +977,17 @@ function AskSlide() {
               </div>
               <div className="pitch-ask-use__item">
                 <span className="pitch-ask-use__percent">10%</span>
+                <span className="pitch-ask-use__label">Open Source</span>
+              </div>
+              <div className="pitch-ask-use__item">
+                <span className="pitch-ask-use__percent">10%</span>
                 <span className="pitch-ask-use__label">Operations</span>
               </div>
             </div>
           </div>
 
           <div className="pitch-ask-runway">
-            <span className="pitch-ask-runway__value">18 months</span>
+            <span className="pitch-ask-runway__value">14 months</span>
             <span className="pitch-ask-runway__label">Runway to Series A milestones</span>
           </div>
         </motion.div>
@@ -763,6 +1053,7 @@ export default function PitchDeck() {
       case 'market': return <MarketSlide />
       case 'business-model': return <BusinessModelSlide />
       case 'traction': return <TractionSlide />
+      case 'partnerships': return <PartnershipsSlide />
       case 'roadmap': return <RoadmapSlide />
       case 'team': return <TeamSlide />
       case 'ask': return <AskSlide />
