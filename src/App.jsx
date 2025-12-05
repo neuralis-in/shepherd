@@ -1757,7 +1757,7 @@ function ShepherdShell() {
     { icon: <Play size={18} />, title: 'Interactive Execution', desc: 'Run agents in isolated, instrumented environments' },
     { icon: <Target size={18} />, title: 'Breakpoints', desc: 'Break on tools, LLM calls, conditions, or branches' },
     { icon: <RotateCcw size={18} />, title: 'Deterministic Replay', desc: 'Replay runs with exact inputs & random seeds' },
-    { icon: <Zap size={18} />, title: 'Self-Healing Fixes', desc: 'Get diff-style patches for prompts & config' },
+    { icon: <Bot size={18} />, title: 'Trace Agent', desc: 'AI that reasons over your execution graph to explain & diagnose' },
   ]
 
   useEffect(() => {
@@ -1889,6 +1889,9 @@ function ShepherdShell() {
           <motion.div className="cli-preview__cta" variants={fadeInUp}>
             <p className="cli-preview__cta-text">
               Want early access to Shepherd Shell?
+            </p>
+            <p className="cli-preview__cta-subtext">
+              GDB-style debugger + an AI agent that reasons over your traces
             </p>
             <a 
               href="https://github.com/neuralis-in/aiobs" 

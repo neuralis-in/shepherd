@@ -2479,6 +2479,13 @@
 .cli-preview__cta-text {
   font-size: 0.9375rem;
   color: var(--color-text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.cli-preview__cta-subtext {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-md);
 }
 
 /* Responsive */
