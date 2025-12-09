@@ -50,7 +50,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/self-healing-prompts" element={<Blog />} />
+        <Route path="/blog/*" element={<Blog />} />
         <Route path="/pitch-deck" element={<PitchDeck />} />
         <Route path="/community" element={<Community />} />
       </Routes>

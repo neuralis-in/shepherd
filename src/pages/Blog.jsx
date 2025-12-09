@@ -46,7 +46,22 @@ import {
   Gauge,
   MessageSquare,
   ThumbsUp,
-  ThumbsDown
+  ThumbsDown,
+  LayoutDashboard,
+  Search,
+  DollarSign,
+  Rocket,
+  Lock,
+  Wrench,
+  Timer,
+  Bug,
+  Route,
+  Coins,
+  Scale,
+  PieChart,
+  Bot,
+  Workflow,
+  Lightbulb
 } from 'lucide-react'
 import './Blog.css'
 
@@ -71,6 +86,17 @@ const scaleIn = {
 // Blog posts data
 const blogPosts = [
   {
+    slug: 'dashboards-power-center-ai-observability',
+    title: 'Why Dashboards are the power center of AI observability.',
+    subtitle: 'The Control Room for AI You Can Actually Trust',
+    excerpt: 'If you can\'t see what your AI is doing, you can\'t trust what your AI is doing. Dashboards transform scattered AI activity into a control environment where teams can monitor, tune, and evolve their systems with confidence.',
+    date: 'December 9, 2025',
+    readTime: '10 min read',
+    tag: 'Observability',
+    featured: true,
+    icon: 'dashboard',
+  },
+  {
     slug: 'self-healing-prompts',
     title: 'How Self-Healing Prompts Will Work',
     subtitle: 'A Simple, Intuitive Guide to the Future of AI Reliability',
@@ -78,9 +104,9 @@ const blogPosts = [
     date: 'December 2, 2025',
     readTime: '15 min read',
     tag: 'AI Systems',
-    featured: true,
+    featured: false,
+    icon: 'sparkles',
   },
-  // Future blog posts can be added here
 ]
 
 // Reading Progress Bar
@@ -213,7 +239,11 @@ function BlogList() {
                 {post.featured && (
                   <div className="blog-card__visual">
                     <div className="blog-card__visual-bg">
-                      <Sparkles size={64} className="blog-card__visual-icon" />
+                      {post.icon === 'dashboard' ? (
+                        <LayoutDashboard size={64} className="blog-card__visual-icon" />
+                      ) : (
+                        <Sparkles size={64} className="blog-card__visual-icon" />
+                      )}
                     </div>
                   </div>
                 )}
@@ -742,7 +772,938 @@ function TableOfContents() {
   )
 }
 
-// Main Blog Article Content
+// Dashboard Stats Card Component
+function DashboardStatsCard({ icon, title, value, trend, color = '#111' }) {
+  return (
+    <motion.div 
+      className="dashboard-stat-card"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+    >
+      <div className="dashboard-stat-card__icon" style={{ background: `${color}15`, color }}>
+        {icon}
+      </div>
+      <div className="dashboard-stat-card__content">
+        <span className="dashboard-stat-card__value">{value}</span>
+        <span className="dashboard-stat-card__title">{title}</span>
+      </div>
+      {trend && (
+        <span className={`dashboard-stat-card__trend ${trend > 0 ? 'dashboard-stat-card__trend--up' : 'dashboard-stat-card__trend--down'}`}>
+          {trend > 0 ? '+' : ''}{trend}%
+        </span>
+      )}
+    </motion.div>
+  )
+}
+
+// Dashboard Visual Component
+function DashboardVisual() {
+  return (
+    <div className="dashboard-visual">
+      <div className="dashboard-visual__header">
+        <div className="dashboard-visual__dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span className="dashboard-visual__title">
+          <LayoutDashboard size={14} />
+          AI Observability Dashboard
+        </span>
+      </div>
+      <div className="dashboard-visual__content">
+        <div className="dashboard-visual__sidebar">
+          <div className="dashboard-visual__nav-item dashboard-visual__nav-item--active">
+            <LayoutDashboard size={14} />
+            <span>Overview</span>
+          </div>
+          <div className="dashboard-visual__nav-item">
+            <Activity size={14} />
+            <span>Traces</span>
+          </div>
+          <div className="dashboard-visual__nav-item">
+            <BarChart3 size={14} />
+            <span>Analytics</span>
+          </div>
+          <div className="dashboard-visual__nav-item">
+            <AlertTriangle size={14} />
+            <span>Issues</span>
+          </div>
+        </div>
+        <div className="dashboard-visual__main">
+          <div className="dashboard-visual__stats">
+            <DashboardStatsCard 
+              icon={<Activity size={18} />} 
+              title="Total Traces" 
+              value="12,847" 
+              trend={23}
+              color="#111"
+            />
+            <DashboardStatsCard 
+              icon={<Timer size={18} />} 
+              title="Avg Latency" 
+              value="342ms" 
+              trend={-12}
+              color="#444"
+            />
+            <DashboardStatsCard 
+              icon={<CheckCircle2 size={18} />} 
+              title="Success Rate" 
+              value="98.7%" 
+              trend={2}
+              color="#111"
+            />
+            <DashboardStatsCard 
+              icon={<DollarSign size={18} />} 
+              title="Cost Today" 
+              value="$47.23" 
+              trend={-8}
+              color="#666"
+            />
+          </div>
+          <div className="dashboard-visual__chart">
+            <div className="dashboard-visual__chart-header">
+              <span>Request Volume</span>
+              <span className="dashboard-visual__chart-period">Last 24h</span>
+            </div>
+            <div className="dashboard-visual__chart-bars">
+              {[40, 65, 45, 80, 55, 70, 90, 75, 60, 85, 50, 95].map((h, i) => (
+                <motion.div 
+                  key={i}
+                  className="dashboard-visual__bar"
+                  style={{ height: `${h}%` }}
+                  initial={{ scaleY: 0 }}
+                  whileInView={{ scaleY: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                  viewport={{ once: true }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// AI Chaos vs Clarity Visual
+function ChaosVsClarityVisual() {
+  return (
+    <div className="chaos-clarity">
+      <motion.div 
+        className="chaos-clarity__side chaos-clarity__side--chaos"
+        initial={{ opacity: 0, x: -30 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+      >
+        <div className="chaos-clarity__icon">
+          <XCircle size={24} />
+        </div>
+        <h4>Without Dashboards</h4>
+        <ul>
+          <li><Eye size={14} /> Behavior buried in logs</li>
+          <li><HelpCircle size={14} /> Silent failures</li>
+          <li><Users size={14} /> Team confusion</li>
+          <li><Clock size={14} /> Days to debug</li>
+          <li><DollarSign size={14} /> Hidden cost leaks</li>
+        </ul>
+      </motion.div>
+      <div className="chaos-clarity__divider">
+        <ChevronRight size={24} />
+      </div>
+      <motion.div 
+        className="chaos-clarity__side chaos-clarity__side--clarity"
+        initial={{ opacity: 0, x: 30 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+      >
+        <div className="chaos-clarity__icon">
+          <CheckCircle2 size={24} />
+        </div>
+        <h4>With Dashboards</h4>
+        <ul>
+          <li><Eye size={14} /> Everything visible</li>
+          <li><AlertTriangle size={14} /> Real-time alerts</li>
+          <li><Users size={14} /> Aligned teams</li>
+          <li><Zap size={14} /> Minutes to debug</li>
+          <li><TrendingUp size={14} /> Cost optimization</li>
+        </ul>
+      </motion.div>
+    </div>
+  )
+}
+
+// Dashboard Benefits Section
+function DashboardBenefitCard({ number, icon, title, points, color = '#111' }) {
+  return (
+    <motion.div 
+      className="dashboard-benefit"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+    >
+      <div className="dashboard-benefit__header">
+        <div className="dashboard-benefit__number" style={{ background: color }}>{number}</div>
+        <div className="dashboard-benefit__icon" style={{ background: `${color}15`, color }}>
+          {icon}
+        </div>
+        <h3 className="dashboard-benefit__title">{title}</h3>
+      </div>
+      <ul className="dashboard-benefit__points">
+        {points.map((point, i) => (
+          <li key={i}>
+            <ChevronRight size={14} />
+            {point}
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  )
+}
+
+// AI Activity Items Component
+function AIActivityItems() {
+  const items = [
+    { icon: <MessageSquare size={16} />, label: 'Prompts', color: '#111' },
+    { icon: <Route size={16} />, label: 'Chain Steps', color: '#333' },
+    { icon: <Wrench size={16} />, label: 'Tool Calls', color: '#444' },
+    { icon: <RefreshCw size={16} />, label: 'Retries', color: '#555' },
+    { icon: <Timer size={16} />, label: 'Latencies', color: '#666' },
+    { icon: <XCircle size={16} />, label: 'Failures', color: '#777' },
+  ]
+
+  return (
+    <div className="ai-activity-items">
+      <div className="ai-activity-items__center">
+        <Bot size={32} />
+        <span>AI Activity</span>
+      </div>
+      <div className="ai-activity-items__grid">
+        {items.map((item, i) => (
+          <motion.div
+            key={i}
+            className="ai-activity-items__item"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.1 }}
+            viewport={{ once: true }}
+          >
+            <div className="ai-activity-items__icon" style={{ background: `${item.color}15`, color: item.color }}>
+              {item.icon}
+            </div>
+            <span>{item.label}</span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Debugging Comparison
+function DebuggingComparison() {
+  const withoutDashboard = [
+    { icon: <Database size={16} />, label: 'Backfilled logs' },
+    { icon: <FlaskConical size={16} />, label: 'Manual experiments' },
+    { icon: <HelpCircle size={16} />, label: 'Inconsistent tests' },
+    { icon: <Clock size={16} />, label: 'Hours of work' },
+  ]
+
+  const withDashboard = [
+    { icon: <Bug size={16} />, label: 'Failing traces', color: '#111' },
+    { icon: <Wrench size={16} />, label: 'Tool bottlenecks', color: '#333' },
+    { icon: <Route size={16} />, label: 'Long reasoning paths', color: '#444' },
+    { icon: <AlertTriangle size={16} />, label: 'Hallucination hotspots', color: '#555' },
+    { icon: <GitBranch size={16} />, label: 'Version regressions', color: '#666' },
+  ]
+
+  return (
+    <div className="debugging-comparison">
+      <motion.div 
+        className="debugging-comparison__old"
+        initial={{ opacity: 0, x: -20 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+      >
+        <h4>
+          <XCircle size={16} />
+          Traditional Debugging
+        </h4>
+        <div className="debugging-comparison__items">
+          {withoutDashboard.map((item, i) => (
+            <div key={i} className="debugging-comparison__item">
+              {item.icon}
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="debugging-comparison__result debugging-comparison__result--bad">
+          <Timer size={16} />
+          Hours to days
+        </div>
+      </motion.div>
+      <motion.div 
+        className="debugging-comparison__new"
+        initial={{ opacity: 0, x: 20 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+      >
+        <h4>
+          <CheckCircle2 size={16} />
+          Dashboard Debugging
+        </h4>
+        <div className="debugging-comparison__items">
+          {withDashboard.map((item, i) => (
+            <div key={i} className="debugging-comparison__item" style={{ borderColor: item.color }}>
+              <span style={{ color: item.color }}>{item.icon}</span>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="debugging-comparison__result debugging-comparison__result--good">
+          <Zap size={16} />
+          A few clicks
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+// Cost Breakdown Visual
+function CostBreakdownVisual() {
+  const costs = [
+    { label: 'Overly long prompts', percentage: 35, color: '#111' },
+    { label: 'Runaway agents', percentage: 25, color: '#444' },
+    { label: 'Unnecessary retries', percentage: 22, color: '#777' },
+    { label: 'Inefficient context', percentage: 18, color: '#AAA' },
+  ]
+
+  return (
+    <div className="cost-breakdown">
+      <div className="cost-breakdown__chart">
+        <motion.div 
+          className="cost-breakdown__pie"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+        >
+          <div className="cost-breakdown__center">
+            <DollarSign size={24} />
+            <span>Hidden Costs</span>
+          </div>
+        </motion.div>
+      </div>
+      <div className="cost-breakdown__legend">
+        {costs.map((cost, i) => (
+          <motion.div
+            key={i}
+            className="cost-breakdown__legend-item"
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.1 }}
+            viewport={{ once: true }}
+          >
+            <span className="cost-breakdown__dot" style={{ background: cost.color }} />
+            <span className="cost-breakdown__label">{cost.label}</span>
+            <span className="cost-breakdown__value">{cost.percentage}%</span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Dashboard Metrics Grid
+function DashboardMetricsGrid() {
+  const metrics = [
+    { icon: <Coins size={18} />, label: 'Token costs', desc: 'Per request & aggregate' },
+    { icon: <Bot size={18} />, label: 'Usage by model', desc: 'GPT-4, Claude, etc.' },
+    { icon: <Users size={18} />, label: 'Usage by user', desc: 'Track consumption' },
+    { icon: <Workflow size={18} />, label: 'Usage by agent chain', desc: 'End-to-end flows' },
+  ]
+
+  return (
+    <div className="metrics-grid">
+      {metrics.map((metric, i) => (
+        <motion.div
+          key={i}
+          className="metrics-grid__item"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.1 }}
+          viewport={{ once: true }}
+        >
+          <div className="metrics-grid__icon">
+            {metric.icon}
+          </div>
+          <div className="metrics-grid__content">
+            <h4>{metric.label}</h4>
+            <p>{metric.desc}</p>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// Confidence Chain Visual
+function ConfidenceChainVisual() {
+  const chain = [
+    { label: 'Visibility', icon: <Eye size={20} />, color: '#111' },
+    { label: 'Confidence', icon: <Shield size={20} />, color: '#333' },
+    { label: 'Adoption', icon: <Users size={20} />, color: '#555' },
+    { label: 'Revenue', icon: <TrendingUp size={20} />, color: '#10B981' },
+  ]
+
+  return (
+    <div className="confidence-chain">
+      {chain.map((item, i) => (
+        <motion.div
+          key={i}
+          className="confidence-chain__step"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ delay: i * 0.15 }}
+          viewport={{ once: true }}
+        >
+          <div className="confidence-chain__icon" style={{ background: item.color }}>
+            {item.icon}
+          </div>
+          <span className="confidence-chain__label">{item.label}</span>
+          {i < chain.length - 1 && (
+            <div className="confidence-chain__arrow">
+              <span>=</span>
+            </div>
+          )}
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// Future Capabilities Visual
+function FutureCapabilitiesVisual() {
+  const capabilities = [
+    { icon: <AlertTriangle size={18} />, label: 'Intelligent alerts', desc: 'Know before users complain' },
+    { icon: <Sparkles size={18} />, label: 'Self-healing prompts', desc: 'Auto-fix failing prompts' },
+    { icon: <Scale size={18} />, label: 'Quality scoring', desc: 'Automated grading' },
+    { icon: <LineChart size={18} />, label: 'Drift detection', desc: 'Catch degradation early' },
+    { icon: <GitBranch size={18} />, label: 'A/B testing', desc: 'Safe experimentation' },
+    { icon: <Workflow size={18} />, label: 'Workflow optimization', desc: 'Streamline agent flows' },
+  ]
+
+  return (
+    <div className="future-capabilities">
+      <div className="future-capabilities__header">
+        <motion.div 
+          className="future-capabilities__badge"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+        >
+          <Rocket size={14} />
+          <span>The Future is Proactive</span>
+        </motion.div>
+      </div>
+      <div className="future-capabilities__grid">
+        {capabilities.map((cap, i) => (
+          <motion.div
+            key={i}
+            className="future-capabilities__item"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            viewport={{ once: true }}
+          >
+            <div className="future-capabilities__icon">
+              {cap.icon}
+            </div>
+            <h4>{cap.label}</h4>
+            <p>{cap.desc}</p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Cockpit Analogy Visual
+function CockpitAnalogy() {
+  return (
+    <div className="cockpit-analogy">
+      <motion.div 
+        className="cockpit-analogy__content"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+      >
+        <div className="cockpit-analogy__left">
+          <div className="cockpit-analogy__icon cockpit-analogy__icon--engine">
+            <Cpu size={32} />
+          </div>
+          <span>AI is the Engine</span>
+        </div>
+        <div className="cockpit-analogy__equals">
+          <ChevronRight size={24} />
+        </div>
+        <div className="cockpit-analogy__right">
+          <div className="cockpit-analogy__icon cockpit-analogy__icon--dashboard">
+            <LayoutDashboard size={32} />
+          </div>
+          <span>Dashboards are the Cockpit</span>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+// Table of Contents sections for Dashboard Blog
+const dashboardSections = [
+  { id: 'introduction', label: 'Introduction' },
+  { id: 'hidden-visible', label: 'Hidden → Visible' },
+  { id: 'single-source', label: 'Single Source of Truth' },
+  { id: 'debugging', label: 'Faster Debugging' },
+  { id: 'cost-waste', label: 'Cost Optimization' },
+  { id: 'confidence', label: 'Building Confidence' },
+  { id: 'future', label: 'The Future' },
+]
+
+// Table of Contents for Dashboard Blog
+function DashboardTableOfContents() {
+  const [activeSection, setActiveSection] = useState('')
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id)
+          }
+        })
+      },
+      { rootMargin: '-20% 0px -70% 0px' }
+    )
+
+    dashboardSections.forEach(({ id }) => {
+      const element = document.getElementById(id)
+      if (element) observer.observe(element)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  return (
+    <nav className="toc">
+      <h4 className="toc__title">
+        <BookOpen size={14} />
+        Contents
+      </h4>
+      <ul className="toc__list">
+        {dashboardSections.map(({ id, label }) => (
+          <li key={id}>
+            <button
+              className={`toc__link ${activeSection === id ? 'toc__link--active' : ''}`}
+              onClick={() => scrollToSection(id)}
+            >
+              {label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+// Dashboard Blog Article Content
+function DashboardBlogArticle() {
+  return (
+    <article className="blog-article">
+      {/* Hero */}
+      <motion.header 
+        className="blog-hero"
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <div className="container">
+          <motion.div className="blog-hero__meta" variants={fadeInUp}>
+            <span className="blog-hero__tag">Observability</span>
+            <span className="blog-hero__separator">•</span>
+            <span className="blog-hero__date">
+              <Calendar size={14} />
+              December 9, 2025
+            </span>
+            <span className="blog-hero__separator">•</span>
+            <span className="blog-hero__read-time">
+              <Clock size={14} />
+              10 min read
+            </span>
+          </motion.div>
+          
+          <motion.h1 className="blog-hero__title" variants={fadeInUp}>
+            Why dashboards are the power center of AI observability.
+          </motion.h1>
+          
+          <motion.p className="blog-hero__subtitle" variants={fadeInUp}>
+            The Control Room for AI You Can Actually Trust
+          </motion.p>
+
+          <motion.div className="blog-hero__author" variants={fadeInUp}>
+            <div className="blog-hero__author-avatar">
+              <User size={20} />
+            </div>
+            <div className="blog-hero__author-info">
+              <span className="blog-hero__author-name">Shepherd Team</span>
+              <span className="blog-hero__author-role">Engineering</span>
+            </div>
+          </motion.div>
+        </div>
+      </motion.header>
+
+      {/* Content */}
+      <div className="blog-content">
+        <div className="container">
+          <div className="blog-content__wrapper">
+            <DashboardTableOfContents />
+            
+            <div className="blog-content__main">
+              {/* Introduction */}
+              <motion.section 
+                id="introduction"
+                className="blog-section"
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">01</span>
+                  Introduction
+                </motion.h2>
+
+                <motion.p className="blog-lead" variants={fadeInUp}>
+                  In today's AI-driven world, your models aren't just running code—they're creating reasoning paths, making decisions, calling tools, fetching context, and influencing user experience at scale.
+                </motion.p>
+
+                <motion.p variants={fadeInUp}>
+                  But here's the truth few teams admit:
+                </motion.p>
+
+                <QuoteBlock>
+                  If you can't see what your AI is doing, you can't trust what your AI is doing.
+                </QuoteBlock>
+
+                <motion.p variants={fadeInUp}>
+                  That's why dashboards are not an optional add-on for observability platforms. They are the <strong>power center</strong>, the <strong>control room</strong>, and often the deciding factor between AI that quietly drifts into chaos… and AI that consistently delivers value.
+                </motion.p>
+
+                <motion.div variants={scaleIn}>
+                  <DashboardVisual />
+                </motion.div>
+
+                <motion.p variants={fadeInUp}>
+                  Let's break down why dashboards matter so much—and why every serious AI team needs them.
+                </motion.p>
+              </motion.section>
+
+              {/* Section 2: Hidden to Visible */}
+              <motion.section 
+                id="hidden-visible"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">02</span>
+                  Dashboards turn hidden AI behavior into visible insights
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  AI systems generate <strong>massive activity</strong> behind the scenes:
+                </motion.p>
+
+                <motion.div variants={fadeInUp}>
+                  <AIActivityItems />
+                </motion.div>
+
+                <motion.div variants={fadeInUp}>
+                  <ChaosVsClarityVisual />
+                </motion.div>
+
+                <KeyInsight icon={<Eye size={18} />}>
+                  Without a dashboard, this behavior remains buried in logs. With one, it becomes beautifully visible—trends, spikes, anomalies, regressions—everything that impacts reliability and user trust.
+                </KeyInsight>
+
+                <motion.p className="blog-emphasis" variants={fadeInUp}>
+                  <strong>Dashboards make the invisible, visible.</strong>
+                </motion.p>
+              </motion.section>
+
+              {/* Section 3: Single Source of Truth */}
+              <motion.section 
+                id="single-source"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">03</span>
+                  They give product, engineering, and leadership a single source of truth
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  AI touches multiple parts of the business. Everyone wants answers:
+                </motion.p>
+
+                <motion.div className="questions-grid" variants={fadeInUp}>
+                  {[
+                    { q: 'Why did this response fail?', icon: <XCircle size={18} /> },
+                    { q: 'Which model version performs better?', icon: <GitBranch size={18} /> },
+                    { q: 'Is our cost increasing because of prompt drift?', icon: <TrendingUp size={18} /> },
+                    { q: 'Did yesterday\'s deploy break anything?', icon: <AlertTriangle size={18} /> },
+                  ].map((item, i) => (
+                    <div key={i} className="questions-grid__item">
+                      <span className="questions-grid__icon">{item.icon}</span>
+                      <span>{item.q}</span>
+                    </div>
+                  ))}
+                </motion.div>
+
+                <motion.p variants={fadeInUp}>
+                  Dashboards unify all these questions under <strong>one lens</strong>.
+                </motion.p>
+
+                <motion.div className="benefits-pills" variants={fadeInUp}>
+                  <span className="benefits-pill">
+                    <Users size={14} />
+                    They align teams
+                  </span>
+                  <span className="benefits-pill">
+                    <Zap size={14} />
+                    They accelerate decisions
+                  </span>
+                  <span className="benefits-pill">
+                    <Target size={14} />
+                    They eliminate guesswork
+                  </span>
+                </motion.div>
+
+                <KeyInsight icon={<Lightbulb size={18} />}>
+                  Because when the numbers are on the screen, the conversation shifts from <strong>opinions → outcomes</strong>.
+                </KeyInsight>
+              </motion.section>
+
+              {/* Section 4: Debugging */}
+              <motion.section 
+                id="debugging"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">04</span>
+                  Dashboards reduce debugging time from days to minutes
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  When AI misbehaves, teams often scramble with backfilled logs, manual experiments, and inconsistent test prompts.
+                </motion.p>
+
+                <motion.div variants={scaleIn}>
+                  <DebuggingComparison />
+                </motion.div>
+
+                <motion.p variants={fadeInUp}>
+                  Dashboards remove friction instantly. You can pinpoint failing traces, tool-call bottlenecks, long reasoning paths, hallucination hotspots, and version-level regressions.
+                </motion.p>
+
+                <KeyInsight icon={<Rocket size={18} />}>
+                  What used to take hours of detective work becomes <strong>a few clicks</strong>. Your team moves from <strong>firefighting → forward momentum</strong>.
+                </KeyInsight>
+              </motion.section>
+
+              {/* Section 5: Cost Optimization */}
+              <motion.section 
+                id="cost-waste"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">05</span>
+                  Dashboards expose cost waste—and unlock optimization
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  Most teams underestimate how much money leaks through inefficient AI operations:
+                </motion.p>
+
+                <motion.div variants={scaleIn}>
+                  <CostBreakdownVisual />
+                </motion.div>
+
+                <motion.p variants={fadeInUp}>
+                  Dashboards surface this in real time:
+                </motion.p>
+
+                <motion.div variants={fadeInUp}>
+                  <DashboardMetricsGrid />
+                </motion.div>
+
+                <KeyInsight icon={<DollarSign size={18} />}>
+                  When cost clarity goes up, <strong>cost burn goes down</strong>.
+                </KeyInsight>
+              </motion.section>
+
+              {/* Section 6: Building Confidence */}
+              <motion.section 
+                id="confidence"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">06</span>
+                  They build confidence—internally and externally
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  Leaders, stakeholders, and customers all want to know:
+                </motion.p>
+
+                <motion.ul className="blog-list" variants={fadeInUp}>
+                  <li>Is this AI stable?</li>
+                  <li>Can we trust the outputs?</li>
+                  <li>How do we know nothing broke?</li>
+                </motion.ul>
+
+                <motion.p variants={fadeInUp}>
+                  Dashboards give teams the confidence to:
+                </motion.p>
+
+                <motion.div className="confidence-actions" variants={fadeInUp}>
+                  <div className="confidence-action">
+                    <Rocket size={20} />
+                    <span>Ship faster</span>
+                  </div>
+                  <div className="confidence-action">
+                    <FlaskConical size={20} />
+                    <span>Experiment more</span>
+                  </div>
+                  <div className="confidence-action">
+                    <TrendingUp size={20} />
+                    <span>Scale without fear</span>
+                  </div>
+                </motion.div>
+
+                <motion.div variants={scaleIn}>
+                  <ConfidenceChainVisual />
+                </motion.div>
+              </motion.section>
+
+              {/* Section 7: The Future */}
+              <motion.section 
+                id="future"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">07</span>
+                  Dashboards unlock the next era of AI automation
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  Dashboards don't just show what happened. They enable <strong>what comes next</strong>:
+                </motion.p>
+
+                <motion.div variants={scaleIn}>
+                  <FutureCapabilitiesVisual />
+                </motion.div>
+
+                <KeyInsight icon={<Sparkles size={18} />}>
+                  The future of AI observability is <strong>proactive, not reactive</strong>. Dashboards lay that foundation.
+                </KeyInsight>
+              </motion.section>
+
+              {/* Final Word */}
+              <motion.section 
+                className="blog-section blog-section--final"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  Final Word: If AI is the engine, dashboards are the cockpit
+                </motion.h2>
+
+                <motion.div variants={scaleIn}>
+                  <CockpitAnalogy />
+                </motion.div>
+
+                <motion.p className="blog-lead" variants={fadeInUp}>
+                  Every high-performing AI team understands this simple truth:
+                </motion.p>
+
+                <QuoteBlock>
+                  You can't scale what you can't see.
+                </QuoteBlock>
+
+                <motion.p variants={fadeInUp}>
+                  Dashboards transform scattered AI activity into a <strong>control environment</strong> where teams can monitor, tune, and evolve their systems with confidence.
+                </motion.p>
+
+                <motion.p variants={fadeInUp}>
+                  This is why modern AI products—LLM apps, agents, copilots, and decision systems—are increasingly built on top of observability dashboards that provide <strong>clarity, stability, and trust</strong>.
+                </motion.p>
+              </motion.section>
+
+              {/* CTA */}
+              <motion.div 
+                className="blog-cta"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="blog-cta__title">Ready to see what your AI is really doing?</h3>
+                <p className="blog-cta__text">Start observing your AI agents with Shepherd today. Beautiful dashboards, powerful insights.</p>
+                <div className="blog-cta__buttons">
+                  <Link to="/api-keys" className="btn btn--primary">
+                    Get Started Free
+                    <ArrowRight size={16} />
+                  </Link>
+                  <Link to="/playground" className="btn btn--secondary">
+                    <PlayCircle size={16} />
+                    Try the Playground
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+// Main Blog Article Content (Self-Healing Prompts)
 function BlogArticle() {
   return (
     <article className="blog-article">
@@ -1555,11 +2516,25 @@ function BlogFooter() {
 
 // Single Blog Post Page
 function BlogPost() {
+  const location = useLocation()
+  const slug = location.pathname.replace('/blog/', '')
+  
+  // Determine which article to render based on the slug
+  const renderArticle = () => {
+    switch (slug) {
+      case 'dashboards-power-center-ai-observability':
+        return <DashboardBlogArticle />
+      case 'self-healing-prompts':
+      default:
+        return <BlogArticle />
+    }
+  }
+  
   return (
     <div className="blog-page">
       <BlogHeader />
       <main>
-        <BlogArticle />
+        {renderArticle()}
       </main>
       <BlogFooter />
     </div>
