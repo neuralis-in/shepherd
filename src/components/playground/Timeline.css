@@ -136,6 +136,7 @@
   gap: 2px;
   height: 200px;
   padding: 0 4px;
+  overflow-x: auto;
 }
 
 .timeline-chart__bar-wrapper {
