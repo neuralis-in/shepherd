@@ -601,6 +601,30 @@
   font-weight: 500;
 }
 
+.vibehack-cycle-subpoints {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-md) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.vibehack-cycle-subpoints li {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+}
+
+.vibehack-cycle-subpoints li::before {
+  content: '•';
+  color: #EF4444;
+  font-weight: bold;
+}
+
 /* ========================================
    EXPERIENCE SLIDE
    ======================================== */
@@ -774,6 +798,82 @@
   text-align: center;
 }
 
+.vibehack-solution-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  align-items: start;
+}
+
+.vibehack-solution-column {
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.vibehack-solution-column h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vibehack-solution-column--workflow {
+  background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+  color: white;
+}
+
+.vibehack-solution-column--workflow h4 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.vibehack-solution-column--savings {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.vibehack-solution-column--savings h4 {
+  color: var(--color-text-muted);
+}
+
+.vibehack-workflow-steps-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.vibehack-workflow-arrow-down {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.25rem;
+}
+
+.vibehack-time-savings-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.vibehack-time-savings__arrow-down {
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  font-weight: bold;
+}
+
+.vibehack-time-savings__benefits-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  align-items: flex-start;
+}
+
 .vibehack-workflow-comparison {
   display: flex;
   flex-direction: column;
@@ -875,6 +975,78 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #10B981;
+}
+
+.vibehack-time-savings {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+.vibehack-time-savings__comparison {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.vibehack-time-savings__before,
+.vibehack-time-savings__after {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  min-width: 140px;
+}
+
+.vibehack-time-savings__before {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.vibehack-time-savings__after {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.vibehack-time-savings__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.vibehack-time-savings__label {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.vibehack-time-savings__arrow {
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+  font-weight: bold;
+}
+
+.vibehack-time-savings__benefits {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.vibehack-time-savings__benefit {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.vibehack-time-savings__benefit svg {
   color: #10B981;
 }
 
@@ -1462,6 +1634,82 @@
   border-radius: var(--radius-lg);
   font-size: 0.875rem;
   color: var(--color-text-muted);
+}
+
+/* ========================================
+   EMERGENT SLIDE
+   ======================================== */
+
+.vibehack-slide--emergent {
+  text-align: center;
+}
+
+.vibehack-highlight-alt {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.vibehack-emergent-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  text-align: left;
+}
+
+.vibehack-emergent-feature {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: all 200ms ease;
+}
+
+.vibehack-emergent-feature:hover {
+  border-color: #8B5CF6;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+}
+
+.vibehack-emergent-feature__icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  border-radius: var(--radius-md);
+  color: #8B5CF6;
+}
+
+.vibehack-emergent-feature__content h4 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.vibehack-emergent-feature__content p {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.vibehack-emergent-feature__badge {
+  display: inline-block;
+  margin-top: var(--spacing-sm);
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* ========================================

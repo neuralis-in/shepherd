@@ -72,6 +72,7 @@ const slides = [
   { id: 'validation', title: 'Validation' },
   { id: 'route', title: 'Route' },
   { id: 'demo', title: 'Demo' },
+  { id: 'emergent', title: 'Emergent' },
   { id: 'thank-you', title: 'Thank You' },
 ]
 
@@ -333,6 +334,11 @@ function TraditionalObsSlide() {
               </div>
             </div>
             <p className="vibehack-cycle-caption">Developers waste hours context-switching instead of fixing</p>
+            <ul className="vibehack-cycle-subpoints">
+              <li>Transmission loss from CXOs to Devs</li>
+              <li>Information lost upon convey</li>
+              <li>Hours of back and forth</li>
+            </ul>
           </div>
         </motion.div>
       </div>
@@ -452,26 +458,55 @@ function SolutionSlide() {
           That's where <span className="vibehack-highlight">Shepherd-MCP</span> comes in.
         </motion.p>
         
-        <motion.div className="vibehack-workflow-comparison" variants={fadeInUp}>
-          <div className="vibehack-workflow vibehack-workflow--new vibehack-workflow--standalone">
+        <motion.div className="vibehack-solution-columns" variants={fadeInUp}>
+          {/* Left Column - Workflow */}
+          <div className="vibehack-solution-column vibehack-solution-column--workflow">
             <h4>With Shepherd-MCP</h4>
-            <div className="vibehack-workflow-steps vibehack-workflow-steps--simple">
+            <div className="vibehack-workflow-steps-vertical">
               <div className="vibehack-workflow-step vibehack-workflow-step--highlight">
                 <Bot size={16} />
                 <span>Offload to Cursor/Windsurf</span>
               </div>
-              <div className="vibehack-workflow-arrow">→</div>
+              <div className="vibehack-workflow-arrow-down">↓</div>
               <div className="vibehack-workflow-step vibehack-workflow-step--highlight">
                 <Search size={16} />
                 <span>AI Isolates & RCA</span>
               </div>
-              <div className="vibehack-workflow-arrow">→</div>
+              <div className="vibehack-workflow-arrow-down">↓</div>
               <div className="vibehack-workflow-step vibehack-workflow-step--highlight">
                 <Wrench size={16} />
                 <span>Fix in Same Tool</span>
               </div>
             </div>
             <span className="vibehack-workflow-time vibehack-workflow-time--fast">Minutes</span>
+          </div>
+
+          {/* Right Column - Time Savings */}
+          <div className="vibehack-solution-column vibehack-solution-column--savings">
+            <h4>Time Saved</h4>
+            <div className="vibehack-time-savings-vertical">
+              <div className="vibehack-time-savings__before">
+                <Clock size={20} />
+                <span className="vibehack-time-savings__value">3-5 hours</span>
+                <span className="vibehack-time-savings__label">Traditional debugging</span>
+              </div>
+              <div className="vibehack-time-savings__arrow-down">↓</div>
+              <div className="vibehack-time-savings__after">
+                <Zap size={20} />
+                <span className="vibehack-time-savings__value">30-50 min</span>
+                <span className="vibehack-time-savings__label">With Shepherd-MCP</span>
+              </div>
+            </div>
+            <div className="vibehack-time-savings__benefits-vertical">
+              <div className="vibehack-time-savings__benefit">
+                <CheckCircle size={16} />
+                <span>Zero information loss in conveyance</span>
+              </div>
+              <div className="vibehack-time-savings__benefit">
+                <TrendingUp size={16} />
+                <span><strong>Over 10x time saved</strong> for CXOs, PMs, EMs</span>
+              </div>
+            </div>
           </div>
         </motion.div>
 
@@ -827,6 +862,72 @@ function DemoSlide() {
   )
 }
 
+function EmergentSlide() {
+  return (
+    <motion.div 
+      className="vibehack-slide vibehack-slide--emergent"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="vibehack-slide__content">
+        <motion.span className="vibehack-slide__label" variants={fadeInUp}>Native Integration</motion.span>
+        
+        <motion.h2 className="vibehack-slide__title" variants={fadeInUp}>
+          <span className="vibehack-highlight">Shepherd-MCP</span> × <span className="vibehack-highlight-alt">Emergent</span>
+        </motion.h2>
+
+        <motion.p className="vibehack-slide__subtitle" variants={fadeInUp}>
+          Seamless integration, click of a button—all native on Emergent!
+        </motion.p>
+        
+        <motion.div className="vibehack-emergent-features" variants={fadeInUp}>
+          <div className="vibehack-emergent-feature">
+            <div className="vibehack-emergent-feature__icon">
+              <Search size={24} />
+            </div>
+            <div className="vibehack-emergent-feature__content">
+              <h4>Trace-Back Analysis for Troubleshooting</h4>
+              <p>If a problem is identified, Shepherd-MCP can trace the root cause across different data sources (Datadog logs, Langfuse traces, etc.), simplifying troubleshooting and accelerating issue resolution.</p>
+              <span className="vibehack-emergent-feature__badge">Shown in Demo</span>
+            </div>
+          </div>
+
+          <div className="vibehack-emergent-feature">
+            <div className="vibehack-emergent-feature__icon">
+              <Workflow size={24} />
+            </div>
+            <div className="vibehack-emergent-feature__content">
+              <h4>End-to-End AI Performance Management</h4>
+              <p>From development to production, Shepherd-MCP seamlessly integrates with your existing observability tools (Langfuse, AIobs, Datadog, etc.) to provide comprehensive model monitoring, automated optimization, and transparent analytics.</p>
+            </div>
+          </div>
+
+          <div className="vibehack-emergent-feature">
+            <div className="vibehack-emergent-feature__icon">
+              <Eye size={24} />
+            </div>
+            <div className="vibehack-emergent-feature__content">
+              <h4>Unlock Total Model Visibility</h4>
+              <p>In a world of complex AI systems, get a single view of your entire AI ecosystem. Shepherd-MCP brings together insights from Langfuse, AIobs, Langsmith, Datadog, and more—empowering your team to monitor, optimize, and control models in real time.</p>
+            </div>
+          </div>
+
+          <div className="vibehack-emergent-feature">
+            <div className="vibehack-emergent-feature__icon">
+              <Lightbulb size={24} />
+            </div>
+            <div className="vibehack-emergent-feature__content">
+              <h4>Enhanced Explainability & Transparency</h4>
+              <p>By visualizing traces and key metrics, Shepherd-MCP provides clearer insights into why specific decisions or outputs were generated, helping improve model explainability and trust with stakeholders.</p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
 function ThankYouSlide() {
   return (
     <motion.div 
@@ -928,6 +1029,7 @@ export default function VibehackDeck() {
       case 'validation': return <ValidationSlide />
       case 'route': return <RouteSlide />
       case 'demo': return <DemoSlide />
+      case 'emergent': return <EmergentSlide />
       case 'thank-you': return <ThankYouSlide />
       default: return <CoverSlide />
     }
