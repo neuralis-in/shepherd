@@ -41,8 +41,7 @@ import {
   ChevronDown,
   ChevronRight,
   LogIn,
-  Target,
-  Trophy
+  Target
 } from 'lucide-react'
 import './App.css'
 import PromptEnhancement from './components/PromptEnhancement'
@@ -460,26 +459,32 @@ function Hero({ onOpenModal }) {
             Trace every LLM call, tool invocation, and decision — turning opaque agent pipelines 
             into debuggable timelines. CLI-first, so AI coding agents can use it too.
           </motion.p>
-          <Link to="/vibehack" className="hero__award">
-            <motion.span variants={fadeInUp} style={{ display: 'contents' }}>
-              <Trophy size={14} />
-              <span><strong>2nd Place</strong> — Vibehack 2025</span>
-              <span className="hero__award-divider">•</span>
-              <span className="hero__award-sponsors">OpenAI × Emergent × Entrepreneurs First</span>
-            </motion.span>
-          </Link>
           <motion.div className="hero__actions" variants={fadeInUp}>
             <div className="hero__action-group">
               <button className="btn btn--primary" onClick={onOpenModal}>
                 Book a Demo <ArrowRight size={16} />
               </button>
               <span className="hero__action-note">For teams & companies</span>
+              <div className="hero__trusted-inline">
+                <span className="hero__trusted-label">Used by Teams at</span>
+                <div className="hero__trusted-logos">
+                  <img src="/fenmoai_logo.jpeg" alt="Fenmo AI" className="hero__trusted-logo" />
+                </div>
+              </div>
             </div>
             <div className="hero__action-group">
               <Link to="/api-keys" className="btn btn--secondary">
                 Start for Free <ArrowRight size={16} />
               </Link>
               <span className="hero__action-note">For individual developers</span>
+              <div className="hero__trusted-inline">
+                <span className="hero__trusted-label">Validated at Vibehack 2025</span>
+                <div className="hero__trusted-logos">
+                  <img src="/ef.png" alt="Entrepreneurs First" className="hero__trusted-logo" />
+                  <img src="/emergent.jpeg" alt="Emergent" className="hero__trusted-logo" />
+                  <img src="/exosphere.jpg" alt="Exosphere" className="hero__trusted-logo" />
+                </div>
+              </div>
             </div>
           </motion.div>
         </motion.div>
