@@ -320,6 +320,46 @@
   text-align: center;
 }
 
+/* Vibehack Award Badge */
+.hero__award {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  margin-bottom: var(--spacing-lg);
+  transition: all var(--transition-fast);
+}
+
+.hero__award:hover {
+  border-color: var(--color-accent);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.hero__award svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.hero__award strong {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.hero__award-divider {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.hero__award-sponsors {
+  color: var(--color-text-muted);
+}
+
 .hero__badge {
   display: inline-flex;
   align-items: center;
