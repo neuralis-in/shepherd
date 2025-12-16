@@ -460,16 +460,14 @@ function Hero({ onOpenModal }) {
             Trace every LLM call, tool invocation, and decision — turning opaque agent pipelines 
             into debuggable timelines. CLI-first, so AI coding agents can use it too.
           </motion.p>
-          <motion.a 
-            href="/vibehack" 
-            className="hero__award" 
-            variants={fadeInUp}
-          >
-            <Trophy size={14} />
-            <span><strong>2nd Place</strong> — Vibehack 2025</span>
-            <span className="hero__award-divider">•</span>
-            <span className="hero__award-sponsors">OpenAI × Emergent × Entrepreneurs First</span>
-          </motion.a>
+          <Link to="/vibehack" className="hero__award">
+            <motion.span variants={fadeInUp} style={{ display: 'contents' }}>
+              <Trophy size={14} />
+              <span><strong>2nd Place</strong> — Vibehack 2025</span>
+              <span className="hero__award-divider">•</span>
+              <span className="hero__award-sponsors">OpenAI × Emergent × Entrepreneurs First</span>
+            </motion.span>
+          </Link>
           <motion.div className="hero__actions" variants={fadeInUp}>
             <div className="hero__action-group">
               <button className="btn btn--primary" onClick={onOpenModal}>
