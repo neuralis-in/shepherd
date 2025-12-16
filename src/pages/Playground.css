@@ -2007,6 +2007,13 @@
   margin: 0 auto;
 }
 
+/* A/B Testing Full-Width Layout */
+.playground-abtest-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
 .playground-content-area {
   flex: 1;
   min-width: 0;

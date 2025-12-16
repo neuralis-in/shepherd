@@ -13,7 +13,8 @@ import {
   Wand2,
   Cpu,
   Terminal,
-  AlertTriangle
+  AlertTriangle,
+  GitCompare
 } from 'lucide-react'
 import './Playground.css'
 
@@ -33,7 +34,8 @@ import {
   SearchBar,
   filterSessions,
   validateObservabilityJson,
-  IssuesView
+  IssuesView,
+  ABTesting
 } from '../components/playground'
 
 import EnhancePrompts from '../components/EnhancePrompts'
@@ -406,6 +408,13 @@ export default function Playground() {
                 <AlertTriangle size={14} />
                 <span>Issues</span>
               </button>
+              <button
+                className={`view-toggle__btn ${viewMode === 'abtest' ? 'view-toggle__btn--active' : ''}`}
+                onClick={() => setViewMode('abtest')}
+              >
+                <GitCompare size={14} />
+                <span>A/B Test</span>
+              </button>
             </div>
             <button className="playground-btn playground-btn--ghost" onClick={handleClearAll}>
               <Trash2 size={14} />
@@ -437,6 +446,14 @@ export default function Playground() {
                 {error}
               </motion.div>
             )}
+          </div>
+        ) : viewMode === 'abtest' ? (
+          /* A/B Testing - Full width standalone view */
+          <div className="playground-abtest-layout">
+            <ABTesting
+              sessions={sessions}
+              isAggregated={true}
+            />
           </div>
         ) : (
           <div className="playground-layout">
