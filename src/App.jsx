@@ -425,6 +425,7 @@ function Header({ onOpenModal }) {
 
 // Hero Section
 function Hero({ onOpenModal }) {
+  const basePath = import.meta.env.BASE_URL
   return (
     <section className="hero">
       <div className="hero__bg">
@@ -468,7 +469,7 @@ function Hero({ onOpenModal }) {
               <div className="hero__trusted-inline">
                 <span className="hero__trusted-label">Used by Teams at</span>
                 <div className="hero__trusted-logos">
-                  <img src="/fenmoai_logo.jpeg" alt="Fenmo AI" className="hero__trusted-logo" />
+                  <img src={`${basePath}fenmoai_logo.jpeg`} alt="Fenmo AI" className="hero__trusted-logo" />
                 </div>
               </div>
             </div>
@@ -480,9 +481,9 @@ function Hero({ onOpenModal }) {
               <div className="hero__trusted-inline">
                 <span className="hero__trusted-label">Validated at Vibehack 2025</span>
                 <div className="hero__trusted-logos">
-                  <img src="/ef.png" alt="Entrepreneurs First" className="hero__trusted-logo" />
-                  <img src="/emergent.jpeg" alt="Emergent" className="hero__trusted-logo" />
-                  <img src="/exosphere.jpg" alt="Exosphere" className="hero__trusted-logo" />
+                  <img src={`${basePath}ef.png`} alt="Entrepreneurs First" className="hero__trusted-logo" />
+                  <img src={`${basePath}emergent.jpeg`} alt="Emergent" className="hero__trusted-logo" />
+                  <img src={`${basePath}openai.png`} alt="Exosphere" className="hero__trusted-logo" />
                 </div>
               </div>
             </div>
