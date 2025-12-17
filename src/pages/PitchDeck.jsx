@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
@@ -34,7 +34,19 @@ import {
   Code,
   Crosshair,
   X,
-  Check
+  Check,
+  MousePointer,
+  ExternalLink,
+  RefreshCw,
+  MonitorPlay,
+  Wrench,
+  Eye,
+  Quote,
+  BrainCircuit,
+  Workflow,
+  Search,
+  Lightbulb,
+  Plug
 } from 'lucide-react'
 import './PitchDeck.css'
 
@@ -62,11 +74,17 @@ const slides = [
   { id: 'problem', title: 'Problem' },
   { id: 'solution', title: 'Solution' },
   { id: 'how-it-works', title: 'How It Works' },
+  { id: 'competitors-intro', title: 'Landscape' },
+  { id: 'vicious-cycle', title: 'The Cycle' },
+  { id: 'experience', title: 'Experience' },
   { id: 'market', title: 'Market' },
-  { id: 'competitors', title: 'Competitors' },
-  { id: 'business-model', title: 'Business Model' },
+  { id: 'turnaround', title: 'Turnaround' },
+  { id: 'paradigm', title: 'Paradigm' },
+  { id: 'integration', title: 'Integration' },
+  { id: 'validation', title: 'Validation' },
   { id: 'traction', title: 'Traction' },
   { id: 'partnerships', title: 'Partnerships' },
+  { id: 'business-model', title: 'Business Model' },
   { id: 'roadmap', title: 'Roadmap' },
   { id: 'team', title: 'Team' },
   { id: 'ask', title: 'The Ask' },
@@ -521,12 +539,226 @@ function HowItWorksSlide() {
   )
 }
 
+// NEW: Competitors Intro Slide - "Yet another observability tool? No."
+function CompetitorsIntroSlide() {
+  const competitors = [
+    { name: 'LangSmith', focus: 'LLM Tracing', origin: 'LangChain ecosystem' },
+    { name: 'Langfuse', focus: 'LLM Observability', origin: 'Open-source tracing' },
+    { name: 'Arize AI', focus: 'ML Observability', origin: 'Model monitoring pivot' },
+    { name: 'Dynatrace', focus: 'APM Giant', origin: 'Traditional APM + AI bolt-on' },
+    { name: 'Portkey', focus: 'LLM Gateway', origin: 'API management focus' },
+    { name: 'Datadog', focus: 'APM Giant', origin: 'Traditional APM + AI bolt-on' },
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--competitors-intro"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Competitive Landscape</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Aren't others doing this? <span className="pitch-highlight-green">Yes.</span>
+        </motion.h2>
+
+        <motion.div className="pitch-competitors-centered" variants={fadeInUp}>
+          <div className="pitch-competitors-list-centered">
+            {competitors.map((comp, i) => (
+              <motion.div 
+                key={comp.name}
+                className="pitch-competitor-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.08 }}
+              >
+                <span className="pitch-competitor-card__name">{comp.name}</span>
+                <span className="pitch-competitor-card__focus">{comp.focus}</span>
+                <span className="pitch-competitor-card__origin">{comp.origin}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Vicious Cycle Slide (from Vibehack)
+function ViciousCycleSlide() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--traditional"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>The Problem</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Yet another observability tool? <span className="pitch-highlight-red">No.</span>
+        </motion.h2>
+        
+        <motion.div className="pitch-traditional-layout" variants={fadeInUp}>
+          <div className="pitch-traditional-problems">
+            <h3>Traditional Observability Pain Points</h3>
+            <div className="pitch-problem-list-detailed">
+              <div className="pitch-problem-item-detailed">
+                <BarChart3 size={20} />
+                <span>Proprietary dashboards</span>
+              </div>
+              <div className="pitch-problem-item-detailed">
+                <MousePointer size={20} />
+                <span>Click-heavy navigation</span>
+              </div>
+              <div className="pitch-problem-item-detailed">
+                <ExternalLink size={20} />
+                <span>Away from dev environment</span>
+              </div>
+              <div className="pitch-problem-item-detailed">
+                <RefreshCw size={20} />
+                <span>Vicious debugging cycle</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="pitch-vicious-cycle">
+            <h4>The Vicious Cycle</h4>
+            <div className="pitch-cycle-circular">
+              {/* SVG for connecting arrows - viewBox matches 320x320 container */}
+              <svg className="pitch-cycle-arrows" viewBox="0 0 320 320">
+                <defs>
+                  <marker id="pitch-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+                  </marker>
+                </defs>
+                {/* L-shaped arrows with aligned axes - clockwise flow */}
+                {/* PM → Alert: right on Y=40, then down to Alert */}
+                <polyline points="200,40 264,40 264,68" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead)" />
+                {/* Alert → Dashboard: down on X=224 (moved left) */}
+                <polyline points="264,132 264,188" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead)" />
+                {/* Dashboard → Click: down on X=264, then left on Y=280 */}
+                <polyline points="264,252 264,280 200,280" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead)" />
+                {/* Click → Overwhelm: left on Y=280, then up to Overwhelm */}
+                <polyline points="120,280 56,280 56,252" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead)" />
+                {/* Overwhelm → Fix: up on X=96 (moved right) */}
+                <polyline points="56,188 56,132" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead)" />
+                {/* Fix → PM: up on X=56, then right on Y=40 */}
+                <polyline points="56,68 56,40 120,40" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead)" />
+              </svg>
+              
+              {/* Cycle nodes positioned in a circle */}
+              <div className="pitch-cycle-node pitch-cycle-node--pm">
+                <Users size={20} />
+                <span>Built for PMs</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--alert">
+                <AlertTriangle size={20} />
+                <span>Alert to Dev</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--dashboard">
+                <MonitorPlay size={20} />
+                <span>Go to Dashboard</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--click">
+                <MousePointer size={20} />
+                <span>Click Chaos</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--overwhelm">
+                <AlertCircle size={20} />
+                <span>Info Overload</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--fix">
+                <Wrench size={20} />
+                <span>Difficulty Fixing</span>
+              </div>
+
+              {/* Center label */}
+              <div className="pitch-cycle-center">
+                <RefreshCw size={24} />
+                <span>Repeat</span>
+              </div>
+            </div>
+            <p className="pitch-cycle-caption">Developers waste hours context-switching instead of fixing</p>
+            <ul className="pitch-cycle-subpoints">
+              <li>Transmission loss from CXOs to Devs</li>
+              <li>Information lost upon convey</li>
+              <li>Hours of back and forth</li>
+            </ul>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Experience Slide (from Vibehack)
+function ExperienceSlide() {
+  const basePath = import.meta.env.BASE_URL
+  
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--experience"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>First-Hand Experience</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          I've lived this problem.
+        </motion.h2>
+        
+        <motion.div className="pitch-experience-cards" variants={fadeInUp}>
+          <div className="pitch-exp-card">
+            <div className="pitch-exp-card__header">
+              <img src={`${basePath}wbd.png`} alt="Warner Bros. Discovery" className="pitch-exp-card__logo" />
+              <div>
+                <h4>Machine Learning Engineer</h4>
+                <span className="pitch-exp-card__company">Warner Bros. Discovery</span>
+              </div>
+            </div>
+            <p>Worked on ML systems at scale. Saw firsthand how observability tools fell short when debugging complex AI pipelines.</p>
+          </div>
+          
+          <div className="pitch-exp-card">
+            <div className="pitch-exp-card__header">
+              <Users size={28} />
+              <div>
+                <h4>Led Agentic Solutions Teams</h4>
+                <span className="pitch-exp-card__company">Consulting Companies</span>
+              </div>
+            </div>
+            <p>Led teams developing agentic AI solutions for enterprises. The debugging pain was real—traces everywhere, fixes nowhere near.</p>
+          </div>
+        </motion.div>
+
+        <motion.div className="pitch-experience-insight" variants={fadeInUp}>
+          <Quote size={24} />
+          <p>The tools weren't built for developers. They were built for dashboards.</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Market Slide (combined from both decks)
 function MarketSlide() {
   const marketData = [
     { year: '2024', value: 5.7, height: 30 },
     { year: '2026', value: 12.0, height: 60 },
     { year: '2028', value: 26.8, height: 110 },
     { year: '2030', value: 52.1, height: 160 },
+  ]
+
+  const stats = [
+    { name: 'Cursor', metric: '5M+', label: 'Daily Active Users', growth: '+400%' },
+    { name: 'Windsurf', metric: '1M+', label: 'Downloads', growth: 'New' },
+    { name: 'GitHub Copilot', metric: '1.3M+', label: 'Paid Subscribers', growth: '+35%' },
   ]
 
   return (
@@ -543,74 +775,68 @@ function MarketSlide() {
           AI agents are the next platform shift
         </motion.h2>
 
-        <motion.div className="pitch-market-chart-section" variants={fadeInUp}>
-          <div className="pitch-market-chart">
-            <div className="pitch-market-chart__header">
-              <h4>AI Agent Market Size</h4>
-              <span className="pitch-market-chart__cagr">45% CAGR</span>
+        <motion.div className="pitch-market-combined" variants={fadeInUp}>
+          <div className="pitch-market-chart-section">
+            <div className="pitch-market-chart">
+              <div className="pitch-market-chart__header">
+                <h4>AI Agent Market Size</h4>
+                <span className="pitch-market-chart__cagr">45% CAGR</span>
+              </div>
+              <div className="pitch-market-chart__container">
+                {marketData.map((item, i) => (
+                  <div key={item.year} className="pitch-market-chart__bar-group">
+                    <motion.span 
+                      className="pitch-market-chart__value"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 + i * 0.15 }}
+                      style={{ bottom: item.height + 8 }}
+                    >
+                      ${item.value}B
+                    </motion.span>
+                    <motion.div 
+                      className="pitch-market-chart__bar"
+                      initial={{ height: 0 }}
+                      animate={{ height: item.height }}
+                      transition={{ delay: 0.3 + i * 0.15, duration: 0.8, ease: "easeOut" }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="pitch-market-chart__years">
+                {marketData.map((item) => (
+                  <span key={item.year} className="pitch-market-chart__year">{item.year}</span>
+                ))}
+              </div>
             </div>
-            <div className="pitch-market-chart__container">
-              {marketData.map((item, i) => (
-                <div key={item.year} className="pitch-market-chart__bar-group">
-                  <motion.span 
-                    className="pitch-market-chart__value"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 + i * 0.15 }}
-                    style={{ bottom: item.height + 8 }}
-                  >
-                    ${item.value}B
-                  </motion.span>
-                  <motion.div 
-                    className="pitch-market-chart__bar"
-                    initial={{ height: 0 }}
-                    animate={{ height: item.height }}
-                    transition={{ delay: 0.3 + i * 0.15, duration: 0.8, ease: "easeOut" }}
-                  />
+
+            <div className="pitch-market-stats-side">
+              <div className="pitch-market-stat-mini">
+                <span className="pitch-market-stat-mini__value">$109.1B</span>
+                <span className="pitch-market-stat-mini__label">U.S. Private AI Investment (2024)</span>
+              </div>
+              <div className="pitch-market-stat-mini">
+                <span className="pitch-market-stat-mini__value">78%</span>
+                <span className="pitch-market-stat-mini__label">Organizations using AI in 2024</span>
+              </div>
+              <div className="pitch-market-stat-mini">
+                <span className="pitch-market-stat-mini__value">90%</span>
+                <span className="pitch-market-stat-mini__label">AI models from industry (2024)</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pitch-ide-stats">
+            <h4>AI IDEs Are Exploding</h4>
+            <div className="pitch-ide-stats__grid">
+              {stats.map((stat) => (
+                <div key={stat.name} className="pitch-ide-stat">
+                  <span className="pitch-ide-stat__name">{stat.name}</span>
+                  <span className="pitch-ide-stat__value">{stat.metric}</span>
+                  <span className="pitch-ide-stat__label">{stat.label}</span>
+                  <span className="pitch-ide-stat__growth">{stat.growth}</span>
                 </div>
               ))}
-            </div>
-            <div className="pitch-market-chart__years">
-              {marketData.map((item) => (
-                <span key={item.year} className="pitch-market-chart__year">{item.year}</span>
-              ))}
-            </div>
-          </div>
-
-          <div className="pitch-market-stats-side">
-            <div className="pitch-market-stat-mini">
-              <span className="pitch-market-stat-mini__value">$109.1B</span>
-              <span className="pitch-market-stat-mini__label">U.S. Private AI Investment (2024)</span>
-            </div>
-            <div className="pitch-market-stat-mini">
-              <span className="pitch-market-stat-mini__value">78%</span>
-              <span className="pitch-market-stat-mini__label">Organizations using AI in 2024</span>
-            </div>
-            <div className="pitch-market-stat-mini">
-              <span className="pitch-market-stat-mini__value">90%</span>
-              <span className="pitch-market-stat-mini__label">AI models from industry (2024)</span>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div className="pitch-market-usecases" variants={fadeInUp}>
-          <h4>AI Agents Already Delivering ROI</h4>
-          <div className="pitch-market-usecases__grid">
-            <div className="pitch-market-usecase">
-              <span className="pitch-market-usecase__stat">95%</span>
-              <span className="pitch-market-usecase__label">Cost reduction in content marketing</span>
-            </div>
-            <div className="pitch-market-usecase">
-              <span className="pitch-market-usecase__stat">10×</span>
-              <span className="pitch-market-usecase__label">Cheaper customer service ops</span>
-            </div>
-            <div className="pitch-market-usecase">
-              <span className="pitch-market-usecase__stat">40%</span>
-              <span className="pitch-market-usecase__label">Productivity boost in IT</span>
-            </div>
-            <div className="pitch-market-usecase">
-              <span className="pitch-market-usecase__stat">25%</span>
-              <span className="pitch-market-usecase__label">Faster R&D cycles</span>
             </div>
           </div>
         </motion.div>
@@ -623,118 +849,307 @@ function MarketSlide() {
   )
 }
 
-function CompetitorsSlide() {
-  const competitors = [
-    { name: 'LangSmith', focus: 'LLM Tracing', origin: 'LangChain ecosystem' },
-    { name: 'Arize AI', focus: 'ML Observability', origin: 'Model monitoring pivot' },
-    { name: 'Dynatrace', focus: 'APM Giant', origin: 'Traditional APM + AI bolt-on' },
-    { name: 'Portkey', focus: 'LLM Gateway', origin: 'API management focus' },
-    { name: 'Datadog', focus: 'APM Giant', origin: 'Traditional APM + AI bolt-on' },
-  ]
-
-  const differentiators = [
-    {
-      icon: <Bot size={24} />,
-      title: 'Agent-Native Architecture',
-      desc: 'Built ground-up for AI agents, not LLMs retrofitted',
-      us: true,
-      them: false
-    },
-    {
-      icon: <Terminal size={24} />,
-      title: 'shepherd-cli First',
-      desc: 'Engineer-oriented CLI workflow, not locked dashboards',
-      us: true,
-      them: false
-    },
-    {
-      icon: <Code size={24} />,
-      title: 'Open Source Core',
-      desc: 'aiobs SDK is MIT licensed, full transparency',
-      us: true,
-      them: false
-    },
-    {
-      icon: <HardDrive size={24} />,
-      title: 'Your Infrastructure',
-      desc: 'Data stays in your cloud, not vendor silos',
-      us: true,
-      them: false
-    },
-  ]
-
+// Turnaround Slide (from Vibehack - Solution)
+function TurnaroundSlide() {
   return (
     <motion.div 
-      className="pitch-slide pitch-slide--competitors"
+      className="pitch-slide pitch-slide--turnaround"
       initial="hidden"
       animate="visible"
       variants={staggerContainer}
     >
       <div className="pitch-slide__content">
-        <motion.span className="pitch-slide__label" variants={fadeInUp}>Competitive Landscape</motion.span>
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>The Solution</motion.span>
         
         <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
-          They pivoted to agents. We started there.
+          How can we cut the turnaround time?
         </motion.h2>
 
-        <motion.div className="pitch-competitors-grid" variants={fadeInUp}>
-          <div className="pitch-competitors-players">
-            <h4>Existing Players</h4>
-            <div className="pitch-competitors-list">
-              {competitors.map((comp, i) => (
-                <motion.div 
-                  key={comp.name}
-                  className="pitch-competitor-card"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.1 }}
-                >
-                  <span className="pitch-competitor-card__name">{comp.name}</span>
-                  <span className="pitch-competitor-card__focus">{comp.focus}</span>
-                  <span className="pitch-competitor-card__origin">{comp.origin}</span>
-                </motion.div>
-              ))}
+        <motion.p className="pitch-slide__subtitle" variants={fadeInUp}>
+          That's where <span className="pitch-highlight">Shepherd-MCP</span> comes in.
+        </motion.p>
+        
+        <motion.div className="pitch-solution-columns" variants={fadeInUp}>
+          {/* Left Column - Workflow */}
+          <div className="pitch-solution-column pitch-solution-column--workflow">
+            <h4>With Shepherd-MCP</h4>
+            <div className="pitch-workflow-steps-vertical">
+              <div className="pitch-workflow-step pitch-workflow-step--highlight">
+                <Bot size={16} />
+                <span>Offload to Cursor/Windsurf</span>
+              </div>
+              <div className="pitch-workflow-arrow-down">↓</div>
+              <div className="pitch-workflow-step pitch-workflow-step--highlight">
+                <Search size={16} />
+                <span>AI Isolates & RCA</span>
+              </div>
+              <div className="pitch-workflow-arrow-down">↓</div>
+              <div className="pitch-workflow-step pitch-workflow-step--highlight">
+                <Wrench size={16} />
+                <span>Fix in Same Tool</span>
+              </div>
             </div>
+            <span className="pitch-workflow-time pitch-workflow-time--fast">Minutes</span>
           </div>
 
-          <div className="pitch-competitors-wedge">
-            <h4>Our Wedge</h4>
-            <div className="pitch-wedge-list">
-              {differentiators.map((diff, i) => (
-                <motion.div 
-                  key={diff.title}
-                  className="pitch-wedge-item"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + i * 0.1 }}
-                >
-                  <div className="pitch-wedge-item__icon">{diff.icon}</div>
-                  <div className="pitch-wedge-item__content">
-                    <span className="pitch-wedge-item__title">{diff.title}</span>
-                    <span className="pitch-wedge-item__desc">{diff.desc}</span>
-                  </div>
-                  <div className="pitch-wedge-item__check">
-                    <Check size={16} />
-                  </div>
-                </motion.div>
-              ))}
+          {/* Right Column - Time Savings */}
+          <div className="pitch-solution-column pitch-solution-column--savings">
+            <h4>Time Saved</h4>
+            <div className="pitch-time-savings-vertical">
+              <div className="pitch-time-savings__before">
+                <Clock size={20} />
+                <span className="pitch-time-savings__value">3-5 hours</span>
+                <span className="pitch-time-savings__label">Traditional debugging</span>
+              </div>
+              <div className="pitch-time-savings__arrow-down">↓</div>
+              <div className="pitch-time-savings__after">
+                <Zap size={20} />
+                <span className="pitch-time-savings__value">30-50 min</span>
+                <span className="pitch-time-savings__label">With Shepherd-MCP</span>
+              </div>
+            </div>
+            <div className="pitch-time-savings__benefits-vertical">
+              <div className="pitch-time-savings__benefit">
+                <CheckCircle size={16} />
+                <span>Zero information loss in conveyance</span>
+              </div>
+              <div className="pitch-time-savings__benefit">
+                <TrendingUp size={16} />
+                <span><strong>Over 10x time saved</strong> for CXOs, PMs, EMs</span>
+              </div>
             </div>
           </div>
         </motion.div>
 
-        <motion.div className="pitch-competitors-summary" variants={fadeInUp}>
-          <div className="pitch-competitors-summary__item">
-            <Crosshair size={20} />
-            <span><strong>Focus:</strong> Purpose-built for agentic workflows</span>
+        <motion.p className="pitch-solution-punchline" variants={fadeInUp}>
+          Let AI isolate issues, conduct RCA, and fix—all without leaving your IDE.
+        </motion.p>
+      </div>
+    </motion.div>
+  )
+}
+
+// Paradigm Slide (from Vibehack - ShepherdMCPSlide)
+function ParadigmSlide() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--paradigm"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>The Paradigm Shift</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Why <span className="pitch-highlight">MCP</span>?
+        </motion.h2>
+        
+        <motion.div className="pitch-mcp-insight" variants={fadeInUp}>
+          <blockquote>
+            "The history of observability tools over the past couple of decades have been about a pretty simple concept: <strong>how do we make terabytes of heterogeneous telemetry data comprehensible to human beings?</strong>"
+          </blockquote>
+        </motion.div>
+
+        <motion.div className="pitch-mcp-death" variants={fadeInUp}>
+          <div className="pitch-mcp-death__icon">
+            <BrainCircuit size={40} />
           </div>
-          <div className="pitch-competitors-summary__item">
-            <Terminal size={20} />
-            <span><strong>Interface:</strong> CLI-first for engineers, not sales demos</span>
+          <div className="pitch-mcp-death__content">
+            <h3>In AI, I see the death of this paradigm.</h3>
+            <p>It's already real. It's already here. It's going to fundamentally change the way we approach systems design and operation in the future.</p>
           </div>
-          <div className="pitch-competitors-summary__item">
-            <Shield size={20} />
-            <span><strong>Control:</strong> Your data, your infrastructure</span>
+        </motion.div>
+
+        <motion.div className="pitch-mcp-catchup" variants={fadeInUp}>
+          <Globe size={24} />
+          <p><strong>The world has moved to Agentic Coding.</strong> Observability is yet to catch up.</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Integration Slide (from Vibehack)
+function IntegrationSlide() {
+  const tools = [
+    { name: 'Langfuse', icon: Eye, highlight: true },
+    { name: 'aiobs', icon: BrainCircuit, highlight: true },
+    { name: 'Portkey', icon: Shield, highlight: false },
+    { name: 'Datadog', icon: BarChart3, highlight: false },
+    { name: 'Any Tool', icon: Layers, highlight: false },
+  ]
+
+  const ides = [
+    { name: 'Cursor', icon: Terminal, highlight: true },
+    { name: 'Claude Code', icon: Code, highlight: true },
+    { name: 'Emergent', icon: Rocket, highlight: true },
+    { name: 'Windsurf', icon: Terminal, highlight: true },
+    { name: 'Any MCP IDE', icon: Terminal, highlight: true },
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--integration"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Universal Integration</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Works with what you already use.
+        </motion.h2>
+        
+        <motion.p className="pitch-slide__subtitle" variants={fadeInUp}>
+          Simply integrate Shepherd-MCP to your IDE—whether you use Langfuse, aiobs, Portkey, Datadog, or any observability tool.
+        </motion.p>
+
+        <motion.div className="pitch-integration-flow" variants={fadeInUp}>
+          <div className="pitch-integration-tools">
+            {tools.map((tool, i) => (
+              <motion.div 
+                key={tool.name}
+                className={`pitch-integration-tool ${tool.highlight ? 'pitch-integration-tool--highlight' : ''}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.1 }}
+              >
+                <tool.icon size={20} />
+                <span>{tool.name}</span>
+              </motion.div>
+            ))}
           </div>
+
+          <div className="pitch-integration-arrow">
+            <Workflow size={32} />
+          </div>
+
+          <div className="pitch-integration-mcp">
+            <div className="pitch-integration-mcp__badge">
+              <svg viewBox="0 0 32 32" className="pitch-integration-mcp__logo">
+                <rect width="32" height="32" rx="6" fill="#111"/>
+                <path d="M8 12L16 8L24 12L16 16L8 12Z" stroke="white" strokeWidth="1.5" fill="none"/>
+                <path d="M8 16L16 20L24 16" stroke="white" strokeWidth="1.5" fill="none"/>
+                <path d="M8 20L16 24L24 20" stroke="white" strokeWidth="1.5" fill="none"/>
+              </svg>
+              <span>Shepherd-MCP</span>
+            </div>
+          </div>
+
+          <div className="pitch-integration-arrow">
+            <Zap size={32} />
+          </div>
+
+          <div className="pitch-integration-ides">
+            {ides.map((ide, i) => (
+              <motion.div 
+                key={ide.name}
+                className={`pitch-integration-ide ${ide.highlight ? 'pitch-integration-ide--highlight' : ''}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 + i * 0.1 }}
+              >
+                <ide.icon size={24} />
+                <span>{ide.name}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div className="pitch-integration-bam" variants={fadeInUp}>
+          <span>And bam!</span> Your AI can read, analyze, and fix production issues.
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Validation Slide (from Vibehack)
+function ValidationSlide() {
+  const basePath = import.meta.env.BASE_URL
+  
+  const quotes = [
+    {
+      company: 'Fenmo AI',
+      logo: `${basePath}fenmoai_logo.jpeg`,
+      role: 'Founder',
+      quote: "Devs have to do frequent context-switching to move to dashboards...",
+      insight: "Need a solution that fits in well",
+      tool: "Uses Langfuse",
+      color: '#F97316'
+    },
+    {
+      company: 'Nurix.ai',
+      logo: `${basePath}nurixai_logo.jpeg`,
+      role: 'Developers',
+      quote: "Looking through Agentic trace containing 50 LLM calls + 20 tool dispatch...",
+      insight: "Pain, chore, bloat—cut it down with agentic coding",
+      tool: "Building AI Agents",
+      color: '#3B82F6'
+    },
+    {
+      company: 'AgnostAI',
+      logo: `${basePath}agnostai.jpeg`,
+      role: 'Founders',
+      quote: "Analytics is for management. Real work is done by developers.",
+      insight: "Building on top of analytics engine may significantly speedup developer pace",
+      tool: "Analytics Platform",
+      color: '#8B5CF6'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--validation"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Market Validation</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Do teams really want this?
+        </motion.h2>
+        
+        <motion.p className="pitch-slide__subtitle" variants={fadeInUp}>
+          I've been talking with teams to understand if this is real—or yet another cool AI feature.
+        </motion.p>
+
+        <motion.div className="pitch-validation-quotes" variants={fadeInUp}>
+          {quotes.map((q, i) => (
+            <motion.div 
+              key={q.company}
+              className="pitch-quote-card"
+              style={{ '--quote-color': q.color }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 + i * 0.15 }}
+            >
+              <div className="pitch-quote-card__header">
+                <div className="pitch-quote-card__company">
+                  {q.logo && <img src={q.logo} alt={q.company} className="pitch-quote-card__logo" />}
+                  <div>
+                    <span className="pitch-quote-card__name">{q.company}</span>
+                    <span className="pitch-quote-card__role">{q.role}</span>
+                  </div>
+                </div>
+                <span className="pitch-quote-card__tool">{q.tool}</span>
+              </div>
+              <blockquote className="pitch-quote-card__quote">"{q.quote}"</blockquote>
+              <p className="pitch-quote-card__insight">
+                <Lightbulb size={14} />
+                {q.insight}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="pitch-validation-verdict" variants={fadeInUp}>
+          <CheckCircle size={24} />
+          <span>Guess what? <strong>They want it.</strong></span>
         </motion.div>
       </div>
     </motion.div>
@@ -818,11 +1233,11 @@ function BusinessModelSlide() {
 
 function TractionSlide() {
   const milestones = [
-    { icon: '🚀', title: 'aiobs SDK', desc: 'Open source SDK launched', date: 'Nov 2025' },
+    { icon: '🚀', title: 'aiobs SDK', desc: 'Open source launch', date: 'Nov 2025' },
     { icon: '⚡', title: 'Shepherd', desc: 'Platform ready', date: 'Nov 2025' },
-    { icon: '🤝', title: 'Intraintel.ai', desc: 'Pilot talks advanced', date: 'Dec 2025' },
-    { icon: '🔧', title: 'Verifast.ai', desc: 'PoC in development', date: 'Dec 2025' },
-    { icon: '🔬', title: 'Exosphere.host', desc: 'Research collaboration', date: 'Dec 2025' },
+    { icon: '🥈', title: 'Vibehack', desc: '2nd Prize', date: 'Dec 2025' },
+    { icon: '🤝', title: 'Pilots', desc: '2 signed', date: 'Dec 2025' },
+    { icon: '🔬', title: 'Research', desc: 'Partnership', date: 'Dec 2025' },
   ]
 
   return (
@@ -839,24 +1254,36 @@ function TractionSlide() {
           Real conversations, real momentum
         </motion.h2>
 
-        <motion.div className="pitch-traction-metrics" variants={fadeInUp}>
-          <div className="pitch-traction-metric">
-            <span className="pitch-traction-metric__value">1</span>
-            <span className="pitch-traction-metric__label">Pilot in Advanced Talks</span>
+        <motion.div className="pitch-traction-metrics-large" variants={fadeInUp}>
+          <div className="pitch-traction-metric-large">
+            <span className="pitch-traction-metric-large__value">2</span>
+            <span className="pitch-traction-metric-large__label">Pilots</span>
           </div>
-          <div className="pitch-traction-metric">
-            <span className="pitch-traction-metric__value">1</span>
-            <span className="pitch-traction-metric__label">PoC in Development</span>
+          <div className="pitch-traction-metric-large">
+            <span className="pitch-traction-metric-large__value">1</span>
+            <span className="pitch-traction-metric-large__label">PoC in Development</span>
           </div>
-          <div className="pitch-traction-metric">
-            <span className="pitch-traction-metric__value">1</span>
-            <span className="pitch-traction-metric__label">Research Partnership</span>
+          <div className="pitch-traction-metric-large">
+            <span className="pitch-traction-metric-large__value">1</span>
+            <span className="pitch-traction-metric-large__label">Research Partnership</span>
+          </div>
+          <div className="pitch-traction-metric-large">
+            <span className="pitch-traction-metric-large__value">1</span>
+            <span className="pitch-traction-metric-large__label">Talks Initiated</span>
           </div>
         </motion.div>
 
+        <motion.div className="pitch-traction-validation" variants={fadeInUp}>
+          <div className="pitch-traction-validation__badge">
+            <CheckCircle size={20} />
+            <span>🥈 2nd Prize at Vibehack 2025</span>
+          </div>
+          <p>
+            Idea validated by <strong>Entrepreneur First</strong>, <strong>OpenAI</strong>, and <strong>Emergent</strong>
+          </p>
+        </motion.div>
+
         <motion.div className="pitch-horizontal-timeline" variants={fadeInUp}>
-          <h4>Journey So Far</h4>
-          
           <div className="pitch-h-timeline">
             <div className="pitch-h-timeline__line" />
             {milestones.map((m, i) => (
@@ -865,7 +1292,7 @@ function TractionSlide() {
                 className="pitch-h-timeline__item"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.15 }}
+                transition={{ delay: 0.3 + i * 0.1 }}
               >
                 <div className="pitch-h-timeline__dot" />
                 <div className="pitch-h-timeline__card">
@@ -884,18 +1311,28 @@ function TractionSlide() {
 }
 
 function PartnershipsSlide() {
+  const basePath = import.meta.env.BASE_URL
+  
   const partnerships = [
     {
       company: 'Intraintel.ai',
-      logo: `${import.meta.env.BASE_URL}intraintel.jpeg`,
-      status: 'Pilot Signing',
+      logo: `${basePath}intraintel.jpeg`,
+      status: 'Pilot',
       statusColor: '#10B981',
-      description: 'AI-powered enterprise solutions company. Advanced discussions for pilot deployment of Shepherd for their agent infrastructure.',
+      description: 'AI-powered enterprise solutions company. Deploying Shepherd for their agent infrastructure to gain visibility into production AI workflows.',
       useCase: 'Enterprise Agent Observability'
     },
     {
+      company: 'Fenmo AI',
+      logo: `${basePath}fenmoai_logo.jpeg`,
+      status: 'Pilot',
+      statusColor: '#10B981',
+      description: 'Uses Langfuse for observability. Integrating Shepherd-MCP to bring traces directly into their development workflow.',
+      useCase: 'IDE-Native Debugging'
+    },
+    {
       company: 'Verifast.ai',
-      logo: `${import.meta.env.BASE_URL}verifast_tech_logo.jpeg`,
+      logo: `${basePath}verifast_tech_logo.jpeg`,
       status: 'PoC In Progress',
       statusColor: '#F59E0B',
       description: 'Building proof-of-concept for self-healing prompts — automatically detecting and fixing failing prompts in production.',
@@ -903,11 +1340,19 @@ function PartnershipsSlide() {
     },
     {
       company: 'Exosphere.host',
-      logo: `${import.meta.env.BASE_URL}exosphere.jpg`,
-      status: 'Research Collab',
+      logo: `${basePath}exosphere.jpg`,
+      status: 'Research Partner',
       statusColor: '#6366F1',
       description: 'Joint research initiative to understand why AI agents fail in production environments and how observability can prevent failures.',
       useCase: 'AI Agent Failure Research'
+    },
+    {
+      company: 'Lambdatest',
+      logo: `${basePath}lambdatest_logo.jpeg`,
+      status: 'Talks Initiated',
+      statusColor: '#3B82F6',
+      description: 'Exploring collaboration for A/B testing capabilities in AI agent workflows — comparing agent performance across different configurations.',
+      useCase: 'A/B Testing for AI Agents'
     }
   ]
 
@@ -925,7 +1370,7 @@ function PartnershipsSlide() {
           Early adopters validating the vision
         </motion.h2>
 
-        <motion.div className="pitch-partnerships-grid" variants={fadeInUp}>
+        <motion.div className="pitch-partnerships-grid pitch-partnerships-grid--five" variants={fadeInUp}>
           {partnerships.map((partner, i) => (
             <motion.div 
               key={partner.company}
@@ -934,7 +1379,13 @@ function PartnershipsSlide() {
               transition={{ delay: i * 0.1 }}
             >
               <div className="pitch-partnership-card__header">
-                <img src={partner.logo} alt={partner.company} className="pitch-partnership-card__logo" />
+                {partner.logo ? (
+                  <img src={partner.logo} alt={partner.company} className="pitch-partnership-card__logo" />
+                ) : (
+                  <div className="pitch-partnership-card__logo-placeholder">
+                    {partner.company.charAt(0)}
+                  </div>
+                )}
                 <div className="pitch-partnership-card__info">
                   <h4 className="pitch-partnership-card__company">{partner.company}</h4>
                   <span 
@@ -967,28 +1418,28 @@ function RoadmapSlide() {
   const roadmap = [
     {
       quarter: '1',
-      title: 'Shepherd',
-      items: ['Mature playground', 'Cloud integrations', 'Enhanced analytics']
+      title: 'Foundation',
+      items: ['Shepherd-MCP launch', 'IDE integrations', 'Cloud storage support']
     },
     {
       quarter: '2',
-      title: 'aiobs SDK',
-      items: ['Setup evals framework', 'Multi-LLM providers', 'GSoC 2026 application']
+      title: 'SDK & Evals',
+      items: ['aiobs evals framework', 'Multi-LLM providers', 'GSoC 2026 application']
     },
     {
       quarter: '3',
-      title: 'Self-Healing + CLI',
+      title: 'Self-Healing',
       items: ['shepherd-cli launch', 'Prompt optimizer', 'Auto-fix implementation']
     },
     {
       quarter: '4',
-      title: 'Traction',
-      items: ['Research partnerships', 'Client pitches', 'Pilot conversions']
+      title: 'Growth',
+      items: ['Pilot conversions', 'Enterprise features', 'A/B testing support']
     },
     {
       quarter: '5',
       title: 'Scale',
-      items: ['Enterprise features', 'Multi-agent support', 'Global expansion']
+      items: ['Multi-agent support', 'Global expansion', 'Platform partnerships']
     }
   ]
 
@@ -1003,7 +1454,7 @@ function RoadmapSlide() {
         <motion.span className="pitch-slide__label" variants={fadeInUp}>Roadmap</motion.span>
         
         <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
-          Building the future of AI observability
+          Bringing observability into the age of agentic coding
         </motion.h2>
 
         <motion.div className="pitch-roadmap" variants={fadeInUp}>
@@ -1133,17 +1584,17 @@ export default function PitchDeck() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const containerRef = useRef(null)
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (currentSlide > 0) {
       setCurrentSlide(currentSlide - 1)
     }
-  }
+  }, [currentSlide])
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1)
     }
-  }
+  }, [currentSlide])
 
   const handleSlideChange = (index) => {
     setCurrentSlide(index)
@@ -1163,7 +1614,7 @@ export default function PitchDeck() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [currentSlide])
+  }, [handleNext, handlePrev])
 
   // Scroll wheel navigation - disabled to prevent accidental navigation
   // Users can navigate via arrow keys, nav dots, or bottom navigation buttons
@@ -1174,11 +1625,17 @@ export default function PitchDeck() {
       case 'problem': return <ProblemSlide />
       case 'solution': return <SolutionSlide />
       case 'how-it-works': return <HowItWorksSlide />
+      case 'competitors-intro': return <CompetitorsIntroSlide />
+      case 'vicious-cycle': return <ViciousCycleSlide />
+      case 'experience': return <ExperienceSlide />
       case 'market': return <MarketSlide />
-      case 'competitors': return <CompetitorsSlide />
-      case 'business-model': return <BusinessModelSlide />
+      case 'turnaround': return <TurnaroundSlide />
+      case 'paradigm': return <ParadigmSlide />
+      case 'integration': return <IntegrationSlide />
+      case 'validation': return <ValidationSlide />
       case 'traction': return <TractionSlide />
       case 'partnerships': return <PartnershipsSlide />
+      case 'business-model': return <BusinessModelSlide />
       case 'roadmap': return <RoadmapSlide />
       case 'team': return <TeamSlide />
       case 'ask': return <AskSlide />
@@ -1214,4 +1671,3 @@ export default function PitchDeck() {
     </div>
   )
 }
-
