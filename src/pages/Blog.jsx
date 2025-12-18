@@ -61,7 +61,15 @@ import {
   PieChart,
   Bot,
   Workflow,
-  Lightbulb
+  Lightbulb,
+  Plug,
+  BrainCircuit,
+  MousePointer,
+  MonitorPlay,
+  Quote,
+  Globe,
+  ArrowDown,
+  AlertCircle
 } from 'lucide-react'
 import './Blog.css'
 
@@ -86,6 +94,17 @@ const scaleIn = {
 // Blog posts data
 const blogPosts = [
   {
+    slug: 'shepherd-mcp-observability-meets-agentic-coding',
+    title: 'Shepherd-MCP: Observability Meets Agentic Coding',
+    subtitle: 'Bringing AI Observability Directly Into Your IDE',
+    excerpt: 'Shepherd-MCP bridges the gap between observability tools and AI-powered coding environments. Debug production issues, run root cause analysis, and fix bugs—all without leaving Cursor, Windsurf, or Claude Code.',
+    date: 'December 18, 2025',
+    readTime: '12 min read',
+    tag: 'MCP',
+    featured: true,
+    icon: 'plug',
+  },
+  {
     slug: 'dashboards-power-center-ai-observability',
     title: 'Why Dashboards are the power center of AI observability.',
     subtitle: 'The Control Room for AI You Can Actually Trust',
@@ -93,7 +112,7 @@ const blogPosts = [
     date: 'December 9, 2025',
     readTime: '10 min read',
     tag: 'Observability',
-    featured: true,
+    featured: false,
     icon: 'dashboard',
   },
   {
@@ -241,6 +260,8 @@ function BlogList() {
                     <div className="blog-card__visual-bg">
                       {post.icon === 'dashboard' ? (
                         <LayoutDashboard size={64} className="blog-card__visual-icon" />
+                      ) : post.icon === 'plug' ? (
+                        <Plug size={64} className="blog-card__visual-icon" />
                       ) : (
                         <Sparkles size={64} className="blog-card__visual-icon" />
                       )}
@@ -1316,6 +1337,853 @@ function DashboardTableOfContents() {
         ))}
       </ul>
     </nav>
+  )
+}
+
+// MCP Sections for Table of Contents
+const mcpSections = [
+  { id: 'mcp-intro', label: 'The Problem' },
+  { id: 'mcp-why', label: 'Why MCP?' },
+  { id: 'mcp-solution', label: 'The Solution' },
+  { id: 'mcp-integration', label: 'Integration' },
+  { id: 'mcp-features', label: 'Features' },
+  { id: 'mcp-validation', label: 'Validation' },
+  { id: 'mcp-future', label: 'The Future' },
+]
+
+// Table of Contents for MCP Blog
+function MCPTableOfContents() {
+  const [activeSection, setActiveSection] = useState('')
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id)
+          }
+        })
+      },
+      { rootMargin: '-20% 0px -70% 0px' }
+    )
+
+    mcpSections.forEach(({ id }) => {
+      const element = document.getElementById(id)
+      if (element) observer.observe(element)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  return (
+    <nav className="toc">
+      <h4 className="toc__title">
+        <BookOpen size={14} />
+        Contents
+      </h4>
+      <ul className="toc__list">
+        {mcpSections.map(({ id, label }) => (
+          <li key={id}>
+            <button
+              className={`toc__link ${activeSection === id ? 'toc__link--active' : ''}`}
+              onClick={() => scrollToSection(id)}
+            >
+              {label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+// Traditional Obs Pain Points Visual - Matching Vibehack Deck Layout
+function TraditionalObsPainPoints() {
+  return (
+    <motion.div 
+      className="mcp-traditional-layout"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+    >
+      <div className="mcp-traditional-problems">
+        <h3>Traditional Observability Pain Points</h3>
+        <div className="mcp-problem-list">
+          <div className="mcp-problem-item">
+            <BarChart3 size={20} />
+            <span>Proprietary dashboards</span>
+          </div>
+          <div className="mcp-problem-item">
+            <MousePointer size={20} />
+            <span>Click-heavy navigation</span>
+          </div>
+          <div className="mcp-problem-item">
+            <ExternalLink size={20} />
+            <span>Away from dev environment</span>
+          </div>
+          <div className="mcp-problem-item">
+            <RefreshCw size={20} />
+            <span>Vicious debugging cycle</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mcp-vicious-cycle">
+        <h4>The Vicious Cycle</h4>
+        <div className="mcp-cycle-circular">
+          {/* SVG for connecting arrows */}
+          <svg className="mcp-cycle-arrows" viewBox="0 0 320 320">
+            <defs>
+              <marker id="mcp-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+              </marker>
+            </defs>
+            {/* Clockwise arrows connecting nodes */}
+            <polyline points="200,40 264,40 264,68" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#mcp-arrowhead)" />
+            <polyline points="264,132 264,188" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#mcp-arrowhead)" />
+            <polyline points="264,252 264,280 200,280" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#mcp-arrowhead)" />
+            <polyline points="120,280 56,280 56,252" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#mcp-arrowhead)" />
+            <polyline points="56,188 56,132" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#mcp-arrowhead)" />
+            <polyline points="56,68 56,40 120,40" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#mcp-arrowhead)" />
+          </svg>
+          
+          {/* Cycle nodes */}
+          <div className="mcp-cycle-node mcp-cycle-node--pm">
+            <Users size={20} />
+            <span>Built for PMs</span>
+          </div>
+          <div className="mcp-cycle-node mcp-cycle-node--alert">
+            <AlertTriangle size={20} />
+            <span>Alert to Dev</span>
+          </div>
+          <div className="mcp-cycle-node mcp-cycle-node--dashboard">
+            <MonitorPlay size={20} />
+            <span>Go to Dashboard</span>
+          </div>
+          <div className="mcp-cycle-node mcp-cycle-node--click">
+            <MousePointer size={20} />
+            <span>Click Chaos</span>
+          </div>
+          <div className="mcp-cycle-node mcp-cycle-node--overwhelm">
+            <AlertCircle size={20} />
+            <span>Info Overload</span>
+          </div>
+          <div className="mcp-cycle-node mcp-cycle-node--fix">
+            <Wrench size={20} />
+            <span>Difficulty Fixing</span>
+          </div>
+
+          {/* Center label */}
+          <div className="mcp-cycle-center">
+            <RefreshCw size={24} />
+            <span>Repeat</span>
+          </div>
+        </div>
+        <p className="mcp-cycle-caption">Developers waste hours context-switching instead of fixing</p>
+        <ul className="mcp-cycle-subpoints">
+          <li>Transmission loss from CXOs to Devs</li>
+          <li>Information lost upon convey</li>
+          <li>Hours of back and forth</li>
+        </ul>
+      </div>
+    </motion.div>
+  )
+}
+
+// Vicious Cycle Visual for MCP Blog (keeping for backward compatibility, but using the combined layout above)
+function ViciousCycleVisual() {
+  return null // Now integrated into TraditionalObsPainPoints
+}
+
+// MCP Integration Flow Visual
+function MCPIntegrationFlow() {
+  const tools = [
+    { name: 'Langfuse', highlight: true },
+    { name: 'aiobs', highlight: true },
+    { name: 'Portkey', highlight: false },
+    { name: 'Datadog', highlight: false },
+    { name: 'Any Tool', highlight: false },
+  ]
+
+  const ides = [
+    { name: 'Cursor', highlight: true },
+    { name: 'Claude Code', highlight: true },
+    { name: 'Windsurf', highlight: true },
+    { name: 'Emergent', highlight: true },
+    { name: 'Any MCP IDE', highlight: true },
+  ]
+
+  return (
+    <div className="mcp-integration-flow">
+      <div className="mcp-integration-flow__column">
+        <h4>Observability Tools</h4>
+        <div className="mcp-integration-flow__items">
+          {tools.map((tool, i) => (
+            <motion.div
+              key={tool.name}
+              className={`mcp-integration-flow__item ${tool.highlight ? 'mcp-integration-flow__item--highlight' : ''}`}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+            >
+              <Eye size={16} />
+              <span>{tool.name}</span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mcp-integration-flow__center">
+        <motion.div
+          className="mcp-integration-flow__bridge"
+          initial={{ scale: 0.8, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <div className="mcp-integration-flow__bridge-icon">
+            <Plug size={24} />
+          </div>
+          <span>Shepherd-MCP</span>
+        </motion.div>
+        <div className="mcp-integration-flow__arrows">
+          <Workflow size={20} />
+        </div>
+      </div>
+
+      <div className="mcp-integration-flow__column">
+        <h4>AI-Powered IDEs</h4>
+        <div className="mcp-integration-flow__items">
+          {ides.map((ide, i) => (
+            <motion.div
+              key={ide.name}
+              className={`mcp-integration-flow__item ${ide.highlight ? 'mcp-integration-flow__item--highlight' : ''}`}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+            >
+              <Terminal size={16} />
+              <span>{ide.name}</span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Time Savings Visual
+function TimeSavingsVisual() {
+  return (
+    <div className="mcp-time-savings">
+      <motion.div
+        className="mcp-time-savings__before"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+      >
+        <Clock size={24} />
+        <div className="mcp-time-savings__content">
+          <span className="mcp-time-savings__value">3-5 hours</span>
+          <span className="mcp-time-savings__label">Traditional debugging</span>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="mcp-time-savings__arrow"
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true }}
+      >
+        <ArrowRight size={24} />
+      </motion.div>
+
+      <motion.div
+        className="mcp-time-savings__after"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        viewport={{ once: true }}
+      >
+        <Zap size={24} />
+        <div className="mcp-time-savings__content">
+          <span className="mcp-time-savings__value">30-50 min</span>
+          <span className="mcp-time-savings__label">With Shepherd-MCP</span>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+// MCP Features Grid
+function MCPFeaturesGrid() {
+  const features = [
+    {
+      icon: <Search size={20} />,
+      title: 'Trace-Back Analysis',
+      description: 'If a problem is identified, Shepherd-MCP can trace the root cause across different data sources—Datadog logs, Langfuse traces, and more.',
+      badge: 'Core Feature'
+    },
+    {
+      icon: <Workflow size={20} />,
+      title: 'End-to-End AI Performance',
+      description: 'From development to production, seamlessly integrate with your existing observability tools for comprehensive model monitoring.',
+      badge: null
+    },
+    {
+      icon: <Eye size={20} />,
+      title: 'Total Model Visibility',
+      description: 'Get a single view of your entire AI ecosystem. Bring together insights from Langfuse, AIobs, Langsmith, Datadog, and more.',
+      badge: null
+    },
+    {
+      icon: <Lightbulb size={20} />,
+      title: 'Enhanced Explainability',
+      description: 'Visualize traces and key metrics to understand why specific decisions or outputs were generated, improving model trust.',
+      badge: null
+    },
+  ]
+
+  return (
+    <div className="mcp-features-grid">
+      {features.map((feature, i) => (
+        <motion.div
+          key={i}
+          className="mcp-feature-card"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.1 }}
+          viewport={{ once: true }}
+        >
+          <div className="mcp-feature-card__header">
+            <div className="mcp-feature-card__icon">
+              {feature.icon}
+            </div>
+            {feature.badge && (
+              <span className="mcp-feature-card__badge">{feature.badge}</span>
+            )}
+          </div>
+          <h4 className="mcp-feature-card__title">{feature.title}</h4>
+          <p className="mcp-feature-card__desc">{feature.description}</p>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// Validation Quotes
+function ValidationQuotes() {
+  const quotes = [
+    {
+      company: 'Fenmo AI',
+      role: 'Founder',
+      quote: "Devs have to do frequent context-switching to move to dashboards...",
+      insight: "Need a solution that fits in well",
+      tool: "Uses Langfuse",
+      color: '#F97316'
+    },
+    {
+      company: 'Nurix.ai',
+      role: 'Developers',
+      quote: "Looking through Agentic trace containing 50 LLM calls + 20 tool dispatch...",
+      insight: "Pain, chore, bloat—cut it down with agentic coding",
+      tool: "Building AI Agents",
+      color: '#3B82F6'
+    },
+    {
+      company: 'AgnostAI',
+      role: 'Founders',
+      quote: "Analytics is for management. Real work is done by developers.",
+      insight: "Building on top of analytics engine may significantly speedup developer pace",
+      tool: "Analytics Platform",
+      color: '#111111'
+    }
+  ]
+
+  return (
+    <div className="mcp-validation-quotes">
+      {quotes.map((q, i) => (
+        <motion.div
+          key={i}
+          className="mcp-quote-card"
+          style={{ '--quote-color': q.color }}
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.15 }}
+          viewport={{ once: true }}
+        >
+          <div className="mcp-quote-card__header">
+            <div className="mcp-quote-card__company">
+              <span className="mcp-quote-card__name">{q.company}</span>
+              <span className="mcp-quote-card__role">{q.role}</span>
+            </div>
+            <span className="mcp-quote-card__tool">{q.tool}</span>
+          </div>
+          <blockquote className="mcp-quote-card__quote">"{q.quote}"</blockquote>
+          <p className="mcp-quote-card__insight">
+            <Lightbulb size={14} />
+            {q.insight}
+          </p>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// AI IDEs Stats
+function AIIDEsStats() {
+  const stats = [
+    { name: 'Cursor', metric: '5M+', label: 'Daily Active Users', growth: '+400%' },
+    { name: 'Windsurf', metric: '1M+', label: 'Downloads', growth: 'New' },
+    { name: 'GitHub Copilot', metric: '1.3M+', label: 'Paid Subscribers', growth: '+35%' },
+  ]
+
+  return (
+    <div className="mcp-ide-stats">
+      {stats.map((stat, i) => (
+        <motion.div
+          key={stat.name}
+          className="mcp-ide-stat"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.1 }}
+          viewport={{ once: true }}
+        >
+          <span className="mcp-ide-stat__name">{stat.name}</span>
+          <span className="mcp-ide-stat__value">{stat.metric}</span>
+          <span className="mcp-ide-stat__label">{stat.label}</span>
+          <span className="mcp-ide-stat__growth">{stat.growth}</span>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// Shepherd-MCP Blog Article Content
+function ShepherdMCPBlogArticle() {
+  return (
+    <article className="blog-article">
+      {/* Hero */}
+      <motion.header 
+        className="blog-hero"
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <div className="container">
+          <motion.div className="blog-hero__meta" variants={fadeInUp}>
+            <span className="blog-hero__tag blog-hero__tag--mcp">MCP</span>
+            <span className="blog-hero__separator">•</span>
+            <span className="blog-hero__date">
+              <Calendar size={14} />
+              December 18, 2025
+            </span>
+            <span className="blog-hero__separator">•</span>
+            <span className="blog-hero__read-time">
+              <Clock size={14} />
+              12 min read
+            </span>
+          </motion.div>
+          
+          <motion.h1 className="blog-hero__title" variants={fadeInUp}>
+            Shepherd-MCP: Observability Meets Agentic Coding
+          </motion.h1>
+          
+          <motion.p className="blog-hero__subtitle" variants={fadeInUp}>
+            Bringing AI Observability Directly Into Your IDE
+          </motion.p>
+
+          <motion.div className="blog-hero__author" variants={fadeInUp}>
+            <div className="blog-hero__author-avatar">
+              <User size={20} />
+            </div>
+            <div className="blog-hero__author-info">
+              <span className="blog-hero__author-name">Shepherd Team</span>
+              <span className="blog-hero__author-role">Engineering</span>
+            </div>
+          </motion.div>
+        </div>
+      </motion.header>
+
+      {/* Content */}
+      <div className="blog-content">
+        <div className="container">
+          <div className="blog-content__wrapper">
+            <MCPTableOfContents />
+            
+            <div className="blog-content__main">
+              {/* Introduction */}
+              <motion.section 
+                className="blog-section"
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer}
+              >
+                <motion.p className="blog-lead" variants={fadeInUp}>
+                  The history of observability tools over the past couple of decades has been about a pretty simple concept: <strong>how do we make terabytes of heterogeneous telemetry data comprehensible to human beings?</strong>
+                </motion.p>
+
+                <motion.p variants={fadeInUp}>
+                  But here's the thing—in the age of AI, we see the death of this paradigm. It's already real. It's already here. It's going to fundamentally change the way we approach systems design and operation.
+                </motion.p>
+
+                <QuoteBlock>
+                  The world has moved to Agentic Coding. Observability is yet to catch up.
+                </QuoteBlock>
+
+                <motion.p variants={fadeInUp}>
+                  That's why we built <strong>Shepherd-MCP</strong>—a tool that bridges the gap between observability platforms and AI-powered coding environments, bringing traces directly into Cursor, Windsurf, Claude Code, and any MCP-compatible IDE.
+                </motion.p>
+              </motion.section>
+
+              {/* The Problem */}
+              <motion.section 
+                id="mcp-intro"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">01</span>
+                  The Problem with Traditional Observability
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  Yet another observability tool? <strong>No.</strong> Traditional observability comes with serious pain points that developers face every day:
+                </motion.p>
+
+                <TraditionalObsPainPoints />
+
+                <KeyInsight icon={<AlertTriangle size={18} />}>
+                  Traditional observability tools were built for product managers and executives—not for the developers who actually fix the bugs.
+                </KeyInsight>
+              </motion.section>
+
+              {/* Why MCP */}
+              <motion.section 
+                id="mcp-why"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">02</span>
+                  Why MCP? Why Now?
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  AI coding assistants are exploding. Developers live inside their IDEs. Why are we still leaving to debug?
+                </motion.p>
+
+                <motion.div variants={fadeInUp}>
+                  <AIIDEsStats />
+                </motion.div>
+
+                <motion.p variants={fadeInUp}>
+                  <strong>Model Context Protocol (MCP)</strong> is the bridge that makes this possible. It's an open standard that allows AI models to connect with external tools and data sources—meaning your AI coding assistant can now read, understand, and act on your observability data.
+                </motion.p>
+
+                <KeyInsight icon={<BrainCircuit size={18} />}>
+                  Developers already use AI to write code. Why not to <strong>debug</strong> it too?
+                </KeyInsight>
+
+                <motion.p variants={fadeInUp}>
+                  This is the paradigm shift. Instead of humans interpreting dashboards, we let AI agents do the heavy lifting—isolating issues, conducting root cause analysis, and even suggesting or applying fixes.
+                </motion.p>
+              </motion.section>
+
+              {/* The Solution */}
+              <motion.section 
+                id="mcp-solution"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">03</span>
+                  How Shepherd-MCP Cuts Turnaround Time
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  With Shepherd-MCP, the workflow becomes radically simpler:
+                </motion.p>
+
+                <motion.div className="mcp-solution-columns" variants={fadeInUp}>
+                  {/* Left Column - Workflow */}
+                  <div className="mcp-solution-column mcp-solution-column--workflow">
+                    <h4>With Shepherd-MCP</h4>
+                    <div className="mcp-workflow-steps-vertical">
+                      <div className="mcp-workflow-step mcp-workflow-step--highlight">
+                        <Bot size={16} />
+                        <span>Offload to Cursor/Windsurf</span>
+                      </div>
+                      <div className="mcp-workflow-arrow-down">↓</div>
+                      <div className="mcp-workflow-step mcp-workflow-step--highlight">
+                        <Search size={16} />
+                        <span>AI Isolates & RCA</span>
+                      </div>
+                      <div className="mcp-workflow-arrow-down">↓</div>
+                      <div className="mcp-workflow-step mcp-workflow-step--highlight">
+                        <Wrench size={16} />
+                        <span>Fix in Same Tool</span>
+                      </div>
+                    </div>
+                    <span className="mcp-workflow-time mcp-workflow-time--fast">Minutes</span>
+                  </div>
+
+                  {/* Right Column - Time Savings */}
+                  <div className="mcp-solution-column mcp-solution-column--savings">
+                    <h4>Time Saved</h4>
+                    <div className="mcp-time-savings-vertical">
+                      <div className="mcp-time-savings__before">
+                        <Clock size={20} />
+                        <span className="mcp-time-savings__value">3-5 hours</span>
+                        <span className="mcp-time-savings__label">Traditional debugging</span>
+                      </div>
+                      <div className="mcp-time-savings__arrow-down">↓</div>
+                      <div className="mcp-time-savings__after">
+                        <Zap size={20} />
+                        <span className="mcp-time-savings__value">30-50 min</span>
+                        <span className="mcp-time-savings__label">With Shepherd-MCP</span>
+                      </div>
+                    </div>
+                    <div className="mcp-time-savings__benefits-vertical">
+                      <div className="mcp-time-savings__benefit">
+                        <CheckCircle2 size={16} />
+                        <span>Zero information loss in conveyance</span>
+                      </div>
+                      <div className="mcp-time-savings__benefit">
+                        <TrendingUp size={16} />
+                        <span><strong>Over 10x time saved</strong> for CXOs, PMs, EMs</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                <KeyInsight icon={<Rocket size={18} />}>
+                  Let AI isolate issues, conduct RCA, and fix—all without leaving your IDE.
+                </KeyInsight>
+              </motion.section>
+
+              {/* Integration */}
+              <motion.section 
+                id="mcp-integration"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">04</span>
+                  Works with What You Already Use
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  Shepherd-MCP is designed to integrate with your existing observability stack. Whether you use Langfuse, aiobs, Portkey, Datadog, or any other tool—it all flows through MCP into your IDE.
+                </motion.p>
+
+                <motion.div variants={scaleIn}>
+                  <MCPIntegrationFlow />
+                </motion.div>
+
+                <motion.div className="mcp-integration-result" variants={fadeInUp}>
+                  <Zap size={24} />
+                  <p><strong>And bam!</strong> Your AI can read, analyze, and fix production issues.</p>
+                </motion.div>
+
+                <motion.p variants={fadeInUp}>
+                  Simply add Shepherd-MCP to your IDE's MCP configuration, connect your observability tools, and you're ready to go. The AI agent in your IDE now has full context of your production traces.
+                </motion.p>
+
+                <CodeBlock filename="mcp_config.json" language="json">
+{`{
+  "mcpServers": {
+    "shepherd": {
+      "command": "uvx",
+      "args": ["shepherd-mcp"],
+      "env": {
+        "AIOBS_API_KEY": "aiobs_sk_xxxx",
+        "LANGFUSE_PUBLIC_KEY": "pk-lf-xxxx",
+        "LANGFUSE_SECRET_KEY": "sk-lf-xxxx"
+      }
+    }
+  }
+}`}
+                </CodeBlock>
+              </motion.section>
+
+              {/* Features */}
+              <motion.section 
+                id="mcp-features"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">05</span>
+                  Key Features
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  Shepherd-MCP brings powerful capabilities to your AI coding assistant:
+                </motion.p>
+
+                <motion.div variants={fadeInUp}>
+                  <MCPFeaturesGrid />
+                </motion.div>
+
+                <motion.p variants={fadeInUp}>
+                  With native integration into platforms like <strong>Emergent</strong>, this becomes even more seamless—just a click of a button to enable full observability context in your coding sessions.
+                </motion.p>
+              </motion.section>
+
+              {/* Validation */}
+              <motion.section 
+                id="mcp-validation"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">06</span>
+                  Do Teams Really Want This?
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  Before building Shepherd-MCP, we talked to teams to understand if this is real—or yet another cool AI feature. Here's what we heard:
+                </motion.p>
+
+                <motion.div variants={fadeInUp}>
+                  <ValidationQuotes />
+                </motion.div>
+
+                <motion.div className="mcp-validation-verdict" variants={fadeInUp}>
+                  <CheckCircle2 size={24} />
+                  <span>Guess what? <strong>They want it.</strong></span>
+                </motion.div>
+              </motion.section>
+
+              {/* The Future */}
+              <motion.section 
+                id="mcp-future"
+                className="blog-section"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  <span className="blog-section__number">07</span>
+                  The Intersection of Observability and Agentic Coding
+                </motion.h2>
+
+                <motion.p variants={fadeInUp}>
+                  We're at an inflection point. The observability market is massive—<strong>$50B+ by 2030</strong>. AI developer tools are the fastest growing segment. Every AI agent needs observability.
+                </motion.p>
+
+                <motion.div className="mcp-market-stats" variants={fadeInUp}>
+                  <div className="mcp-market-stat">
+                    <Globe size={24} />
+                    <span className="mcp-market-stat__value">$50B+</span>
+                    <span className="mcp-market-stat__label">Observability / AI Agent Market by 2030</span>
+                  </div>
+                  <div className="mcp-market-stat">
+                    <Users size={24} />
+                    <span className="mcp-market-stat__value">30M+</span>
+                    <span className="mcp-market-stat__label">Developers worldwide</span>
+                  </div>
+                </motion.div>
+
+                <QuoteBlock>
+                  The intersection of observability and agentic coding is where we play.
+                </QuoteBlock>
+
+                <motion.p variants={fadeInUp}>
+                  Shepherd-MCP is just the beginning. As MCP adoption grows and AI coding assistants become the default, the need for seamless observability integration will only increase.
+                </motion.p>
+
+                <KeyInsight icon={<Rocket size={18} />}>
+                  Shepherd-MCP: Bringing observability into the age of agentic coding.
+                </KeyInsight>
+              </motion.section>
+
+              {/* Final Word */}
+              <motion.section 
+                className="blog-section blog-section--final"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={staggerContainer}
+              >
+                <motion.h2 className="blog-section__title" variants={fadeInUp}>
+                  Getting Started
+                </motion.h2>
+
+                <motion.p className="blog-lead" variants={fadeInUp}>
+                  Ready to bring observability into your IDE? Setting up Shepherd-MCP takes just a few minutes:
+                </motion.p>
+
+                <motion.ol className="blog-list blog-list--numbered" variants={fadeInUp}>
+                  <li>Install the Shepherd-MCP package</li>
+                  <li>Configure your observability tool credentials</li>
+                  <li>Add to your IDE's MCP configuration</li>
+                  <li>Start debugging with AI</li>
+                </motion.ol>
+
+                <motion.p variants={fadeInUp}>
+                  Check out our <a href="https://github.com/neuralis-ai/shepherd-mcp" target="_blank" rel="noopener noreferrer">GitHub repository</a> for detailed setup instructions and examples.
+                </motion.p>
+              </motion.section>
+
+              {/* CTA */}
+              <motion.div 
+                className="blog-cta"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="blog-cta__title">Ready to debug with AI?</h3>
+                <p className="blog-cta__text">Try Shepherd-MCP and bring observability directly into your coding workflow.</p>
+                <div className="blog-cta__buttons">
+                  <a 
+                    href="https://github.com/neuralis-ai/shepherd-mcp" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="btn btn--primary"
+                  >
+                    <Github size={16} />
+                    View on GitHub
+                  </a>
+                  <Link to="/playground" className="btn btn--secondary">
+                    <PlayCircle size={16} />
+                    Try the Playground
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
   )
 }
 
@@ -2522,6 +3390,8 @@ function BlogPost() {
   // Determine which article to render based on the slug
   const renderArticle = () => {
     switch (slug) {
+      case 'shepherd-mcp-observability-meets-agentic-coding':
+        return <ShepherdMCPBlogArticle />
       case 'dashboards-power-center-ai-observability':
         return <DashboardBlogArticle />
       case 'self-healing-prompts':
