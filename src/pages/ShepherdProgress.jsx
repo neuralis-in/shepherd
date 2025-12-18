@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   ArrowRight,
@@ -30,7 +30,23 @@ import {
   User,
   X,
   Sparkles,
-  FlaskConical
+  FlaskConical,
+  Calendar,
+  Crosshair,
+  AlertTriangle,
+  AlertCircle,
+  ThumbsUp,
+  ThumbsDown,
+  Lightbulb,
+  Database,
+  Megaphone,
+  Brain,
+  Award,
+  MousePointer,
+  RefreshCw,
+  MonitorPlay,
+  Wrench,
+  Search
 } from 'lucide-react'
 import './ShepherdProgress.css'
 
@@ -52,21 +68,76 @@ const scaleIn = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } }
 }
 
-// Slide data
-const slides = [
-  { id: 'cover', title: 'Progress' },
-  { id: 'recap', title: 'Recap' },
-  { id: 'dev-updates', title: 'Development' },
-  { id: 'traction', title: 'Traction' },
-  { id: 'cli-wedge', title: 'CLI Wedge' },
-  { id: 'why-cli-business', title: 'Why CLI' },
-  { id: 'why-cli-solution', title: 'Solution' },
-  { id: 'cli-demo', title: 'Demo' },
-  { id: 'async-evals', title: 'Async Evals' },
-  { id: 'next-week', title: "What's Next" },
-]
+// Week definitions
+const weeks = {
+  week1: {
+    id: 'week1',
+    dateRange: 'December 5 – December 12, 2025',
+    shortDate: 'Dec 5–12',
+    slides: [
+      { id: 'cover', title: 'Progress' },
+      { id: 'recap', title: 'Recap' },
+      { id: 'dev-updates', title: 'Development' },
+      { id: 'traction', title: 'Traction' },
+      { id: 'cli-wedge', title: 'CLI Wedge' },
+      { id: 'why-cli-business', title: 'Why CLI' },
+      { id: 'why-cli-solution', title: 'Solution' },
+      { id: 'cli-demo', title: 'Demo' },
+      { id: 'async-evals', title: 'Async Evals' },
+      { id: 'next-week', title: "What's Next" },
+    ],
+    stats: {
+      devUpdates: 2,
+      tractionUpdates: 4,
+      contributors: 5
+    }
+  },
+  week2: {
+    id: 'week2',
+    dateRange: 'December 12 – December 18, 2025',
+    shortDate: 'Dec 12–18',
+    slides: [
+      { id: 'cover', title: 'Progress' },
+      { id: 'vicious-cycle', title: 'Problem' },
+      { id: 'gtm-solution', title: 'Solution' },
+      { id: 'dev-updates', title: 'Development' },
+      { id: 'traction', title: 'Traction' },
+      { id: 'pilot-feedback', title: 'Feedback' },
+      { id: 'next-week', title: "What's Next" },
+    ],
+    stats: {
+      devUpdates: 2,
+      tractionUpdates: 3,
+      pilotFeedback: 1
+    }
+  }
+}
 
-function ProgressHeader({ currentSlide, onSlideChange }) {
+// Order of weeks (newest first)
+const weekOrder = ['week2', 'week1']
+
+function WeekSelector({ currentWeek, onWeekChange }) {
+  return (
+    <div className="progress-week-selector">
+      <Calendar size={14} />
+      <select 
+        value={currentWeek} 
+        onChange={(e) => onWeekChange(e.target.value)}
+        className="progress-week-selector__dropdown"
+      >
+        {weekOrder.map((weekId) => (
+          <option key={weekId} value={weekId}>
+            {weeks[weekId].shortDate}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+function ProgressHeader({ currentSlide, onSlideChange, currentWeek, onWeekChange }) {
+  const currentWeekData = weeks[currentWeek]
+  
   return (
     <header className="pitch-header">
       <div className="pitch-header__container">
@@ -84,7 +155,7 @@ function ProgressHeader({ currentSlide, onSlideChange }) {
         </Link>
         
         <nav className="pitch-header__nav">
-          {slides.map((slide, index) => (
+          {currentWeekData.slides.map((slide, index) => (
             <button
               key={slide.id}
               className={`pitch-header__nav-item ${currentSlide === index ? 'active' : ''}`}
@@ -96,8 +167,10 @@ function ProgressHeader({ currentSlide, onSlideChange }) {
           ))}
         </nav>
 
+        <WeekSelector currentWeek={currentWeek} onWeekChange={onWeekChange} />
+
         <div className="pitch-header__badge pitch-header__badge--progress">
-          Shepherd Progress
+          Progress
         </div>
       </div>
     </header>
@@ -128,8 +201,8 @@ function SlideNavigation({ currentSlide, totalSlides, onPrev, onNext }) {
   )
 }
 
-// Cover Slide
-function CoverSlide() {
+// Cover Slide - Week 1
+function CoverSlideWeek1() {
   return (
     <motion.div 
       className="pitch-slide pitch-slide--cover"
@@ -173,6 +246,58 @@ function CoverSlide() {
           <div className="pitch-cover__stat">
             <span className="pitch-cover__stat-value">5</span>
             <span className="pitch-cover__stat-label">aiobs Contributors</span>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Cover Slide - Week 2
+function CoverSlideWeek2() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--cover"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.div className="pitch-cover__logo" variants={fadeInUp}>
+          <svg viewBox="0 0 32 32" className="pitch-cover__logo-icon">
+            <rect width="32" height="32" rx="6" fill="#111"/>
+            <path d="M8 12L16 8L24 12L16 16L8 12Z" stroke="white" strokeWidth="1.5" fill="none"/>
+            <path d="M8 16L16 20L24 16" stroke="white" strokeWidth="1.5" fill="none"/>
+            <path d="M8 20L16 24L24 20" stroke="white" strokeWidth="1.5" fill="none"/>
+          </svg>
+        </motion.div>
+        
+        <motion.h1 className="pitch-cover__title" variants={fadeInUp}>
+          Progress Report
+        </motion.h1>
+        
+        <motion.p className="pitch-cover__tagline" variants={fadeInUp}>
+          Building the observability layer for AI agents
+        </motion.p>
+
+        <motion.p className="pitch-cover__hook" variants={fadeInUp}>
+          December 12 – December 18, 2025
+        </motion.p>
+        
+        <motion.div className="pitch-cover__stats" variants={fadeInUp}>
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">2</span>
+            <span className="pitch-cover__stat-label">Dev Updates</span>
+          </div>
+          <div className="pitch-cover__stat-divider" />
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">3</span>
+            <span className="pitch-cover__stat-label">Traction Updates</span>
+          </div>
+          <div className="pitch-cover__stat-divider" />
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">1</span>
+            <span className="pitch-cover__stat-label">Pilot Feedback</span>
           </div>
         </motion.div>
       </div>
@@ -950,7 +1075,538 @@ function AsyncEvalsSlide() {
   )
 }
 
-// Next Week Slide
+// ========================================
+// WEEK 2 SPECIFIC SLIDES
+// ========================================
+
+// Vicious Cycle Slide - Week 2 (The Problem)
+function ViciousCycleSlideWeek2() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--traditional"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label progress-label--inline" variants={fadeInUp}>
+          <Crosshair size={14} />
+          <span>Major Positioning Change</span>
+        </motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Yet another observability tool? <span className="pitch-highlight-red">No.</span>
+        </motion.h2>
+        
+        <motion.div className="pitch-traditional-layout" variants={fadeInUp}>
+          <div className="pitch-traditional-problems">
+            <h3>Traditional Observability Pain Points</h3>
+            <div className="pitch-problem-list-detailed">
+              <div className="pitch-problem-item-detailed">
+                <BarChart3 size={20} />
+                <span>Proprietary dashboards built for CXOs, PMs, EMs</span>
+              </div>
+              <div className="pitch-problem-item-detailed">
+                <MousePointer size={20} />
+                <span>Click-heavy navigation, manual analysis</span>
+              </div>
+              <div className="pitch-problem-item-detailed">
+                <ExternalLink size={20} />
+                <span>Reactive — wait for alerts, then investigate</span>
+              </div>
+              <div className="pitch-problem-item-detailed">
+                <RefreshCw size={20} />
+                <span>Slow top-down feedback loops</span>
+              </div>
+            </div>
+            <div className="progress-problem-insight">
+              <p>Debugging today means <strong>long bug-to-fix cycles</strong>. As teams ship agentic pipelines to production, they need <strong>fast, continuous feedback</strong> — but observability has failed to evolve with AI-driven development.</p>
+            </div>
+          </div>
+          
+          <div className="pitch-vicious-cycle">
+            <h4>The Vicious Cycle</h4>
+            <div className="pitch-cycle-circular">
+              <svg className="pitch-cycle-arrows" viewBox="0 0 320 320">
+                <defs>
+                  <marker id="pitch-arrowhead-w2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+                  </marker>
+                </defs>
+                <polyline points="200,40 264,40 264,68" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead-w2)" />
+                <polyline points="264,132 264,188" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead-w2)" />
+                <polyline points="264,252 264,280 200,280" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead-w2)" />
+                <polyline points="120,280 56,280 56,252" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead-w2)" />
+                <polyline points="56,188 56,132" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead-w2)" />
+                <polyline points="56,68 56,40 120,40" fill="none" stroke="#64748b" strokeWidth="2" strokeLinejoin="round" markerEnd="url(#pitch-arrowhead-w2)" />
+              </svg>
+              
+              <div className="pitch-cycle-node pitch-cycle-node--pm">
+                <Users size={20} />
+                <span>Built for PMs</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--alert">
+                <AlertTriangle size={20} />
+                <span>Alert to Dev</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--dashboard">
+                <MonitorPlay size={20} />
+                <span>Go to Dashboard</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--click">
+                <MousePointer size={20} />
+                <span>Click Chaos</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--overwhelm">
+                <AlertCircle size={20} />
+                <span>Info Overload</span>
+              </div>
+              <div className="pitch-cycle-node pitch-cycle-node--fix">
+                <Wrench size={20} />
+                <span>Difficulty Fixing</span>
+              </div>
+
+              <div className="pitch-cycle-center">
+                <RefreshCw size={24} />
+                <span>Repeat</span>
+              </div>
+            </div>
+            <p className="pitch-cycle-caption">Developers waste hours context-switching instead of fixing</p>
+            <ul className="pitch-cycle-subpoints">
+              <li>Transmission loss from CXOs to Devs</li>
+              <li>Information lost upon convey</li>
+              <li>Hours of back and forth</li>
+            </ul>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// GTM Solution Slide - Week 2 (Shepherd-MCP as Solution)
+function GTMSolutionSlide() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--gtm-solution"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>The Solution</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          <span className="pitch-highlight-green">Shepherd-MCP</span> makes observability proactive
+        </motion.h2>
+        
+        <motion.p className="pitch-slide__subtitle" variants={fadeInUp}>
+          Developer-native observability that enables faster, automated debugging directly where developers work.
+        </motion.p>
+
+        <motion.div className="progress-gtm-layout" variants={fadeInUp}>
+          <div className="progress-gtm-solution-card">
+            <div className="progress-gtm-solution-card__header">
+              <Terminal size={28} />
+              <h3>Shepherd-MCP</h3>
+            </div>
+            <div className="progress-gtm-solution-card__features">
+              <div className="progress-gtm-feature">
+                <Bot size={18} />
+                <div>
+                  <strong>Offload to AI IDEs</strong>
+                  <span>Cursor, Windsurf, Claude Code</span>
+                </div>
+              </div>
+              <div className="progress-gtm-feature">
+                <Search size={18} />
+                <div>
+                  <strong>AI Isolates & RCA</strong>
+                  <span>Automated root cause analysis</span>
+                </div>
+              </div>
+              <div className="progress-gtm-feature">
+                <Wrench size={18} />
+                <div>
+                  <strong>Fix in Same Tool</strong>
+                  <span>No context switching</span>
+                </div>
+              </div>
+            </div>
+            <div className="progress-gtm-solution-card__time">
+              <Clock size={16} />
+              <span>3-5 hours → <strong>30-50 minutes</strong></span>
+            </div>
+          </div>
+
+          <div className="progress-gtm-strategy">
+            <h4>Go-to-Market Strategy</h4>
+            <div className="progress-gtm-steps">
+              <div className="progress-gtm-step">
+                <div className="progress-gtm-step__num">1</div>
+                <div className="progress-gtm-step__content">
+                  <strong>Shepherd-MCP as Wedge</strong>
+                  <span>Get into developer workflow through AI IDEs</span>
+                </div>
+              </div>
+              <div className="progress-gtm-step__arrow">↓</div>
+              <div className="progress-gtm-step">
+                <div className="progress-gtm-step__num">2</div>
+                <div className="progress-gtm-step__content">
+                  <strong>Optimize aiobs × Shepherd-MCP</strong>
+                  <span>Reduce latency, optimize token utilization</span>
+                </div>
+              </div>
+              <div className="progress-gtm-step__arrow">↓</div>
+              <div className="progress-gtm-step progress-gtm-step--highlight">
+                <div className="progress-gtm-step__num">3</div>
+                <div className="progress-gtm-step__content">
+                  <strong>Drop-in Replacement</strong>
+                  <span>Move to Shepherd with no/minimal code change vs existing obs tools</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-gtm-tagline" variants={fadeInUp}>
+          <Zap size={20} />
+          <p><strong>Over 10x time saved</strong> for CXOs, PMs, EMs — zero information loss in conveyance</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Dev Updates Slide - Week 2
+function DevUpdatesSlideWeek2() {
+  const devUpdates = [
+    {
+      icon: <Terminal size={28} />,
+      title: 'Shepherd MCP',
+      description: 'Model Context Protocol integration allowing AI IDEs to directly query and analyze traces. Works with Cursor, Windsurf, and Claude Code.',
+      status: 'shipped',
+      highlight: true,
+      details: [
+        'Direct trace querying from IDE',
+        'AI-powered root cause analysis',
+        'Works with existing observability tools'
+      ]
+    },
+    {
+      icon: <GitBranch size={28} />,
+      title: 'A/B Testing Infrastructure',
+      description: 'Infrastructure for comparing agent versions and prompt variations. Compare performance across different configurations.',
+      status: 'completed',
+      details: [
+        'Prompt variation comparison',
+        'Agent version testing',
+        'Performance metrics tracking'
+      ]
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--dev-updates"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>This Week</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          <Code size={32} style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+          Development Updates
+        </motion.h2>
+
+        <motion.div className="progress-dev-grid" variants={fadeInUp}>
+          {devUpdates.map((update, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-dev-card ${update.highlight ? 'progress-dev-card--highlight' : ''}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.15 }}
+            >
+              <div className="progress-dev-card__header">
+                <div className="progress-dev-card__icon">{update.icon}</div>
+                <div className="progress-dev-card__title-section">
+                  <h3>{update.title}</h3>
+                  <span className={`progress-dev-card__status progress-dev-card__status--${update.status}`}>
+                    {update.status === 'shipped' && <Rocket size={14} />}
+                    {update.status === 'completed' && <CheckCircle size={14} />}
+                    {update.status}
+                  </span>
+                </div>
+              </div>
+              <p className="progress-dev-card__desc">{update.description}</p>
+              {update.details && (
+                <ul className="progress-dev-card__details">
+                  {update.details.map((detail, j) => (
+                    <li key={j}>
+                      <CheckCircle size={14} />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-dev-summary" variants={fadeInUp}>
+          <p>
+            <strong>Key Achievement:</strong> Shepherd-MCP enables AI-powered IDEs to debug agentic systems 
+            without leaving the development environment.
+          </p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Traction Slide - Week 2
+function TractionSlideWeek2() {
+  const tractionUpdates = [
+    {
+      icon: <Rocket size={24} />,
+      company: 'Fenmo AI',
+      title: 'Pilot Successfully Started',
+      description: 'Fenmo AI pilot is now live. They are actively using Shepherd CLI and MCP for their agent infrastructure.',
+      status: 'active',
+      statusLabel: 'Pilot Active'
+    },
+    {
+      icon: <Award size={24} />,
+      company: 'Vibehack 2025',
+      title: 'Second Prize Winner',
+      description: 'Won 2nd prize at Vibehack 2025 — validated by Emergent, OpenAI, and Entrepreneur First.',
+      status: 'award',
+      statusLabel: '🥈 2nd Prize'
+    },
+    {
+      icon: <Activity size={24} />,
+      company: 'Intraintel.ai',
+      title: 'Ongoing Production Use',
+      description: 'Intraintel.ai continues using Shepherd in production. Positive feedback on debugging experience.',
+      status: 'active',
+      statusLabel: 'In Production'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--traction"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>This Week</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          <TrendingUp size={32} style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+          Traction Updates
+        </motion.h2>
+
+        <motion.div className="progress-traction-grid progress-traction-grid--three" variants={fadeInUp}>
+          {tractionUpdates.map((update, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-traction-card ${update.status === 'award' ? 'progress-traction-card--award' : ''}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <div className="progress-traction-card__header">
+                <div className="progress-traction-card__icon">{update.icon}</div>
+                <div className="progress-traction-card__company">{update.company}</div>
+                <span className={`progress-traction-card__status progress-traction-card__status--${update.status}`}>
+                  {update.statusLabel}
+                </span>
+              </div>
+              <h4 className="progress-traction-card__title">{update.title}</h4>
+              <p className="progress-traction-card__desc">{update.description}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-traction-summary" variants={fadeInUp}>
+          <p>"Real pilots, real validation — momentum is building."</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Pilot Feedback Slide - Week 2
+function PilotFeedbackSlide() {
+  const basePath = import.meta.env.BASE_URL
+  
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--pilot-feedback"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Pilot Insights</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          <MessageSquare size={32} style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+          Feedback from Pilots
+        </motion.h2>
+
+        <motion.div className="progress-feedback-card" variants={fadeInUp}>
+          <div className="progress-feedback-card__header">
+            <img src={`${basePath}intraintel.jpeg`} alt="Intraintel.ai" className="progress-feedback-card__logo" />
+            <div>
+              <h3>Intraintel.ai</h3>
+              <span className="progress-feedback-card__status">Active Pilot</span>
+            </div>
+          </div>
+
+          <div className="progress-feedback-sections">
+            <div className="progress-feedback-section progress-feedback-section--positive">
+              <h4>
+                <ThumbsUp size={18} />
+                What's Working
+              </h4>
+              <ul>
+                <li>Shepherd playground is being used to track and debug very well</li>
+                <li>Turnaround time for going back to client's problem is reduced</li>
+                <li>Fixing issues has become faster</li>
+                <li>Excited about Shepherd-MCP!</li>
+              </ul>
+            </div>
+
+            <div className="progress-feedback-section progress-feedback-section--improvement">
+              <h4>
+                <ThumbsDown size={18} />
+                Areas for Improvement
+              </h4>
+              <ul>
+                <li>Playground can be simplified</li>
+                <li>Database push-based instead of manual refresh</li>
+              </ul>
+            </div>
+
+            <div className="progress-feedback-section progress-feedback-section--request">
+              <h4>
+                <Lightbulb size={18} />
+                Feature Requests
+              </h4>
+              <ul>
+                <li>Custom prompt A/B testing</li>
+                <li>Model comparison testing</li>
+              </ul>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-feedback-insight" variants={fadeInUp}>
+          <p><strong>Key Insight:</strong> Pilots are validating the core value prop — faster debugging. 
+          The feedback points to clear product improvements we can ship quickly.</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Next Week Slide - Week 2
+function NextWeekSlideWeek2() {
+  const nextItems = [
+    {
+      icon: <Database size={24} />,
+      title: 'Database Push-Based Playground',
+      description: 'Real-time updates for Intraintel.ai — no more manual refresh',
+      priority: 'high'
+    },
+    {
+      icon: <Megaphone size={24} />,
+      title: 'Increase Outreach',
+      description: 'More company talks + client conversations',
+      priority: 'high'
+    },
+    {
+      icon: <Bot size={24} />,
+      title: 'Shepherd Agent',
+      description: 'AI agent that works alongside CLI to auto-diagnose failures',
+      priority: 'medium'
+    },
+    {
+      icon: <Code size={24} />,
+      title: 'aiobs Development',
+      description: 'Continue expanding SDK features and provider support',
+      priority: 'medium'
+    },
+    {
+      icon: <Brain size={24} />,
+      title: 'Memory Integration',
+      description: 'Explore memory integration for persistent agent context',
+      priority: 'low'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--next"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Looking Ahead</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          What's Next?
+        </motion.h2>
+        
+        <motion.div className="progress-next-grid" variants={fadeInUp}>
+          {nextItems.map((item, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-next-card progress-next-card--${item.priority}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <div className="progress-next-card__icon">{item.icon}</div>
+              <div className="progress-next-card__content">
+                <h4>{item.title}</h4>
+                <p>{item.description}</p>
+              </div>
+              <span className={`progress-next-card__priority progress-next-card__priority--${item.priority}`}>
+                {item.priority === 'high' && <Target size={14} />}
+                {item.priority}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-next-cta" variants={fadeInUp}>
+          <Link to="/pitch-deck" className="btn btn--secondary">
+            <ArrowLeft size={16} />
+            Back to Pitch Deck
+          </Link>
+          <Link to="/contact" className="btn btn--primary">
+            Get in Touch
+            <ArrowRight size={16} />
+          </Link>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ========================================
+// WEEK 1 SPECIFIC SLIDES (kept for reference)
+// ========================================
+
+// Next Week Slide - Week 1
 function NextWeekSlide() {
   const nextItems = [
     {
@@ -1035,8 +1691,23 @@ function NextWeekSlide() {
 
 // Main component
 export default function ShepherdProgress() {
+  const { weekId } = useParams()
+  const navigate = useNavigate()
   const [currentSlide, setCurrentSlide] = useState(0)
   const containerRef = useRef(null)
+
+  // Determine current week (default to latest week if not specified)
+  const currentWeek = weekId && weeks[weekId] ? weekId : weekOrder[0]
+  const currentWeekData = weeks[currentWeek]
+
+  // Reset slide when week changes
+  useEffect(() => {
+    setCurrentSlide(0)
+  }, [currentWeek])
+
+  const handleWeekChange = (newWeekId) => {
+    navigate(`/pitch-deck/updates/${newWeekId}`)
+  }
 
   const handlePrev = () => {
     if (currentSlide > 0) {
@@ -1045,7 +1716,7 @@ export default function ShepherdProgress() {
   }
 
   const handleNext = () => {
-    if (currentSlide < slides.length - 1) {
+    if (currentSlide < currentWeekData.slides.length - 1) {
       setCurrentSlide(currentSlide + 1)
     }
   }
@@ -1068,11 +1739,28 @@ export default function ShepherdProgress() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [currentSlide])
+  }, [currentSlide, currentWeekData.slides.length])
 
   const renderSlide = () => {
-    switch (slides[currentSlide].id) {
-      case 'cover': return <CoverSlide />
+    const slideId = currentWeekData.slides[currentSlide]?.id
+
+    // Week 2 slides
+    if (currentWeek === 'week2') {
+      switch (slideId) {
+        case 'cover': return <CoverSlideWeek2 />
+        case 'vicious-cycle': return <ViciousCycleSlideWeek2 />
+        case 'gtm-solution': return <GTMSolutionSlide />
+        case 'dev-updates': return <DevUpdatesSlideWeek2 />
+        case 'traction': return <TractionSlideWeek2 />
+        case 'pilot-feedback': return <PilotFeedbackSlide />
+        case 'next-week': return <NextWeekSlideWeek2 />
+        default: return <CoverSlideWeek2 />
+      }
+    }
+
+    // Week 1 slides (default)
+    switch (slideId) {
+      case 'cover': return <CoverSlideWeek1 />
       case 'recap': return <RecapSlide />
       case 'dev-updates': return <DevUpdatesSlide />
       case 'traction': return <TractionSlide />
@@ -1082,18 +1770,23 @@ export default function ShepherdProgress() {
       case 'cli-demo': return <CLIDemoSlide />
       case 'async-evals': return <AsyncEvalsSlide />
       case 'next-week': return <NextWeekSlide />
-      default: return <CoverSlide />
+      default: return <CoverSlideWeek1 />
     }
   }
 
   return (
     <div className="pitch-deck" ref={containerRef}>
-      <ProgressHeader currentSlide={currentSlide} onSlideChange={handleSlideChange} />
+      <ProgressHeader 
+        currentSlide={currentSlide} 
+        onSlideChange={handleSlideChange}
+        currentWeek={currentWeek}
+        onWeekChange={handleWeekChange}
+      />
       
       <main className="pitch-main">
         <AnimatePresence mode="wait">
           <motion.div
-            key={currentSlide}
+            key={`${currentWeek}-${currentSlide}`}
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
@@ -1107,7 +1800,7 @@ export default function ShepherdProgress() {
 
       <SlideNavigation 
         currentSlide={currentSlide}
-        totalSlides={slides.length}
+        totalSlides={currentWeekData.slides.length}
         onPrev={handlePrev}
         onNext={handleNext}
       />

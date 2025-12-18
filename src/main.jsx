@@ -56,6 +56,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/blog/*" element={<Blog />} />
         <Route path="/pitch-deck" element={<PitchDeck />} />
         <Route path="/pitch-deck/updates" element={<ShepherdProgress />} />
+        <Route path="/pitch-deck/updates/:weekId" element={<ShepherdProgress />} />
         <Route path="/vibehack" element={<VibehackDeck />} />
         <Route path="/community" element={<Community />} />
         <Route path="/design-document" element={<DesignDocument />} />
