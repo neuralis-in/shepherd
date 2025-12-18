@@ -687,15 +687,15 @@ Stored as: SHA256(api_key) → key_hash`}
 }`}
                 </CodeBlock>
 
-                <h4>Usage with Cursor</h4>
+                <h4>Usage with AI Coding Assistants</h4>
                 <CodeBlock>
 {`User: "Show me sessions that failed evaluations today"
-Assistant: [calls aiobs_search_sessions with evals_failed=true, after="2024-12-18"]
-           → Returns matching sessions with errors highlighted
+AI Assistant: [calls aiobs_search_sessions with evals_failed=true, after="2024-12-18"]
+              → Returns matching sessions with errors highlighted
 
 User: "Compare the last two runs of my summarize pipeline"
-Assistant: [calls aiobs_diff_sessions]
-           → Shows diff in tokens, latency, models, prompts, responses`}
+AI Assistant: [calls aiobs_diff_sessions]
+              → Shows diff in tokens, latency, models, prompts, responses`}
                 </CodeBlock>
               </DesignSection>
 
