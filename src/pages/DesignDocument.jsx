@@ -73,7 +73,7 @@ function DesignHeader() {
   )
 }
 
-function DesignSection({ icon, title, id, children }) {
+function DesignSection({ icon, title, id, githubUrl, children }) {
   return (
     <motion.section className="design-section" variants={fadeInUp} id={id}>
       <div className="design-section__header">
@@ -81,6 +81,17 @@ function DesignSection({ icon, title, id, children }) {
           {icon}
         </div>
         <h2 className="design-section__title">{title}</h2>
+        {githubUrl && (
+          <a 
+            href={githubUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="design-section__github"
+            title="View on GitHub"
+          >
+            <Github size={16} />
+          </a>
+        )}
       </div>
       <div className="design-section__content">
         {children}
@@ -293,7 +304,7 @@ export default function DesignDocument() {
               </DesignSection>
 
               {/* aiobs SDK */}
-              <DesignSection icon={<Code size={20} />} title="1. aiobs — The Python SDK" id="aiobs-sdk">
+              <DesignSection icon={<Code size={20} />} title="1. aiobs — The Python SDK" id="aiobs-sdk" githubUrl="https://github.com/neuralis-in/aiobs">
                 <p><strong>Purpose:</strong> Instrument your Python AI/LLM applications with zero-friction observability.</p>
                 <p><strong>Location:</strong> <code>/aiobs/</code></p>
                 
@@ -338,7 +349,7 @@ aiobs.flush()  # POST /v1/traces with full session payload`}
               </DesignSection>
 
               {/* aiobs-flush-server */}
-              <DesignSection icon={<Server size={20} />} title="2. aiobs-flush-server — Trace Ingestion Service" id="flush-server">
+              <DesignSection icon={<Server size={20} />} title="2. aiobs-flush-server — Trace Ingestion Service" id="flush-server" githubUrl="https://github.com/neuralis-in/aiobs-flush-server">
                 <p><strong>Purpose:</strong> Receive and persist trace data from the aiobs SDK.</p>
                 <p><strong>Location:</strong> <code>/aiobs-flush-server/</code></p>
 
@@ -427,7 +438,7 @@ session_labels (
               </DesignSection>
 
               {/* shepherd-server */}
-              <DesignSection icon={<Database size={20} />} title="3. shepherd-server — Core API & Playground Backend" id="shepherd-server">
+              <DesignSection icon={<Database size={20} />} title="3. shepherd-server — Core API & Playground Backend" id="shepherd-server" githubUrl="https://github.com/neuralis-in/shepherd-server">
                 <p><strong>Purpose:</strong> Central API for authentication, usage metering, and trace retrieval.</p>
                 <p><strong>Location:</strong> <code>/shepherd-server/</code></p>
 
@@ -507,7 +518,7 @@ Stored as: SHA256(api_key) → key_hash`}
               </DesignSection>
 
               {/* Evaluation Orchestrator */}
-              <DesignSection icon={<Cpu size={20} />} title="4. shepherd-evaluation-orchestrator — Async Evaluation Engine" id="orchestrator">
+              <DesignSection icon={<Cpu size={20} />} title="4. shepherd-evaluation-orchestrator — Async Evaluation Engine" id="orchestrator" githubUrl="https://github.com/neuralis-in/shepherd-evaluation-orchestrator">
                 <p><strong>Purpose:</strong> Run evaluations on traced sessions asynchronously.</p>
                 <p><strong>Location:</strong> <code>/shepherd-evaluation-orchestrator/</code></p>
 
@@ -596,7 +607,7 @@ Stored as: SHA256(api_key) → key_hash`}
               </DesignSection>
 
               {/* shepherd-mcp */}
-              <DesignSection icon={<Terminal size={20} />} title="5. shepherd-mcp — Model Context Protocol Server" id="mcp">
+              <DesignSection icon={<Terminal size={20} />} title="5. shepherd-mcp — Model Context Protocol Server" id="mcp" githubUrl="https://github.com/neuralis-in/shepherd-mcp">
                 <p><strong>Purpose:</strong> Expose observability data to AI coding assistants via MCP.</p>
                 <p><strong>Location:</strong> <code>/shepherd-mcp/</code></p>
 
@@ -689,7 +700,7 @@ Assistant: [calls aiobs_diff_sessions]
               </DesignSection>
 
               {/* Playground */}
-              <DesignSection icon={<Layout size={20} />} title="6. shepherd — The Playground (Web UI)" id="playground">
+              <DesignSection icon={<Layout size={20} />} title="6. shepherd — The Playground (Web UI)" id="playground" githubUrl="https://github.com/neuralis-in/shepherd">
                 <p><strong>Purpose:</strong> Visual interface for exploring, analyzing, and debugging AI agent traces.</p>
                 <p><strong>Location:</strong> <code>/shepherd/</code></p>
 
