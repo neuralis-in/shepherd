@@ -54,9 +54,14 @@ export function NodeDetails({ node, depth }) {
                       {node.api === 'embeddings.create' ? 'Input Text:' : 'Prompt:'}
                     </span>
                     <p className="node-details__field-value">
-                      {node.request.contents || 
-                       (node.request.messages && node.request.messages.map(m => `[${m.role}]: ${m.content}`).join('\n')) ||
-                       (node.request.input && (Array.isArray(node.request.input) ? node.request.input.join(' | ') : node.request.input))}
+                      {node.request.contents 
+                        ? (typeof node.request.contents === 'string' 
+                            ? node.request.contents 
+                            : Array.isArray(node.request.contents)
+                              ? node.request.contents.map(c => c.parts?.map(p => p.text).join(' ') || '').join(' ')
+                              : JSON.stringify(node.request.contents))
+                        : (node.request.messages && node.request.messages.map(m => `[${m.role}]: ${m.content}`).join('\n')) ||
+                          (node.request.input && (Array.isArray(node.request.input) ? node.request.input.join(' | ') : node.request.input))}
                     </p>
                   </div>
                 )}

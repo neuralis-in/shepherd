@@ -41,8 +41,14 @@ function EnhancePromptTraceItem({ trace, index }) {
       const lastMsg = trace.request.messages[trace.request.messages.length - 1]
       return lastMsg?.content || null
     }
-    // Gemini/other format: request.contents
-    if (trace.request?.contents) return trace.request.contents
+    // Gemini/other format: request.contents (can be string or array)
+    if (trace.request?.contents) {
+      if (typeof trace.request.contents === 'string') return trace.request.contents
+      if (Array.isArray(trace.request.contents)) {
+        return trace.request.contents.map(c => c.parts?.map(p => p.text).join(' ') || '').join(' ')
+      }
+      return JSON.stringify(trace.request.contents)
+    }
     // Function args
     if (trace.args && trace.args.length > 1) {
       return typeof trace.args[1] === 'string' ? trace.args[1] : JSON.stringify(trace.args[1], null, 2)
@@ -350,7 +356,13 @@ export default function EnhancePrompts({ data, isAggregated = false, sessions = 
         systemPrompt = trace.request.config.system_instruction
       }
       if (trace.request?.contents) {
-        userPromptTemplate = trace.request.contents
+        if (typeof trace.request.contents === 'string') {
+          userPromptTemplate = trace.request.contents
+        } else if (Array.isArray(trace.request.contents)) {
+          userPromptTemplate = trace.request.contents.map(c => c.parts?.map(p => p.text).join(' ') || '').join(' ')
+        } else {
+          userPromptTemplate = JSON.stringify(trace.request.contents)
+        }
       }
       
       return {

@@ -80,9 +80,16 @@ export function getPromptText(request, api) {
     const lastUserMsg = request.messages.filter(m => m.role === 'user').pop()
     return lastUserMsg?.content || request.messages[0]?.content || 'N/A'
   }
-  // Gemini format uses contents
+  // Gemini format uses contents (can be string or array)
   if (request.contents) {
-    return request.contents
+    if (typeof request.contents === 'string') {
+      return request.contents
+    }
+    if (Array.isArray(request.contents)) {
+      // Extract text from Gemini's array format: [{role, parts: [{text}]}]
+      return request.contents.map(c => c.parts?.map(p => p.text).join(' ') || '').join(' ')
+    }
+    return JSON.stringify(request.contents)
   }
   return 'N/A'
 }

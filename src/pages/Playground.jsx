@@ -81,8 +81,15 @@ export default function Playground() {
       if (node.request?.model?.toLowerCase().includes(lowerQuery)) return true
       // Search in messages (OpenAI format)
       if (node.request?.messages?.some(m => m.content?.toLowerCase().includes(lowerQuery))) return true
-      // Search in contents (Gemini format)
-      if (node.request?.contents?.toLowerCase().includes(lowerQuery)) return true
+      // Search in contents (Gemini format - can be string or array)
+      if (node.request?.contents) {
+        const contents = node.request.contents
+        if (typeof contents === 'string' && contents.toLowerCase().includes(lowerQuery)) return true
+        if (Array.isArray(contents)) {
+          const contentsText = contents.map(c => c.parts?.map(p => p.text).join(' ') || '').join(' ')
+          if (contentsText.toLowerCase().includes(lowerQuery)) return true
+        }
+      }
       // Search in input (embeddings)
       if (node.request?.input) {
         const input = Array.isArray(node.request.input) ? node.request.input.join(' ') : node.request.input

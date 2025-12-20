@@ -200,7 +200,13 @@ function getPromptDetails(trace) {
     systemPrompt = trace.request.config.system_instruction;
   }
   if (trace.request?.contents) {
-    userPrompt = trace.request.contents;
+    if (typeof trace.request.contents === 'string') {
+      userPrompt = trace.request.contents;
+    } else if (Array.isArray(trace.request.contents)) {
+      userPrompt = trace.request.contents.map(c => c.parts?.map(p => p.text).join(' ') || '').join(' ');
+    } else {
+      userPrompt = JSON.stringify(trace.request.contents);
+    }
   }
   
   return {
