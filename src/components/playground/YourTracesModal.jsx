@@ -91,9 +91,10 @@ export default function YourTracesModal({ isOpen, onClose, onImportSessions }) {
       source: 'api'
     }))
 
-    onImportSessions(transformedSessions)
+    // Pass the API key along with sessions for refresh functionality
+    onImportSessions(transformedSessions, apiKey.trim())
     handleClose()
-  }, [fetchedSessions, onImportSessions])
+  }, [fetchedSessions, onImportSessions, apiKey])
 
   const handleClose = useCallback(() => {
     setApiKey('')

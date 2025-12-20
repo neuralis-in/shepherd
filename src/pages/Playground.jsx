@@ -14,7 +14,8 @@ import {
   Cpu,
   Terminal,
   AlertTriangle,
-  GitCompare
+  GitCompare,
+  RefreshCw
 } from 'lucide-react'
 import './Playground.css'
 
@@ -39,6 +40,7 @@ import {
 } from '../components/playground'
 
 import EnhancePrompts from '../components/EnhancePrompts'
+import api from '../api'
 
 // Main Playground Component
 export default function Playground() {
@@ -54,6 +56,8 @@ export default function Playground() {
   const [activeFilters, setActiveFilters] = useState({})
   const [searchQuery, setSearchQuery] = useState('')
   const [issuesFilter, setIssuesFilter] = useState('all') // Filter for issues view
+  const [storedApiKey, setStoredApiKey] = useState(null) // API key for refresh
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Apply filters to sessions
   const filteredSessions = useMemo(() => {
@@ -248,16 +252,84 @@ export default function Playground() {
     }
   }, [sessions.length])
 
-  const handleYourTracesImport = useCallback((importedSessions) => {
+  const handleYourTracesImport = useCallback((importedSessions, apiKey = null) => {
     setSessions(prev => [...prev, ...importedSessions])
     setError(null)
     setValidationError(null)
+    
+    // Store the API key for refresh functionality
+    if (apiKey) {
+      setStoredApiKey(apiKey)
+    }
     
     if (sessions.length === 0) {
       setSelectedSessionId(null)
       setViewMode('analytics')
     }
   }, [sessions.length])
+
+  // Refresh traces using stored API key
+  const handleRefresh = useCallback(async () => {
+    if (!storedApiKey) return
+
+    setIsRefreshing(true)
+    setError(null)
+
+    try {
+      const response = await api.fetchUserSessions(storedApiKey)
+      
+      if (!response.sessions || response.sessions.length === 0) {
+        setError('No sessions found')
+        return
+      }
+
+      // Merge root-level events/trace_tree with sessions
+      const sessionsWithData = response.sessions.map(session => {
+        const sessionEvents = (response.events || []).filter(e => e.session_id === session.id)
+        const sessionFunctionEvents = (response.function_events || []).filter(e => e.session_id === session.id)
+        const sessionTraceTree = (response.trace_tree || []).filter(t => t.session_id === session.id)
+        
+        return {
+          ...session,
+          events: session.events || sessionEvents,
+          function_events: session.function_events || sessionFunctionEvents,
+          trace_tree: session.trace_tree || sessionTraceTree
+        }
+      })
+
+      // Transform to Playground format
+      const transformedSessions = sessionsWithData.map((session, index) => ({
+        id: `${Date.now()}-refresh-${index}-${Math.random().toString(36).substr(2, 9)}`,
+        fileName: session.name || `Session ${index + 1}`,
+        data: {
+          sessions: [{
+            id: session.external_id || session.id,
+            name: session.name,
+            started_at: session.started_at,
+            ended_at: session.ended_at,
+            meta: session.meta || {},
+            labels: session.labels || []
+          }],
+          trace_tree: session.trace_tree || [],
+          events: session.events || [],
+          function_events: session.function_events || []
+        },
+        uploadedAt: Date.now(),
+        source: 'api'
+      }))
+
+      // Replace API-sourced sessions with fresh data
+      setSessions(prev => {
+        const nonApiSessions = prev.filter(s => s.source !== 'api')
+        return [...nonApiSessions, ...transformedSessions]
+      })
+      setSelectedSessionId(null)
+    } catch (err) {
+      setError(err.message || 'Failed to refresh sessions')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [storedApiKey])
 
   const handleRemoveSession = useCallback((sessionId) => {
     setSessions(prev => prev.filter(s => s.id !== sessionId))
@@ -270,6 +342,7 @@ export default function Playground() {
     setSessions([])
     setSelectedSessionId(null)
     setError(null)
+    setStoredApiKey(null)
   }
 
   const hasData = sessions.length > 0
@@ -423,6 +496,17 @@ export default function Playground() {
                 <span>A/B Test</span>
               </button>
             </div>
+            {storedApiKey && (
+              <button 
+                className={`playground-btn playground-btn--ghost ${isRefreshing ? 'playground-btn--loading' : ''}`}
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                title="Refresh traces from API"
+              >
+                <RefreshCw size={14} className={isRefreshing ? 'spin' : ''} />
+                <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+              </button>
+            )}
             <button className="playground-btn playground-btn--ghost" onClick={handleClearAll}>
               <Trash2 size={14} />
               <span>Clear All</span>
