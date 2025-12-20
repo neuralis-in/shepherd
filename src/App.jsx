@@ -443,15 +443,6 @@ function Hero({ onOpenModal }) {
             Built on aiobs — open-source Python SDK
           </motion.div>
           <motion.div className="hero__title-wrapper" variants={fadeInUp}>
-            <a href="#mcp" className="hero__cli-ribbon hero__cli-ribbon--live">
-              <Terminal size={10} />
-              <span>shepherd-mcp v0.0.1</span>
-              <span className="hero__ribbon-badge">NEW</span>
-            </a>
-            <span className="hero__coming-soon-ribbon">
-              <span className="hero__ribbon-dot"></span>
-              prompt-enhancer coming soon
-            </span>
             <h1 className="heading-xl hero__title">
               Shepherd traces AI agents<br />so they don't fail.
             </h1>
