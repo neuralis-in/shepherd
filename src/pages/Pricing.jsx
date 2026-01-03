@@ -66,7 +66,8 @@ const plans = [
     period: 'forever',
     description: 'Perfect for developers exploring AI agent observability.',
     features: [
-      'Up to 10,000 traces/month',
+      '50,000 traces free',
+      'Then $7 per 100,000 traces',
       'Basic timeline view',
       '7-day data retention',
       'Single project',
@@ -86,7 +87,8 @@ const plans = [
     period: 'contact us',
     description: 'For teams shipping production AI agents at scale.',
     features: [
-      'Unlimited traces',
+      '100,000 traces free',
+      'Then $7 per 100,000 traces',
       'Advanced analytics dashboard',
       'Unlimited data retention',
       'Unlimited projects & teams',
