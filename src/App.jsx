@@ -440,7 +440,7 @@ function Hero({ onOpenModal }) {
         >
           <motion.div className="hero__badge" variants={fadeInUp}>
             <span className="hero__badge-dot"></span>
-            Built on aiobs — open-source Python SDK
+            Built on aiobs — open-source Python & TypeScript SDK
           </motion.div>
           <motion.div className="hero__title-wrapper" variants={fadeInUp}>
             <h1 className="heading-xl hero__title">
@@ -1192,6 +1192,8 @@ function TimelineMockup() {
 
 // aiobs Section
 function AiobsSection() {
+  const [selectedLang, setSelectedLang] = useState('python')
+  
   return (
     <section className="section aiobs" id="aiobs">
       <div className="container">
@@ -1213,12 +1215,27 @@ function AiobsSection() {
               </div>
             </div>
             <h2 className="heading-lg">
-              Built on aiobs — an open-source Python observability SDK.
+              Built on aiobs — an open-source Python & TypeScript observability SDK.
             </h2>
             <p className="text-lg">
               Shepherd's tracing is powered by aiobs, an extensible observability layer for LLM providers.
               It records JSON traces for requests, responses, timings, and errors with just three lines.
             </p>
+          </motion.div>
+          
+          <motion.div className="aiobs__lang-toggle" variants={fadeInUp}>
+            <button 
+              className={`aiobs__lang-btn ${selectedLang === 'python' ? 'aiobs__lang-btn--active' : ''}`}
+              onClick={() => setSelectedLang('python')}
+            >
+              Python
+            </button>
+            <button 
+              className={`aiobs__lang-btn ${selectedLang === 'typescript' ? 'aiobs__lang-btn--active' : ''}`}
+              onClick={() => setSelectedLang('typescript')}
+            >
+              TypeScript
+            </button>
           </motion.div>
           
           <motion.div className="aiobs__code-grid" variants={fadeInUp}>
@@ -1227,7 +1244,11 @@ function AiobsSection() {
                 <span className="code-block__title">Install</span>
               </div>
               <div className="code-block__content">
-                <pre><code><span className="function">pip</span> install aiobs[openai]</code></pre>
+                {selectedLang === 'python' ? (
+                  <pre><code><span className="function">pip</span> install aiobs[openai]</code></pre>
+                ) : (
+                  <pre><code><span className="function">npm</span> install aiobs</code></pre>
+                )}
               </div>
             </div>
             
@@ -1236,7 +1257,11 @@ function AiobsSection() {
                 <span className="code-block__title">Use</span>
               </div>
               <div className="code-block__content">
-                <pre><code><span className="keyword">from</span> aiobs <span className="keyword">import</span> observer{'\n\n'}observer.<span className="function">observe</span>(){'\n'}<span className="comment"># your LLM calls here</span>{'\n'}observer.<span className="function">end</span>(){'\n'}observer.<span className="function">flush</span>()</code></pre>
+                {selectedLang === 'python' ? (
+                  <pre><code><span className="keyword">from</span> aiobs <span className="keyword">import</span> observer{'\n\n'}observer.<span className="function">observe</span>(){'\n'}<span className="comment"># your LLM calls here</span>{'\n'}observer.<span className="function">end</span>(){'\n'}observer.<span className="function">flush</span>()</code></pre>
+                ) : (
+                  <pre><code><span className="keyword">import</span> {'{'} observer {'}'} <span className="keyword">from</span> <span className="string">'aiobs'</span>{'\n\n'}<span className="keyword">await</span> observer.<span className="function">observe</span>(){'\n'}<span className="comment">// your LLM calls here</span>{'\n'}observer.<span className="function">end</span>(){'\n'}<span className="keyword">await</span> observer.<span className="function">flush</span>()</code></pre>
+                )}
               </div>
             </div>
           </motion.div>
@@ -1578,11 +1603,21 @@ function TypingCode({ lines, isVisible }) {
     charIndex: 0,
     isComplete: false
   })
-  const hasStarted = useRef(false)
+
+  // Reset state when lines change
+  useEffect(() => {
+    setTypingState({
+      lineIndex: 0,
+      charIndex: 0,
+      isComplete: false
+    })
+  }, [lines])
 
   useEffect(() => {
-    if (!isVisible || hasStarted.current) return
-    hasStarted.current = true
+    if (!isVisible) return
+    
+    // Don't restart if already complete
+    if (typingState.isComplete) return
 
     const interval = setInterval(() => {
       setTypingState(prev => {
@@ -1619,7 +1654,7 @@ function TypingCode({ lines, isVisible }) {
     }, 40)
 
     return () => clearInterval(interval)
-  }, [isVisible, lines])
+  }, [isVisible, lines, typingState.isComplete])
 
   const { lineIndex, charIndex, isComplete } = typingState
 
@@ -1688,9 +1723,10 @@ function TypingCode({ lines, isVisible }) {
 
 function Developer() {
   const [isVisible, setIsVisible] = useState(false)
+  const [selectedLang, setSelectedLang] = useState('python')
   const sectionRef = useRef(null)
 
-  const codeLines = [
+  const pythonCodeLines = [
     { type: 'added', text: 'from aiobs import observer' },
     { type: 'empty', text: '' },
     { type: 'added', text: 'observer.observe(api_key="aiobs_sk_369•••••••••••")' },
@@ -1700,6 +1736,19 @@ function Developer() {
     { type: 'added', text: 'observer.end()' },
     { type: 'added', text: 'observer.flush()' },
   ]
+
+  const typescriptCodeLines = [
+    { type: 'added', text: 'import { observer } from "aiobs"' },
+    { type: 'empty', text: '' },
+    { type: 'added', text: 'await observer.observe({ apiKey: "aiobs_sk_369•••••••••••" })' },
+    { type: 'empty', text: '' },
+    { type: 'context', text: 'const result = await agent.run("Plan a 3-day trip to Tokyo")' },
+    { type: 'empty', text: '' },
+    { type: 'added', text: 'observer.end()' },
+    { type: 'added', text: 'await observer.flush()' },
+  ]
+
+  const codeLines = selectedLang === 'python' ? pythonCodeLines : typescriptCodeLines
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -1733,6 +1782,21 @@ function Developer() {
             Built for engineers shipping agents at scale.
           </motion.h2>
           
+          <motion.div className="developer__lang-toggle" variants={fadeInUp}>
+            <button 
+              className={`developer__lang-btn ${selectedLang === 'python' ? 'developer__lang-btn--active' : ''}`}
+              onClick={() => setSelectedLang('python')}
+            >
+              Python
+            </button>
+            <button 
+              className={`developer__lang-btn ${selectedLang === 'typescript' ? 'developer__lang-btn--active' : ''}`}
+              onClick={() => setSelectedLang('typescript')}
+            >
+              TypeScript
+            </button>
+          </motion.div>
+          
           <motion.div className="developer__code-wrapper" variants={scaleIn}>
             <div className="developer__code-header">
               <span className="developer__code-title">Quick Start</span>
@@ -1743,10 +1807,14 @@ function Developer() {
             </div>
             <div className="code-diff">
               <div className="code-diff__header">
-                <span className="code-diff__title">agent.py</span>
+                <span className="code-diff__title">{selectedLang === 'python' ? 'agent.py' : 'agent.ts'}</span>
               </div>
-              <TypingCode lines={codeLines} isVisible={isVisible} />
+              <TypingCode key={selectedLang} lines={codeLines} isVisible={isVisible} />
             </div>
+          </motion.div>
+          
+          <motion.div className="developer__install" variants={fadeInUp}>
+            <code>{selectedLang === 'python' ? 'pip install aiobs' : 'npm install aiobs'}</code>
           </motion.div>
           
           <motion.p className="text-lg developer__subtitle" variants={fadeInUp}>

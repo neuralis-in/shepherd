@@ -1436,6 +1436,37 @@
   margin-bottom: var(--spacing-md);
 }
 
+.aiobs__lang-toggle {
+  display: inline-flex;
+  background: var(--color-bg-subtle);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.aiobs__lang-btn {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.aiobs__lang-btn:hover {
+  color: var(--color-text);
+}
+
+.aiobs__lang-btn--active {
+  background: #FFFFFF;
+  color: var(--color-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .aiobs__code-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2061,7 +2092,38 @@
 }
 
 .developer__title {
+  margin-bottom: var(--spacing-lg);
+}
+
+.developer__lang-toggle {
+  display: inline-flex;
+  background: var(--color-bg-subtle);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
   margin-bottom: var(--spacing-xl);
+}
+
+.developer__lang-btn {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.developer__lang-btn:hover {
+  color: var(--color-text);
+}
+
+.developer__lang-btn--active {
+  background: #FFFFFF;
+  color: var(--color-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Code Wrapper - matches apikeys-quickstart */
@@ -2113,6 +2175,22 @@
 @keyframes patchPulse {
   0%, 100% { opacity: 0.5; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.2); }
+}
+
+.developer__install {
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.developer__install code {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-text);
 }
 
 /* Code Diff Styles */
