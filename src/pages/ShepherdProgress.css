@@ -2814,6 +2814,19 @@
     grid-template-columns: 1fr;
   }
 
+  .progress-pricing-columns {
+    flex-direction: column;
+  }
+
+  .progress-pricing-arrow-horizontal {
+    transform: rotate(90deg);
+    padding: var(--spacing-sm) 0;
+  }
+
+  .progress-pricing-icp__table {
+    grid-template-columns: 1fr;
+  }
+
   .progress-feedback-main {
     grid-template-columns: 1fr;
   }
@@ -2950,5 +2963,54 @@
 
   .progress-next-cta {
     flex-direction: column;
+  }
+
+  /* Page 5 - Pricing Model mobile */
+  .progress-pricing-icp__value {
+    font-size: 2rem;
+  }
+
+  .progress-pricing-icp__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .progress-pricing-card__highlight {
+    font-size: 2rem;
+  }
+
+  .progress-pricing-card__tiers {
+    flex-direction: column;
+  }
+
+  /* Page 6 - Trojan Horse mobile */
+  .progress-trojan-step {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .progress-trojan-step__num {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .progress-trojan-outcome {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .progress-trojan-outcome p {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .progress-trojan-providers {
+    flex-direction: column;
+  }
+
+  .progress-trojan-providers__list {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
