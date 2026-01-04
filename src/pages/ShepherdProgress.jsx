@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowDown,
   Layers,
   Zap,
   TrendingUp,
@@ -46,7 +47,13 @@ import {
   RefreshCw,
   MonitorPlay,
   Wrench,
-  Search
+  Search,
+  DollarSign,
+  Shield,
+  FileText,
+  Plug,
+  CircleDollarSign,
+  Package
 } from 'lucide-react'
 import './ShepherdProgress.css'
 
@@ -110,11 +117,31 @@ const weeks = {
       tractionUpdates: 3,
       pilotFeedback: 1
     }
+  },
+  week3: {
+    id: 'week3',
+    dateRange: 'December 19, 2025 – January 4, 2026',
+    shortDate: 'Dec 19–Jan 4',
+    slides: [
+      { id: 'cover', title: 'Progress' },
+      { id: 'dev-updates', title: 'Development' },
+      { id: 'traction', title: 'Traction' },
+      { id: 'strategic-thinking', title: 'Strategy' },
+      { id: 'pricing-model', title: 'Pricing' },
+      { id: 'trojan-horse', title: 'GTM' },
+      { id: 'pilot-feedback', title: 'Feedback' },
+      { id: 'whats-next', title: "What's Next" },
+    ],
+    stats: {
+      devUpdates: 2,
+      tractionUpdates: 3,
+      strategicInsights: 2
+    }
   }
 }
 
 // Order of weeks (newest first)
-const weekOrder = ['week2', 'week1']
+const weekOrder = ['week3', 'week2', 'week1']
 
 function WeekSelector({ currentWeek, onWeekChange }) {
   return (
@@ -1603,6 +1630,676 @@ function NextWeekSlideWeek2() {
 }
 
 // ========================================
+// WEEK 3 SPECIFIC SLIDES
+// ========================================
+
+// Cover Slide - Week 3
+function CoverSlideWeek3() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--cover"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.div className="pitch-cover__logo" variants={fadeInUp}>
+          <svg viewBox="0 0 32 32" className="pitch-cover__logo-icon">
+            <rect width="32" height="32" rx="6" fill="#111"/>
+            <path d="M8 12L16 8L24 12L16 16L8 12Z" stroke="white" strokeWidth="1.5" fill="none"/>
+            <path d="M8 16L16 20L24 16" stroke="white" strokeWidth="1.5" fill="none"/>
+            <path d="M8 20L16 24L24 20" stroke="white" strokeWidth="1.5" fill="none"/>
+          </svg>
+        </motion.div>
+        
+        <motion.h1 className="pitch-cover__title" variants={fadeInUp}>
+          Progress Report
+        </motion.h1>
+        
+        <motion.p className="pitch-cover__tagline" variants={fadeInUp}>
+          Building the observability layer for AI agents
+        </motion.p>
+
+        <motion.div 
+          className="progress-happy-new-year"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+        >
+          <span className="progress-happy-new-year__party progress-happy-new-year__party--left">🎉</span>
+          <span className="progress-happy-new-year__text">Happy New Year 2026!</span>
+          <span className="progress-happy-new-year__party progress-happy-new-year__party--right">🎊</span>
+          
+          {/* Confetti burst */}
+          <span className="progress-confetti">
+            <span className="progress-confetti__piece" style={{ '--delay': '0s', '--x': '-60px', '--y': '-40px' }}></span>
+            <span className="progress-confetti__piece" style={{ '--delay': '0.1s', '--x': '70px', '--y': '-50px' }}></span>
+            <span className="progress-confetti__piece" style={{ '--delay': '0.2s', '--x': '-80px', '--y': '20px' }}></span>
+            <span className="progress-confetti__piece" style={{ '--delay': '0.3s', '--x': '90px', '--y': '10px' }}></span>
+            <span className="progress-confetti__piece" style={{ '--delay': '0.4s', '--x': '-40px', '--y': '-70px' }}></span>
+            <span className="progress-confetti__piece" style={{ '--delay': '0.5s', '--x': '50px', '--y': '-60px' }}></span>
+            <span className="progress-confetti__piece" style={{ '--delay': '0.6s', '--x': '-100px', '--y': '-20px' }}></span>
+            <span className="progress-confetti__piece" style={{ '--delay': '0.7s', '--x': '100px', '--y': '-30px' }}></span>
+          </span>
+        </motion.div>
+
+        <motion.p className="pitch-cover__hook" variants={fadeInUp}>
+          December 19, 2025 – January 4, 2026
+        </motion.p>
+        
+        <motion.div className="pitch-cover__stats" variants={fadeInUp}>
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">2</span>
+            <span className="pitch-cover__stat-label">Dev Updates</span>
+          </div>
+          <div className="pitch-cover__stat-divider" />
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">3</span>
+            <span className="pitch-cover__stat-label">Traction Updates</span>
+          </div>
+          <div className="pitch-cover__stat-divider" />
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">🚀</span>
+            <span className="pitch-cover__stat-label">Ready to Raise</span>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Dev Updates Slide - Week 3
+function DevUpdatesSlideWeek3() {
+  const devUpdates = [
+    {
+      icon: <Package size={28} />,
+      title: 'aiobs TypeScript Package',
+      description: 'TypeScript package for aiobs is now ready. Full type safety and seamless integration with Node.js/TypeScript projects.',
+      status: 'shipped',
+      highlight: true,
+      details: [
+        'Complete TypeScript support',
+        'Type-safe trace capturing',
+        'NPM package ready for distribution'
+      ]
+    },
+    {
+      icon: <Shield size={28} />,
+      title: 'Improved Evals',
+      description: 'Enhanced PII detection and hallucination evaluations for aiobs based on client feedback from pilots.',
+      status: 'completed',
+      details: [
+        'Better PII detection accuracy',
+        'Hallucination eval improvements',
+        'Client feedback incorporated'
+      ]
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--dev-updates"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>This Period</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          <Code size={32} style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+          Development Updates
+        </motion.h2>
+
+        <motion.div className="progress-dev-grid" variants={fadeInUp}>
+          {devUpdates.map((update, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-dev-card ${update.highlight ? 'progress-dev-card--highlight' : ''}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.15 }}
+            >
+              <div className="progress-dev-card__header">
+                <div className="progress-dev-card__icon">{update.icon}</div>
+                <div className="progress-dev-card__title-section">
+                  <h3>{update.title}</h3>
+                  <span className={`progress-dev-card__status progress-dev-card__status--${update.status}`}>
+                    {update.status === 'shipped' && <Rocket size={14} />}
+                    {update.status === 'completed' && <CheckCircle size={14} />}
+                    {update.status}
+                  </span>
+                </div>
+              </div>
+              <p className="progress-dev-card__desc">{update.description}</p>
+              {update.details && (
+                <ul className="progress-dev-card__details">
+                  {update.details.map((detail, j) => (
+                    <li key={j}>
+                      <CheckCircle size={14} />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-dev-summary" variants={fadeInUp}>
+          <p>
+            <strong>Key Achievement:</strong> aiobs now supports both Python and TypeScript, 
+            enabling broader adoption across different tech stacks.
+          </p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Traction Slide - Week 3
+function TractionSlideWeek3() {
+  const tractionUpdates = [
+    {
+      icon: <MessageSquare size={24} />,
+      company: 'QuickReply.ai',
+      title: 'Pilot Discussions',
+      description: 'Initiated talks with QuickReply.ai for pilot program. More progress expected in first week of January.',
+      status: 'talks',
+      statusLabel: 'In Talks'
+    },
+    {
+      icon: <Bot size={24} />,
+      company: 'SupatestAI',
+      title: 'Pilot Discussions',
+      description: 'Engaged with SupatestAI for potential pilot program. Follow-up scheduled for early January.',
+      status: 'talks',
+      statusLabel: 'In Talks'
+    },
+    {
+      icon: <AlertCircle size={24} />,
+      company: 'LambdaTest',
+      title: 'No Updates',
+      description: 'No progress from LambdaTest. Partnership appears to be almost closed at this point.',
+      status: 'closed',
+      statusLabel: 'Almost Closed'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--traction"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>This Period</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          <TrendingUp size={32} style={{ marginRight: '12px', verticalAlign: 'middle' }} />
+          Traction Updates
+        </motion.h2>
+
+        <motion.div className="progress-traction-grid progress-traction-grid--three" variants={fadeInUp}>
+          {tractionUpdates.map((update, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-traction-card ${update.status === 'closed' ? 'progress-traction-card--muted' : ''}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <div className="progress-traction-card__header">
+                <div className="progress-traction-card__icon">{update.icon}</div>
+                <div className="progress-traction-card__company">{update.company}</div>
+                <span className={`progress-traction-card__status progress-traction-card__status--${update.status}`}>
+                  {update.statusLabel}
+                </span>
+              </div>
+              <h4 className="progress-traction-card__title">{update.title}</h4>
+              <p className="progress-traction-card__desc">{update.description}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-traction-summary" variants={fadeInUp}>
+          <p>"New conversations started — more progress expected in January."</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Strategic Thinking Slide - Week 3
+function StrategicThinkingSlide() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--strategic"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Strategic Thinking</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          What's the 10x reason to switch?
+        </motion.h2>
+        
+        <motion.div className="progress-strategic-answer" variants={fadeInUp}>
+          <div className="progress-strategic-problem">
+            <h4>
+              <AlertTriangle size={20} />
+              Existing Tools
+            </h4>
+            <p>Dashboards that help <strong>humans debug</strong> LLM systems</p>
+          </div>
+
+          <div className="progress-strategic-arrow">
+            <ArrowRight size={32} />
+          </div>
+
+          <div className="progress-strategic-solution">
+            <h4>
+              <Rocket size={20} />
+              Shepherd
+            </h4>
+            <p>Turns debugging into an <strong>autonomous closed loop</strong></p>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-strategic-details" variants={fadeInUp}>
+          <div className="progress-strategic-detail">
+            <Search size={20} />
+            <span><strong>Detects failures</strong></span>
+          </div>
+          <div className="progress-strategic-detail">
+            <Layers size={20} />
+            <span><strong>Clusters root causes</strong></span>
+          </div>
+          <div className="progress-strategic-detail">
+            <Lightbulb size={20} />
+            <span><strong>Proposes fixes</strong></span>
+          </div>
+          <div className="progress-strategic-detail">
+            <CheckCircle size={20} />
+            <span><strong>Validates them</strong></span>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-strategic-outcome" variants={fadeInUp}>
+          <div className="progress-strategic-outcome__metric">
+            <span className="progress-strategic-outcome__value">10x</span>
+            <span className="progress-strategic-outcome__label">Reduction in MTTR</span>
+          </div>
+          <div className="progress-strategic-outcome__text">
+            <p>Order-of-magnitude faster iteration <strong>without adding humans-in-the-loop</strong></p>
+            <span>Humans = CXOs, EMs, PMs — not needed in the debugging loop anymore</span>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-strategic-developer" variants={fadeInUp}>
+          <Terminal size={24} />
+          <div>
+            <p><strong>All control to developers.</strong></p>
+            <span>Without leaving their coding environment, they can get the work done.</span>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Pricing Model Slide - Week 3
+function PricingModelSlide() {
+  const icpMetrics = [
+    { label: 'Traces / Session', value: '60' },
+    { label: 'Sessions / Business / Day', value: '1,000' },
+    { label: 'Implied Usage Unit / Business / Day', value: '10' },
+    { label: 'Sessions / Usage Unit / Day', value: '10' },
+  ]
+
+  const pricingDetails = [
+    { label: 'Pricing Type', value: 'B2B, Pay-as-you-go' },
+    { label: 'Free Tier', value: 'First 100,000 traces / business' },
+    { label: 'Paid Usage', value: '$7 / 100,000 traces' },
+  ]
+
+  const definitions = [
+    { term: 'Trace', definition: 'Smallest billable unit generated by an agentic pipeline (LLM calls, tools, evals, dispatch, etc.)' },
+    { term: 'Session', definition: 'One pipeline run (JSON event); contains multiple traces' },
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--pricing"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Strategic Thinking</motion.span>
+        
+        <motion.h2 className="pitch-slide__title pitch-slide__title--inline" variants={fadeInUp}>
+          <DollarSign size={32} />
+          <span>Pricing Model Update</span>
+        </motion.h2>
+
+        <motion.div className="progress-pricing-definitions progress-pricing-definitions--top" variants={fadeInUp}>
+          <h5>Definitions</h5>
+          <div className="progress-pricing-definitions__grid">
+            {definitions.map((item, i) => (
+              <div key={i} className="progress-pricing-definition">
+                <span className="progress-pricing-definition__term">{item.term}</span>
+                <span className="progress-pricing-definition__desc">{item.definition}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-pricing-columns" variants={fadeInUp}>
+          <div className="progress-pricing-icp">
+            <div className="progress-pricing-icp__header">
+              <Users size={24} />
+              <h3>Ideal Customer Profile</h3>
+            </div>
+            <div className="progress-pricing-icp__table progress-pricing-icp__table--vertical">
+              {icpMetrics.map((item, i) => (
+                <div key={i} className="progress-pricing-icp__row">
+                  <span className="progress-pricing-icp__row-label">{item.label}</span>
+                  <span className="progress-pricing-icp__row-value">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="progress-pricing-arrow-horizontal">
+            <ArrowRight size={32} />
+          </div>
+
+          <div className="progress-pricing-card progress-pricing-card--primary">
+            <h4>Pricing Structure</h4>
+            <div className="progress-pricing-table">
+              {pricingDetails.map((item, i) => (
+                <div key={i} className="progress-pricing-row">
+                  <span className="progress-pricing-row__label">{item.label}</span>
+                  <span className="progress-pricing-row__value">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Trojan Horse Slide - Week 3
+function TrojanHorseSlide() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--trojan"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Go-to-Market Strategy</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          What's the trojan horse to the platform?
+        </motion.h2>
+
+        <motion.div className="progress-trojan-columns" variants={fadeInUp}>
+          <div className="progress-trojan-wedge">
+            <div className="progress-trojan-wedge__icon">
+              <Terminal size={32} />
+            </div>
+            <h3>Shepherd MCP</h3>
+            <p>Our trojan horse that sits on top of <strong>whatever observability product teams already use</strong></p>
+            <div className="progress-trojan-providers">
+              <span>Works with:</span>
+              <div className="progress-trojan-providers__list">
+                <span>Langfuse</span>
+                <span>LangSmith</span>
+                <span>Phoenix</span>
+                <span>etc.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="progress-trojan-arrow-horizontal">
+            <ArrowRight size={32} />
+          </div>
+
+          <div className="progress-trojan-flow">
+            <div className="progress-trojan-step">
+              <div className="progress-trojan-step__num">1</div>
+              <div className="progress-trojan-step__content">
+                <strong>MCP becomes default debugging environment</strong>
+                <span>Developers go to Shepherd MCP, not dashboards or raw logs</span>
+              </div>
+            </div>
+            <div className="progress-trojan-flow__arrow">↓</div>
+            <div className="progress-trojan-step">
+              <div className="progress-trojan-step__num">2</div>
+              <div className="progress-trojan-step__content">
+                <strong>Deeply embedded in workflow</strong>
+                <span>Strong position to sell Shepherd aiobs as primary observability layer</span>
+              </div>
+            </div>
+            <div className="progress-trojan-flow__arrow">↓</div>
+            <div className="progress-trojan-step progress-trojan-step--highlight">
+              <div className="progress-trojan-step__num">3</div>
+              <div className="progress-trojan-step__content">
+                <strong>Drop-in replacement</strong>
+                <span>Better debugging, lower cost, tighter integration with MCP</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-trojan-outcome" variants={fadeInUp}>
+          <Plug size={20} />
+          <p><strong>From tool on top of observability</strong> → <strong>Replace the observability layer</strong> → <strong>Own the full agent control plane</strong></p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Pilot Feedback Slide - Week 3
+function PilotFeedbackSlideWeek3() {
+  const basePath = import.meta.env.BASE_URL
+  
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--pilot-feedback"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Pilot Insights</motion.span>
+        
+        <motion.h2 className="pitch-slide__title pitch-slide__title--inline" variants={fadeInUp}>
+          <MessageSquare size={32} />
+          <span>Feedback from Pilots</span>
+        </motion.h2>
+
+        <motion.div className="progress-feedback-card progress-feedback-card--single" variants={fadeInUp}>
+          <div className="progress-feedback-card__header">
+            <img src={`${basePath}fenmoai_logo.jpeg`} alt="FenmoAI" className="progress-feedback-card__logo" />
+            <div>
+              <h3>FenmoAI</h3>
+              <span className="progress-feedback-card__status">Using Shepherd MCP</span>
+            </div>
+          </div>
+
+          <div className="progress-feedback-main">
+            <div className="progress-feedback-quote">
+              <AlertTriangle size={24} />
+              <blockquote>
+                "MCP is consuming the context window too quickly."
+              </blockquote>
+            </div>
+
+            <div className="progress-feedback-implications">
+              <h5>Implications</h5>
+              <ul>
+                <li>Need to optimize token utilization in MCP responses</li>
+                <li>Consider implementing context summarization</li>
+                <li>Validates that teams are actively using the tool</li>
+                <li>Clear product improvement opportunity</li>
+              </ul>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-feedback-insight" variants={fadeInUp}>
+          <p><strong>Key Insight:</strong> Real usage generates real feedback. 
+          This is exactly the kind of feedback we need to improve the product.</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// What's Next Slide - Week 3
+function WhatsNextSlideWeek3() {
+  const nextItems = [
+    {
+      icon: <Database size={24} />,
+      title: 'Database Push-Based Playground',
+      description: 'Real-time updates for Intraintel.ai — no more manual refresh',
+      priority: 'medium'
+    },
+    {
+      icon: <Megaphone size={24} />,
+      title: 'Increase Outreach',
+      description: 'More company talks + client conversations',
+      priority: 'high'
+    },
+    {
+      icon: <Zap size={24} />,
+      title: 'MCP Context Window Optimisation',
+      description: 'Reduce context consumption based on FenmoAI feedback',
+      priority: 'medium'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--next"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Looking Ahead</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          What's Next?
+        </motion.h2>
+        
+        <motion.div className="progress-next-grid" variants={fadeInUp}>
+          {nextItems.map((item, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-next-card progress-next-card--${item.priority}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <div className="progress-next-card__icon">{item.icon}</div>
+              <div className="progress-next-card__content">
+                <h4>{item.title}</h4>
+                <p>{item.description}</p>
+              </div>
+              <span className={`progress-next-card__priority progress-next-card__priority--${item.priority}`}>
+                {item.priority === 'high' && <Target size={14} />}
+                {item.priority}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-ready-to-raise-banner" variants={fadeInUp}>
+          <Rocket size={24} />
+          <span>Ready to Raise</span>
+        </motion.div>
+
+        <motion.div className="progress-next-cta" variants={fadeInUp}>
+          <Link to="/pitch-deck" className="btn btn--secondary">
+            <ArrowLeft size={16} />
+            Back to Pitch Deck
+          </Link>
+          <Link to="/contact" className="btn btn--primary">
+            Get in Touch
+            <ArrowRight size={16} />
+          </Link>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Ready to Raise Slide - Week 3
+function ReadyToRaiseSlide() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--raise"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Milestone</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Now Ready to Raise! 🚀
+        </motion.h2>
+
+        <motion.div className="progress-raise-content" variants={fadeInUp}>
+          <div className="progress-raise-milestone">
+            <div className="progress-raise-milestone__icon">
+              <FileText size={40} />
+            </div>
+            <div className="progress-raise-milestone__content">
+              <h3>P&L Sheet Complete</h3>
+              <p>Worked on financials and projections. Ready to share with investors.</p>
+            </div>
+            <div className="progress-raise-milestone__check">
+              <CheckCircle size={24} />
+            </div>
+          </div>
+
+          <div className="progress-raise-ready">
+            <div className="progress-raise-ready__badge">
+              <Rocket size={32} />
+              <span>Ready to Raise</span>
+            </div>
+            <p>All materials prepared for pre-seed discussions</p>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-raise-cta" variants={fadeInUp}>
+          <Link to="/pitch-deck" className="btn btn--secondary">
+            <ArrowLeft size={16} />
+            View Pitch Deck
+          </Link>
+          <Link to="/contact" className="btn btn--primary">
+            Get in Touch
+            <ArrowRight size={16} />
+          </Link>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ========================================
 // WEEK 1 SPECIFIC SLIDES (kept for reference)
 // ========================================
 
@@ -1743,6 +2440,21 @@ export default function ShepherdProgress() {
 
   const renderSlide = () => {
     const slideId = currentWeekData.slides[currentSlide]?.id
+
+    // Week 3 slides
+    if (currentWeek === 'week3') {
+      switch (slideId) {
+        case 'cover': return <CoverSlideWeek3 />
+        case 'dev-updates': return <DevUpdatesSlideWeek3 />
+        case 'traction': return <TractionSlideWeek3 />
+        case 'strategic-thinking': return <StrategicThinkingSlide />
+        case 'pricing-model': return <PricingModelSlide />
+        case 'trojan-horse': return <TrojanHorseSlide />
+        case 'pilot-feedback': return <PilotFeedbackSlideWeek3 />
+        case 'whats-next': return <WhatsNextSlideWeek3 />
+        default: return <CoverSlideWeek3 />
+      }
+    }
 
     // Week 2 slides
     if (currentWeek === 'week2') {
