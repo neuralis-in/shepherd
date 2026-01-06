@@ -20,6 +20,7 @@ import ShepherdProgress from './pages/ShepherdProgress.jsx'
 import VibehackDeck from './pages/VibehackDeck.jsx'
 import Community from './pages/Community.jsx'
 import DesignDocument from './pages/DesignDocument.jsx'
+import Docs from './pages/Docs.jsx'
 
 // ScrollToTop component - scrolls to top on route change
 function ScrollToTop() {
@@ -60,6 +61,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/vibehack" element={<VibehackDeck />} />
         <Route path="/community" element={<Community />} />
         <Route path="/design-document" element={<DesignDocument />} />
+        <Route path="/docs" element={<Docs />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

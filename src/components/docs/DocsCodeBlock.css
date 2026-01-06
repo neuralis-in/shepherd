@@ -1,0 +1,122 @@
+.docs-code-block {
+  background: var(--color-bg-code, #0D0D0D);
+  color: #E5E5E5;
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.docs-code-block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.docs-code-block__filename {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.docs-code-block__lang {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.docs-code-block__content {
+  position: relative;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+}
+
+.docs-code-block__copy {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  opacity: 0;
+  z-index: 10;
+}
+
+.docs-code-block:hover .docs-code-block__copy {
+  opacity: 1;
+}
+
+.docs-code-block__copy:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #E5E5E5;
+}
+
+.docs-code-block pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-wrap: normal;
+}
+
+.docs-code-block code {
+  display: block;
+  font-family: var(--font-mono, 'IBM Plex Mono', 'SF Mono', Consolas, monospace);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: #E5E5E5 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-wrap: normal;
+}
+
+.docs-code-block__line {
+  display: flex;
+}
+
+.docs-code-block__line-number {
+  width: 2.5rem;
+  padding-right: 1rem;
+  text-align: right;
+  color: #555;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.docs-code-block__line-content {
+  flex: 1;
+  color: #E5E5E5;
+}
+
+/* Syntax Colors - matches App code-block theme */
+.docs-code-block .keyword { color: #FF7B72 !important; }
+.docs-code-block .string { color: #A5D6FF !important; }
+.docs-code-block .function { color: #D2A8FF !important; }
+.docs-code-block .comment { color: #8B949E !important; }
+.docs-code-block .property { color: #79C0FF !important; }
+.docs-code-block .number { color: #79C0FF !important; }
+.docs-code-block .punctuation { color: #E5E5E5 !important; }
+.docs-code-block .operator { color: #FF7B72 !important; }
+.docs-code-block .class-name { color: #FFA657 !important; }

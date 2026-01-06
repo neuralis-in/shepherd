@@ -318,9 +318,9 @@ function Header({ onOpenModal }) {
             <Link to="/pricing" className="header__link">Pricing</Link>
             <Link to="/integrations" className="header__link">Integrations</Link>
             <Link to="/blog" className="header__link">Blog</Link>
-            <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer" className="header__link">
-              Docs <ExternalLink size={12} />
-            </a>
+            <Link to="/docs" className="header__link">
+              Docs
+            </Link>
           </div>
           <div className="header__nav-divider"></div>
           <div className="header__nav-actions">
@@ -385,9 +385,9 @@ function Header({ onOpenModal }) {
               <Link to="/pricing" className="header__mobile-link" onClick={closeMobileMenu}>Pricing</Link>
               <Link to="/integrations" className="header__mobile-link" onClick={closeMobileMenu}>Integrations</Link>
               <Link to="/blog" className="header__mobile-link" onClick={closeMobileMenu}>Blog</Link>
-              <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer" className="header__mobile-link">
-                Docs <ExternalLink size={14} />
-              </a>
+              <Link to="/docs" className="header__mobile-link" onClick={closeMobileMenu}>
+                Docs
+              </Link>
               <div className="header__mobile-actions">
                 <Link to="/playground" className="btn btn--highlight btn--sm btn--full" onClick={closeMobileMenu}>
                   Playground

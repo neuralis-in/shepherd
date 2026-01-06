@@ -28,3 +28,6 @@ dist-ssr
 
 # symlinks
 aiobs-ts
+aiobs
+shepherd-mcp
+shepherd-cli
