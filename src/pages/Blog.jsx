@@ -3368,7 +3368,7 @@ function BlogFooter() {
   return (
     <footer className="blog-footer">
       <div className="container blog-footer__container">
-        <span>© Shepherd, 2025</span>
+        <span>© Shepherd, 2026</span>
         <div className="blog-footer__links">
           <Link to="/">Home</Link>
           <Link to="/pricing">Pricing</Link>

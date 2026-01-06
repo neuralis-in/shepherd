@@ -576,7 +576,7 @@ export default function Community() {
 
       <footer className="community-footer">
         <div className="container community-footer__container">
-          <span>© Shepherd, 2025</span>
+          <span>© Shepherd, 2026</span>
           <div className="community-footer__links">
             <Link to="/">Home</Link>
             <Link to="/pricing">Pricing</Link>

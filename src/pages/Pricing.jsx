@@ -660,7 +660,7 @@ export default function Pricing() {
 
       <footer className="pricing-footer">
         <div className="container pricing-footer__container">
-          <span>© Shepherd, 2025</span>
+          <span>© Shepherd, 2026</span>
           <div className="pricing-footer__links">
             <Link to="/">Home</Link>
             <a href="https://neuralis-in.github.io/aiobs/getting_started.html" target="_blank" rel="noopener noreferrer">Docs</a>

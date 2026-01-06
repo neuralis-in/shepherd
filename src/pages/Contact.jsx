@@ -332,7 +332,7 @@ export default function Contact() {
 
       <footer className="contact-footer">
         <div className="container contact-footer__container">
-          <span>© Shepherd, 2025</span>
+          <span>© Shepherd, 2026</span>
           <div className="contact-footer__links">
             <Link to="/">Home</Link>
             <Link to="/pricing">Pricing</Link>

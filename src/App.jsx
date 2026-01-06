@@ -2754,7 +2754,7 @@ function Footer() {
           <Link to="/contact">Contact</Link>
         </nav>
         <div className="footer__copyright">
-          © Shepherd, 2025
+          © Shepherd, 2026
         </div>
       </div>
     </footer>

@@ -1470,7 +1470,7 @@ aiobs.flush()
 
       <footer className="design-footer">
         <div className="container design-footer__container">
-          <span>© Shepherd, 2025</span>
+          <span>© Shepherd, 2026</span>
           <div className="design-footer__links">
             <Link to="/">Home</Link>
             <Link to="/pricing">Pricing</Link>

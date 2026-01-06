@@ -985,7 +985,7 @@ This agreement was signed through Shepherd's Pilot Program Portal.
       {/* Footer */}
       <footer className="pilot-footer">
         <div className="container pilot-footer__container">
-          <span>© Shepherd, 2025</span>
+          <span>© Shepherd, 2026</span>
           <div className="pilot-footer__links">
             <Link to="/">Home</Link>
             <Link to="/pricing">Pricing</Link>

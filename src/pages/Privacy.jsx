@@ -191,7 +191,7 @@ export default function Privacy() {
 
       <footer className="privacy-footer">
         <div className="container privacy-footer__container">
-          <span>© Shepherd, 2025</span>
+          <span>© Shepherd, 2026</span>
           <div className="privacy-footer__links">
             <Link to="/">Home</Link>
             <Link to="/pricing">Pricing</Link>

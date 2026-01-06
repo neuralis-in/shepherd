@@ -91,4 +91,4 @@ To use a custom domain instead of `username.github.io/repo-name`:
 
 ## License
 
-© Shepherd, 2025
+© Shepherd, 2026

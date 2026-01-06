@@ -77,7 +77,7 @@ export default function DocsSidebar({ activeSection, activeItem, onNavigate }) {
     <aside className="docs-sidebar">
       <div className="docs-sidebar__header">
         <Link to="/" className="docs-sidebar__logo">
-          <img src={`${basePath}shepherd.svg`} alt="Shepherd" className="docs-sidebar__logo-icon" />
+          <img src="/shepherd.svg" alt="Shepherd" className="docs-sidebar__logo-icon" />
           <div className="docs-sidebar__logo-text">
             <span className="docs-sidebar__logo-title">Shepherd</span>
             <span className="docs-sidebar__logo-subtitle">Documentation</span>

@@ -1035,7 +1035,7 @@ function IntraintelFooter() {
   return (
     <footer className="intraintel-footer">
       <div className="container intraintel-footer__container">
-        <span>© Shepherd, 2025</span>
+        <span>© Shepherd, 2026</span>
         <div className="intraintel-footer__links">
           <Link to="/">Home</Link>
           <Link to="/pricing">Pricing</Link>
