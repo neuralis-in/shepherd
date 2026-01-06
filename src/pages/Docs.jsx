@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { DocsSidebar, DocsContent, DocsNav } from '../components/docs';
+import { DocsSidebar, DocsContent, DocsNav, DocsSearch } from '../components/docs';
 import { aiobsContent, aiobsTsContent, shepherdCliContent, shepherdMcpContent } from './docs/content';
 import './Docs.css';
 
@@ -39,6 +39,7 @@ const navigationOrder = [
 export default function Docs() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   // Get current section and item from URL params
   const activeSection = searchParams.get('section') || 'aiobs';
@@ -61,6 +62,19 @@ export default function Docs() {
     setIsSidebarOpen(false);
     window.scrollTo(0, 0);
   };
+  
+  // Keyboard shortcut for search (⌘K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
   
   // Close sidebar on mobile when clicking outside
   useEffect(() => {
@@ -92,6 +106,7 @@ export default function Docs() {
         <DocsNav 
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          onOpenSearch={() => setIsSearchOpen(true)}
         />
         <DocsContent
           title="Page Not Found"
@@ -99,6 +114,7 @@ export default function Docs() {
         >
           <p>Please select a topic from the sidebar.</p>
         </DocsContent>
+        <DocsSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       </div>
     );
   }
@@ -116,6 +132,7 @@ export default function Docs() {
       <DocsNav 
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        onOpenSearch={() => setIsSearchOpen(true)}
       />
       <DocsContent
         title={pageContent.title}
@@ -129,7 +146,9 @@ export default function Docs() {
       
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && <div className="docs-overlay" onClick={() => setIsSidebarOpen(false)} />}
+      
+      {/* Search modal */}
+      <DocsSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </div>
   );
 }
-

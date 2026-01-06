@@ -1,0 +1,213 @@
+/* Search Overlay */
+.docs-search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+}
+
+/* Search Modal */
+.docs-search-modal {
+  width: 100%;
+  max-width: 560px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Header */
+.docs-search-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.docs-search-modal__icon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.docs-search-modal__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.docs-search-modal__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.docs-search-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.docs-search-modal__close:hover {
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+/* Body */
+.docs-search-modal__body {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.docs-search-modal__empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* Results */
+.docs-search-modal__results {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+}
+
+.docs-search-modal__result {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+
+.docs-search-modal__result:hover,
+.docs-search-modal__result--selected {
+  background: var(--color-bg-subtle);
+}
+
+.docs-search-modal__result-icon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.docs-search-modal__result-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.docs-search-modal__result-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.docs-search-modal__result-category {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.docs-search-modal__result-arrow {
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.docs-search-modal__result:hover .docs-search-modal__result-arrow,
+.docs-search-modal__result--selected .docs-search-modal__result-arrow {
+  opacity: 1;
+}
+
+/* Hints */
+.docs-search-modal__hints {
+  padding: 1.25rem;
+}
+
+.docs-search-modal__hint-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+}
+
+.docs-search-modal__hint-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.docs-search-modal__hint-tags button {
+  padding: 0.375rem 0.75rem;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.docs-search-modal__hint-tags button:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+/* Footer */
+.docs-search-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+}
+
+.docs-search-modal__footer span {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.docs-search-modal__footer kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 0.125rem 0.375rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary);
+}
+

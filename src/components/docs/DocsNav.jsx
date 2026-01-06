@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Menu, X, Search, Github, ExternalLink } from 'lucide-react';
 import './DocsNav.css';
 
-export default function DocsNav({ isSidebarOpen, onToggleSidebar }) {
+export default function DocsNav({ isSidebarOpen, onToggleSidebar, onOpenSearch }) {
   return (
     <header className="docs-nav">
       <div className="docs-nav__left">
@@ -22,15 +22,11 @@ export default function DocsNav({ isSidebarOpen, onToggleSidebar }) {
       </div>
       
       <div className="docs-nav__right">
-        <div className="docs-nav__search">
+        <button className="docs-nav__search" onClick={onOpenSearch}>
           <Search size={16} className="docs-nav__search-icon" />
-          <input 
-            type="text" 
-            placeholder="Search docs..." 
-            className="docs-nav__search-input"
-          />
+          <span className="docs-nav__search-text">Search docs...</span>
           <span className="docs-nav__search-shortcut">⌘K</span>
-        </div>
+        </button>
         
         <div className="docs-nav__links">
           <a 
@@ -50,4 +46,3 @@ export default function DocsNav({ isSidebarOpen, onToggleSidebar }) {
     </header>
   );
 }
-
