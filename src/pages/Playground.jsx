@@ -15,7 +15,8 @@ import {
   Terminal,
   AlertTriangle,
   GitCompare,
-  RefreshCw
+  RefreshCw,
+  Brain
 } from 'lucide-react'
 import './Playground.css'
 
@@ -36,7 +37,8 @@ import {
   filterSessions,
   validateObservabilityJson,
   IssuesView,
-  ABTesting
+  ABTesting,
+  Memory
 } from '../components/playground'
 
 import EnhancePrompts from '../components/EnhancePrompts'
@@ -495,6 +497,13 @@ export default function Playground() {
                 <GitCompare size={14} />
                 <span>A/B Test</span>
               </button>
+              <button
+                className={`view-toggle__btn ${viewMode === 'memory' ? 'view-toggle__btn--active' : ''}`}
+                onClick={() => setViewMode('memory')}
+              >
+                <Brain size={14} />
+                <span>Memory</span>
+              </button>
             </div>
             {storedApiKey && (
               <button 
@@ -612,6 +621,12 @@ export default function Playground() {
                           initialFilter={issuesFilter}
                           onBack={() => setViewMode('analytics')}
                         />
+                      ) : viewMode === 'memory' ? (
+                        <Memory
+                          data={{}}
+                          isAggregated={true}
+                          sessions={filteredSessions}
+                        />
                       ) : (
                         <Analytics 
                           data={{}} 
@@ -653,6 +668,8 @@ export default function Playground() {
                           initialFilter={issuesFilter}
                           onBack={() => setViewMode('analytics')}
                         />
+                      ) : viewMode === 'memory' ? (
+                        <Memory data={currentData} />
                       ) : viewMode === 'analytics' ? (
                         <Analytics 
                           data={currentData}

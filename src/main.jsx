@@ -18,6 +18,7 @@ import Blog from './pages/Blog.jsx'
 import PitchDeck from './pages/PitchDeck.jsx'
 import ShepherdProgress from './pages/ShepherdProgress.jsx'
 import VibehackDeck from './pages/VibehackDeck.jsx'
+import EFDeck from './pages/EFDeck.jsx'
 import Community from './pages/Community.jsx'
 import DesignDocument from './pages/DesignDocument.jsx'
 import Docs from './pages/Docs.jsx'
@@ -59,6 +60,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/pitch-deck/updates" element={<ShepherdProgress />} />
         <Route path="/pitch-deck/updates/:weekId" element={<ShepherdProgress />} />
         <Route path="/vibehack" element={<VibehackDeck />} />
+        <Route path="/ef" element={<EFDeck />} />
         <Route path="/community" element={<Community />} />
         <Route path="/design-document" element={<DesignDocument />} />
         <Route path="/docs" element={<Docs />} />
