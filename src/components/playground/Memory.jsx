@@ -16,7 +16,9 @@ import {
   Files,
   ZoomIn,
   ZoomOut,
-  Maximize2
+  RotateCcw,
+  Trash2,
+  ArrowRightLeft
 } from 'lucide-react'
 import { fadeInUp } from './constants'
 import { formatDuration, truncateString, getPromptText, extractLLMEvents } from './utils'
@@ -331,17 +333,97 @@ function calculateEdges(clusters) {
 }
 
 /**
+ * Draggable Graph Node Component
+ */
+function GraphNode({ node, index, isSelected, isHovered, onSelect, onHover, onLeave, onDrag, zoom = 1 }) {
+  const nodeRef = useRef(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStart = useRef({ x: 0, y: 0 })
+  const hasMoved = useRef(false)
+  
+  const handleMouseDown = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+    hasMoved.current = false
+    dragStart.current = { x: e.clientX, y: e.clientY }
+    
+    const handleMouseMove = (e) => {
+      // Account for zoom level when calculating delta
+      const dx = (e.clientX - dragStart.current.x) / zoom
+      const dy = (e.clientY - dragStart.current.y) / zoom
+      
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        hasMoved.current = true
+      }
+      
+      onDrag(node.id, {
+        x: node.x + dx,
+        y: node.y + dy
+      })
+      dragStart.current = { x: e.clientX, y: e.clientY }
+    }
+    
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      
+      // Only trigger click if we didn't move
+      if (!hasMoved.current) {
+        onSelect(node)
+      }
+    }
+    
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }, [node, onDrag, onSelect, zoom])
+  
+  return (
+    <motion.div
+      ref={nodeRef}
+      className={`graph-node-html ${isSelected ? 'graph-node-html--selected' : ''} ${isHovered ? 'graph-node-html--hovered' : ''} ${isDragging ? 'graph-node-html--dragging' : ''}`}
+      style={{
+        left: node.x - node.size / 2,
+        top: node.y - node.size / 2,
+        width: node.size,
+        height: node.size,
+        '--node-color': node.color.accent,
+        '--node-bg': node.color.bg
+      }}
+      onMouseDown={handleMouseDown}
+      onMouseEnter={() => onHover(index)}
+      onMouseLeave={onLeave}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ delay: index * 0.05, type: 'spring', stiffness: 300, damping: 25 }}
+      whileHover={{ scale: isDragging ? 1 : 1.08 }}
+    >
+      <div className="graph-node-html__inner">
+        <span className="graph-node-html__count">{node.traces.length}</span>
+        <span className="graph-node-html__label">traces</span>
+      </div>
+      <span className="graph-node-html__name">
+        {node.name.length > 15 ? node.name.slice(0, 15) + '…' : node.name}
+      </span>
+    </motion.div>
+  )
+}
+
+/**
  * Knowledge Graph Visualization Component
  */
 function KnowledgeGraph({ clusters, selectedCluster, onSelectCluster }) {
   const containerRef = useRef(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 500 })
+  const [hoveredNode, setHoveredNode] = useState(null)
+  const [nodePositions, setNodePositions] = useState({})
+  
+  // Zoom and pan state
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [hasMoved, setHasMoved] = useState(false)
-  const [hoveredNode, setHoveredNode] = useState(null)
+  const [isPanning, setIsPanning] = useState(false)
+  const panStart = useRef({ x: 0, y: 0 })
   
   // Measure container
   useEffect(() => {
@@ -357,66 +439,84 @@ function KnowledgeGraph({ clusters, selectedCluster, onSelectCluster }) {
     return () => window.removeEventListener('resize', updateDimensions)
   }, [])
   
-  // Calculate layout
-  const nodes = useMemo(() => 
+  // Calculate initial layout
+  const initialNodes = useMemo(() => 
     calculateGraphLayout(clusters, dimensions.width, dimensions.height),
     [clusters, dimensions]
   )
   
+  // Reset positions when clusters change
+  useEffect(() => {
+    setNodePositions({})
+    setPan({ x: 0, y: 0 })
+    setZoom(1)
+  }, [clusters.length, dimensions])
+  
+  // Get current node positions (initial or dragged)
+  const nodes = useMemo(() => 
+    initialNodes.map((node) => ({
+      ...node,
+      x: nodePositions[node.id]?.x ?? node.x,
+      y: nodePositions[node.id]?.y ?? node.y
+    })),
+    [initialNodes, nodePositions]
+  )
+  
   const edges = useMemo(() => calculateEdges(clusters), [clusters])
   
-  // Pan handlers - only on the SVG background, not nodes
-  const handleBackgroundMouseDown = useCallback((e) => {
-    // Only start drag if clicking on the background (SVG or edges)
-    const target = e.target
-    const isNode = target.closest('.graph-node')
-    if (isNode) return
-    
-    setIsDragging(true)
-    setHasMoved(false)
-    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
-  }, [pan])
-  
-  const handleMouseMove = useCallback((e) => {
-    if (!isDragging) return
-    setHasMoved(true)
-    setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y })
-  }, [isDragging, dragStart])
-  
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false)
+  // Handle drag position update
+  const handleDrag = useCallback((nodeId, newPos) => {
+    setNodePositions(prev => ({
+      ...prev,
+      [nodeId]: newPos
+    }))
   }, [])
   
-  // Node click handler - separate from drag
-  const handleNodeClick = useCallback((e, node) => {
-    e.stopPropagation()
+  // Handle zoom with mouse wheel
+  const handleWheel = useCallback((e) => {
     e.preventDefault()
-    onSelectCluster(node)
-  }, [onSelectCluster])
+    const delta = e.deltaY > 0 ? -0.1 : 0.1
+    setZoom(z => Math.max(0.3, Math.min(2.5, z + delta)))
+  }, [])
   
-  const handleZoomIn = (e) => {
-    e.stopPropagation()
-    setZoom(z => Math.min(z + 0.2, 2))
-  }
-  const handleZoomOut = (e) => {
-    e.stopPropagation()
-    setZoom(z => Math.max(z - 0.2, 0.5))
-  }
-  const handleReset = (e) => {
-    e.stopPropagation()
-    setZoom(1)
-    setPan({ x: 0, y: 0 })
-  }
+  // Handle pan start
+  const handlePanStart = useCallback((e) => {
+    // Only pan if clicking on the background
+    if (e.target.closest('.graph-node-html')) return
+    setIsPanning(true)
+    panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y }
+  }, [pan])
+  
+  // Handle pan move
+  const handlePanMove = useCallback((e) => {
+    if (!isPanning) return
+    setPan({
+      x: e.clientX - panStart.current.x,
+      y: e.clientY - panStart.current.y
+    })
+  }, [isPanning])
+  
+  // Handle pan end
+  const handlePanEnd = useCallback(() => {
+    setIsPanning(false)
+  }, [])
+  
+  // Zoom controls
+  const handleZoomIn = () => setZoom(z => Math.min(z + 0.2, 2.5))
+  const handleZoomOut = () => setZoom(z => Math.max(z - 0.2, 0.3))
+  const handleReset = () => { setZoom(1); setPan({ x: 0, y: 0 }) }
   
   return (
     <div 
-      className="knowledge-graph"
+      className={`knowledge-graph ${isPanning ? 'knowledge-graph--panning' : ''}`}
       ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onWheel={handleWheel}
+      onMouseDown={handlePanStart}
+      onMouseMove={handlePanMove}
+      onMouseUp={handlePanEnd}
+      onMouseLeave={handlePanEnd}
     >
-      {/* Controls */}
+      {/* Zoom Controls */}
       <div className="knowledge-graph__controls">
         <button onClick={handleZoomIn} title="Zoom in">
           <ZoomIn size={14} />
@@ -425,142 +525,84 @@ function KnowledgeGraph({ clusters, selectedCluster, onSelectCluster }) {
           <ZoomOut size={14} />
         </button>
         <button onClick={handleReset} title="Reset view">
-          <Maximize2 size={14} />
+          <RotateCcw size={14} />
         </button>
+        <span className="knowledge-graph__zoom-level">{Math.round(zoom * 100)}%</span>
       </div>
       
-      {/* Graph SVG */}
-      <svg 
-        className="knowledge-graph__svg"
-        width={dimensions.width}
-        height={dimensions.height}
-        onMouseDown={handleBackgroundMouseDown}
-        style={{ 
-          transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-          cursor: isDragging ? 'grabbing' : 'grab'
+      {/* Zoomable/Pannable container */}
+      <div 
+        className="knowledge-graph__canvas"
+        style={{
+          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transformOrigin: 'center center'
         }}
       >
-        <defs>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        
-        {/* Background rect to capture clicks */}
-        <rect 
-          x="0" 
-          y="0" 
-          width={dimensions.width} 
-          height={dimensions.height} 
-          fill="transparent"
-        />
-        
-        {/* Edges */}
-        <g className="knowledge-graph__edges">
-          {edges.map((edge, i) => {
-            const source = nodes[edge.source]
-            const target = nodes[edge.target]
-            if (!source || !target) return null
-            
-            const isHighlighted = 
-              selectedCluster?.id === clusters[edge.source]?.id ||
-              selectedCluster?.id === clusters[edge.target]?.id ||
-              hoveredNode === edge.source ||
-              hoveredNode === edge.target
-            
-            return (
-              <line
-                key={i}
-                x1={source.x}
-                y1={source.y}
-                x2={target.x}
-                y2={target.y}
-                className={`graph-edge ${isHighlighted ? 'graph-edge--highlighted' : ''}`}
-                strokeWidth={1 + edge.strength * 2}
-                strokeOpacity={isHighlighted ? 0.6 : 0.15 + edge.strength * 0.2}
-              />
-            )
-          })}
-        </g>
-        
-        {/* Nodes */}
-        <g className="knowledge-graph__nodes">
-          {nodes.map((node, i) => {
-            const isSelected = selectedCluster?.id === node.id
-            const isHovered = hoveredNode === i
-            
-            return (
-              <g
-                key={node.id}
-                className={`graph-node ${isSelected ? 'graph-node--selected' : ''} ${isHovered ? 'graph-node--hovered' : ''}`}
-                transform={`translate(${node.x}, ${node.y})`}
-                onClick={(e) => handleNodeClick(e, node)}
-                onMouseDown={(e) => e.stopPropagation()}
-                onMouseEnter={() => setHoveredNode(i)}
-                onMouseLeave={() => setHoveredNode(null)}
-                style={{ cursor: 'pointer' }}
-              >
-                {/* Node circle */}
-                <circle
-                  r={node.size / 2}
-                  className="graph-node__circle"
-                  style={{ '--node-color': node.color.accent }}
-                  filter={isSelected || isHovered ? 'url(#glow)' : undefined}
+        {/* SVG for edges only */}
+        <svg 
+          className="knowledge-graph__svg"
+          width={dimensions.width}
+          height={dimensions.height}
+        >
+          {/* Edges */}
+          <g className="knowledge-graph__edges">
+            {edges.map((edge, i) => {
+              const source = nodes[edge.source]
+              const target = nodes[edge.target]
+              if (!source || !target) return null
+              
+              const isHighlighted = 
+                selectedCluster?.id === clusters[edge.source]?.id ||
+                selectedCluster?.id === clusters[edge.target]?.id ||
+                hoveredNode === edge.source ||
+                hoveredNode === edge.target
+              
+              return (
+                <line
+                  key={i}
+                  x1={source.x}
+                  y1={source.y}
+                  x2={target.x}
+                  y2={target.y}
+                  className={`graph-edge ${isHighlighted ? 'graph-edge--highlighted' : ''}`}
+                  strokeWidth={1 + edge.strength * 2}
+                  strokeOpacity={isHighlighted ? 0.6 : 0.15 + edge.strength * 0.2}
                 />
-                
-                {/* Inner circle */}
-                <circle
-                  r={node.size / 2 - 3}
-                  className="graph-node__inner"
-                />
-                
-                {/* Count */}
-                <text
-                  className="graph-node__count"
-                  textAnchor="middle"
-                  dy="-0.1em"
-                >
-                  {node.traces.length}
-                </text>
-                
-                {/* Label */}
-                <text
-                  className="graph-node__label"
-                  textAnchor="middle"
-                  dy="1.1em"
-                >
-                  traces
-                </text>
-                
-                {/* Name (below node) */}
-                <text
-                  className="graph-node__name"
-                  textAnchor="middle"
-                  y={node.size / 2 + 16}
-                >
-                  {node.name.length > 15 ? node.name.slice(0, 15) + '…' : node.name}
-                </text>
-              </g>
-            )
-          })}
-        </g>
-      </svg>
+              )
+            })}
+          </g>
+        </svg>
+        
+        {/* HTML Nodes - positioned absolutely for reliable click handling */}
+        <div className="knowledge-graph__nodes-container">
+          {nodes.map((node, i) => (
+            <GraphNode
+              key={node.id}
+              node={node}
+              index={i}
+              isSelected={selectedCluster?.id === node.id}
+              isHovered={hoveredNode === i}
+              onSelect={onSelectCluster}
+              onHover={setHoveredNode}
+              onLeave={() => setHoveredNode(null)}
+              onDrag={handleDrag}
+              zoom={zoom}
+            />
+          ))}
+        </div>
+      </div>
       
       {/* Tooltip */}
       <AnimatePresence>
-        {hoveredNode !== null && nodes[hoveredNode] && !isDragging && (
+        {hoveredNode !== null && nodes[hoveredNode] && !isPanning && (
           <motion.div
             className="knowledge-graph__tooltip"
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
             style={{
-              left: nodes[hoveredNode].x * zoom + pan.x,
-              top: (nodes[hoveredNode].y - nodes[hoveredNode].size / 2 - 10) * zoom + pan.y
+              left: nodes[hoveredNode].x * zoom + pan.x + dimensions.width * (1 - zoom) / 2,
+              top: (nodes[hoveredNode].y - nodes[hoveredNode].size / 2 - 10) * zoom + pan.y + dimensions.height * (1 - zoom) / 2
             }}
           >
             <div className="knowledge-graph__tooltip-header">
@@ -585,8 +627,11 @@ function KnowledgeGraph({ clusters, selectedCluster, onSelectCluster }) {
 /**
  * Trace item in cluster detail view
  */
-function MemoryTraceItem({ trace, index }) {
+function MemoryTraceItem({ trace, index, currentCluster, allClusters, onRemove, onMove }) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [showMoveMenu, setShowMoveMenu] = useState(false)
+  
+  const otherClusters = allClusters?.filter(c => c.id !== currentCluster?.id) || []
   
   return (
     <motion.div
@@ -653,6 +698,72 @@ function MemoryTraceItem({ trace, index }) {
                 {trace.sessionName}
               </div>
             )}
+            
+            {/* Cluster Actions */}
+            <div className="memory-trace-item__actions">
+              <button 
+                className="memory-trace-item__action memory-trace-item__action--remove"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemove?.(trace)
+                }}
+                title="Remove from this cluster"
+              >
+                <Trash2 size={12} />
+                Remove from cluster
+              </button>
+              
+              {otherClusters.length > 0 && (
+                <button 
+                  className="memory-trace-item__action memory-trace-item__action--move"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowMoveMenu(!showMoveMenu)
+                  }}
+                  title="Move to another cluster"
+                >
+                  <ArrowRightLeft size={12} />
+                  Move to cluster
+                  <ChevronDown size={12} className={showMoveMenu ? 'rotated' : ''} />
+                </button>
+              )}
+            </div>
+            
+            {/* Move Menu - rendered separately for better visibility */}
+            <AnimatePresence>
+              {showMoveMenu && otherClusters.length > 0 && (
+                <motion.div 
+                  className="memory-trace-item__move-menu"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <div className="memory-trace-item__move-menu-header">
+                    Select target cluster:
+                  </div>
+                  {otherClusters.map(cluster => (
+                    <button
+                      key={cluster.id}
+                      className="memory-trace-item__move-option"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onMove?.(trace, cluster)
+                        setShowMoveMenu(false)
+                      }}
+                    >
+                      <div 
+                        className="memory-trace-item__move-option-color"
+                        style={{ background: cluster.color.accent }}
+                      />
+                      <span>{cluster.name}</span>
+                      <span className="memory-trace-item__move-option-count">
+                        {cluster.traces.length} traces
+                      </span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
@@ -663,7 +774,7 @@ function MemoryTraceItem({ trace, index }) {
 /**
  * Cluster Detail Panel
  */
-function ClusterDetailPanel({ cluster, onClose }) {
+function ClusterDetailPanel({ cluster, allClusters, onClose, onRemoveTrace, onMoveTrace }) {
   const [searchQuery, setSearchQuery] = useState('')
   
   const filteredTraces = useMemo(() => {
@@ -737,7 +848,15 @@ function ClusterDetailPanel({ cluster, onClose }) {
         </div>
         <div className="cluster-detail-panel__traces-list">
           {filteredTraces.map((trace, i) => (
-            <MemoryTraceItem key={trace.span_id || i} trace={trace} index={i} />
+            <MemoryTraceItem 
+              key={trace.span_id || i} 
+              trace={trace} 
+              index={i}
+              currentCluster={cluster}
+              allClusters={allClusters}
+              onRemove={onRemoveTrace}
+              onMove={onMoveTrace}
+            />
           ))}
           {filteredTraces.length === 0 && (
             <div className="cluster-detail-panel__empty">
@@ -757,6 +876,9 @@ function ClusterDetailPanel({ cluster, onClose }) {
 export default function Memory({ data, isAggregated = false, sessions = [] }) {
   const [selectedCluster, setSelectedCluster] = useState(null)
   const [clusterCount, setClusterCount] = useState(6)
+  const [clusterModifications, setClusterModifications] = useState({})
+  // Track removed traces (traces that have been removed from all clusters)
+  const [removedTraces, setRemovedTraces] = useState(new Set())
   
   // Extract and prepare all trace data for clustering
   const memoryTraces = useMemo(() => {
@@ -807,14 +929,93 @@ export default function Memory({ data, isAggregated = false, sessions = [] }) {
   }, [data, isAggregated, sessions])
   
   // Perform semantic clustering
-  const clusters = useMemo(() => {
+  const baseClusters = useMemo(() => {
     return clusterTraces(memoryTraces, clusterCount)
   }, [memoryTraces, clusterCount])
+  
+  // Apply modifications to clusters
+  const clusters = useMemo(() => {
+    return baseClusters.map(cluster => {
+      const mods = clusterModifications[cluster.id]
+      if (!mods) {
+        // Filter out removed traces
+        return {
+          ...cluster,
+          traces: cluster.traces.filter(t => !removedTraces.has(t.span_id || t.prompt))
+        }
+      }
+      
+      // Apply additions and removals
+      let traces = cluster.traces.filter(t => {
+        const traceId = t.span_id || t.prompt
+        return !mods.removed?.has(traceId) && !removedTraces.has(traceId)
+      })
+      
+      if (mods.added) {
+        traces = [...traces, ...mods.added]
+      }
+      
+      return { ...cluster, traces }
+    }).filter(c => c.traces.length > 0)
+  }, [baseClusters, clusterModifications, removedTraces])
   
   // Handle cluster selection
   const handleClusterClick = (cluster) => {
     setSelectedCluster(selectedCluster?.id === cluster.id ? null : cluster)
   }
+  
+  // Handle removing a trace from a cluster
+  const handleRemoveTrace = useCallback((trace) => {
+    const traceId = trace.span_id || trace.prompt
+    setRemovedTraces(prev => new Set([...prev, traceId]))
+    
+    // Update selected cluster to reflect the change
+    setSelectedCluster(prev => {
+      if (!prev) return null
+      const updatedTraces = prev.traces.filter(t => (t.span_id || t.prompt) !== traceId)
+      if (updatedTraces.length === 0) return null
+      return { ...prev, traces: updatedTraces }
+    })
+  }, [])
+  
+  // Handle moving a trace to another cluster
+  const handleMoveTrace = useCallback((trace, targetCluster) => {
+    const traceId = trace.span_id || trace.prompt
+    
+    // Remove from current cluster (add to removed set for source)
+    setClusterModifications(prev => {
+      const newMods = { ...prev }
+      
+      // Remove from source cluster
+      if (selectedCluster) {
+        const sourceMods = newMods[selectedCluster.id] || { removed: new Set(), added: [] }
+        sourceMods.removed = new Set([...(sourceMods.removed || []), traceId])
+        newMods[selectedCluster.id] = sourceMods
+      }
+      
+      // Add to target cluster
+      const targetMods = newMods[targetCluster.id] || { removed: new Set(), added: [] }
+      targetMods.added = [...(targetMods.added || []), trace]
+      newMods[targetCluster.id] = targetMods
+      
+      return newMods
+    })
+    
+    // Update selected cluster to reflect the change
+    setSelectedCluster(prev => {
+      if (!prev) return null
+      const updatedTraces = prev.traces.filter(t => (t.span_id || t.prompt) !== traceId)
+      if (updatedTraces.length === 0) return null
+      return { ...prev, traces: updatedTraces }
+    })
+  }, [selectedCluster])
+  
+  // Reset modifications when cluster count changes
+  useEffect(() => {
+    setClusterModifications({})
+    setRemovedTraces(new Set())
+    setSelectedCluster(null)
+  }, [clusterCount])
   
   if (memoryTraces.length === 0) {
     return (
@@ -915,7 +1116,10 @@ export default function Memory({ data, isAggregated = false, sessions = [] }) {
           {selectedCluster && (
             <ClusterDetailPanel
               cluster={selectedCluster}
+              allClusters={clusters}
               onClose={() => setSelectedCluster(null)}
+              onRemoveTrace={handleRemoveTrace}
+              onMoveTrace={handleMoveTrace}
             />
           )}
         </AnimatePresence>

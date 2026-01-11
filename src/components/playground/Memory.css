@@ -271,12 +271,35 @@
     repeating-linear-gradient(90deg, transparent, transparent 40px, var(--color-border-light) 40px, var(--color-border-light) 41px);
   overflow: hidden;
   user-select: none;
+  cursor: grab;
+}
+
+.knowledge-graph--panning {
+  cursor: grabbing;
+}
+
+.knowledge-graph__canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 50ms ease-out;
 }
 
 .knowledge-graph__svg {
-  display: block;
-  transform-origin: center center;
-  transition: transform 100ms ease-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.knowledge-graph__nodes-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* Graph Controls */
@@ -285,19 +308,25 @@
   top: 12px;
   right: 12px;
   display: flex;
+  align-items: center;
   gap: 4px;
-  z-index: 10;
+  z-index: 20;
+  background: white;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .knowledge-graph__controls button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
   color: var(--color-text-muted);
   cursor: pointer;
   transition: all 150ms ease;
@@ -306,7 +335,15 @@
 .knowledge-graph__controls button:hover {
   background: var(--color-bg-subtle);
   color: var(--color-text);
-  border-color: var(--color-text-muted);
+}
+
+.knowledge-graph__zoom-level {
+  font-size: 0.6875rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  padding: 0 8px;
+  min-width: 40px;
+  text-align: center;
 }
 
 /* Graph Edges */
@@ -319,82 +356,95 @@
   stroke: var(--color-accent);
 }
 
-/* Graph Nodes */
-.graph-node {
-  transition: transform 150ms ease;
-  cursor: pointer !important;
-  pointer-events: all;
+/* HTML Graph Nodes */
+.graph-node-html {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 5;
 }
 
-.graph-node:hover {
-  transform: scale(1.05);
+.graph-node-html:active {
+  cursor: grabbing;
 }
 
-.graph-node--selected {
-  transform: scale(1.08);
-}
-
-.graph-node * {
-  pointer-events: none;
-}
-
-.graph-node__circle {
-  fill: white;
-  stroke: var(--color-border);
-  stroke-width: 2;
+.graph-node-html__inner {
+  width: 100%;
+  height: calc(100% - 20px);
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   transition: all 200ms ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.graph-node:hover .graph-node__circle {
-  stroke: var(--node-color, var(--color-accent));
-  stroke-width: 2.5;
+.graph-node-html:hover .graph-node-html__inner {
+  border-color: var(--node-color, var(--color-accent));
+  border-width: 2.5px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-.graph-node:active .graph-node__circle {
-  stroke: var(--node-color, var(--color-accent));
-  stroke-width: 3;
-  fill: #F8F8F8;
+.graph-node-html:active .graph-node-html__inner {
+  border-color: var(--node-color, var(--color-accent));
+  border-width: 3px;
+  background: var(--node-bg, #F8F8F8);
 }
 
-.graph-node--selected .graph-node__circle {
-  stroke: var(--node-color, var(--color-accent));
-  stroke-width: 3;
-  fill: white;
+.graph-node-html--selected .graph-node-html__inner {
+  border-color: var(--node-color, var(--color-accent));
+  border-width: 3px;
+  box-shadow: 
+    0 0 0 4px rgba(99, 102, 241, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.graph-node__inner {
-  fill: var(--color-bg-subtle);
-  transition: fill 200ms ease;
+.graph-node-html--dragging {
+  z-index: 100;
+  cursor: grabbing !important;
 }
 
-.graph-node:hover .graph-node__inner,
-.graph-node--selected .graph-node__inner {
-  fill: white;
+.graph-node-html--dragging .graph-node-html__inner {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
-.graph-node__count {
+.graph-node-html__count {
   font-family: var(--font-mono);
   font-size: 16px;
   font-weight: 600;
-  fill: var(--color-text);
+  color: var(--color-text);
+  line-height: 1;
 }
 
-.graph-node__label {
+.graph-node-html__label {
   font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  fill: var(--color-text-muted);
+  color: var(--color-text-muted);
+  margin-top: 2px;
 }
 
-.graph-node__name {
+.graph-node-html__name {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 11px;
   font-weight: 500;
-  fill: var(--color-text-secondary);
+  color: var(--color-text-secondary);
   text-transform: capitalize;
+  white-space: nowrap;
+  text-align: center;
 }
 
-.graph-node--selected .graph-node__name {
-  fill: var(--color-text);
+.graph-node-html--selected .graph-node-html__name {
+  color: var(--color-text);
   font-weight: 600;
 }
 
@@ -654,11 +704,11 @@
    ======================================== */
 
 .memory-trace-item {
+  position: relative;
   background: var(--color-bg-subtle);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   margin-bottom: 8px;
-  overflow: hidden;
   transition: all 150ms ease;
 }
 
@@ -756,7 +806,7 @@
 
 .memory-trace-item__details {
   padding: 0 14px 14px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .memory-trace-item__section {
@@ -811,6 +861,119 @@
 
 .memory-trace-item__session svg {
   opacity: 0.7;
+}
+
+/* Trace Actions */
+.memory-trace-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.memory-trace-item__action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  font-family: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.memory-trace-item__action--remove {
+  color: #DC2626;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+}
+
+.memory-trace-item__action--remove:hover {
+  background: #FEE2E2;
+  border-color: #F87171;
+}
+
+.memory-trace-item__action--move {
+  color: var(--color-text-secondary);
+  background: white;
+  border: 1px solid var(--color-border);
+}
+
+.memory-trace-item__action--move:hover {
+  background: var(--color-bg-subtle);
+  border-color: var(--color-text-muted);
+}
+
+.memory-trace-item__action--move svg.rotated {
+  transform: rotate(180deg);
+}
+
+.memory-trace-item__move-menu {
+  margin-top: 10px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.memory-trace-item__move-menu-header {
+  padding: 8px 12px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.memory-trace-item__move-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background 150ms ease;
+  text-align: left;
+}
+
+.memory-trace-item__move-option:last-child {
+  border-bottom: none;
+}
+
+.memory-trace-item__move-option:hover {
+  background: var(--color-bg-subtle);
+}
+
+.memory-trace-item__move-option-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.memory-trace-item__move-option span:first-of-type {
+  flex: 1;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.memory-trace-item__move-option-count {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
 }
 
 /* ========================================
@@ -892,25 +1055,15 @@
     min-height: 350px;
   }
   
-  .knowledge-graph__controls {
-    top: 8px;
-    right: 8px;
-  }
-  
-  .knowledge-graph__controls button {
-    width: 28px;
-    height: 28px;
-  }
-  
-  .graph-node__count {
+  .graph-node-html__count {
     font-size: 14px;
   }
   
-  .graph-node__label {
+  .graph-node-html__label {
     font-size: 7px;
   }
   
-  .graph-node__name {
+  .graph-node-html__name {
     font-size: 10px;
   }
   
@@ -978,15 +1131,15 @@
     min-height: 300px;
   }
   
-  .graph-node__count {
+  .graph-node-html__count {
     font-size: 12px;
   }
   
-  .graph-node__label {
+  .graph-node-html__label {
     font-size: 6px;
   }
   
-  .graph-node__name {
+  .graph-node-html__name {
     font-size: 9px;
   }
   
