@@ -36,8 +36,9 @@ export { default as IssuesView } from './IssuesView'
 // A/B Testing Component
 export { default as ABTesting } from './ABTesting'
 
-// Memory Component
+// Memory Components
 export { default as Memory } from './Memory'
+export { default as MemoryChatbot } from './MemoryChatbot'
 
 // Re-export EnhancePrompts from parent components folder
 // (kept separate as it's a more general-purpose component)

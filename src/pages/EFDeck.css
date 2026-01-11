@@ -358,7 +358,7 @@
    ======================================== */
 
 .ef-slide--memlake {
-  background: linear-gradient(180deg, #fff 0%, #f0fdf4 100%);
+  background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
 }
 
 .ef-memlake-flow {
@@ -888,86 +888,99 @@
    ======================================== */
 
 .ef-slide--hunch4 {
-  background: linear-gradient(180deg, #fff 0%, #f0fdf4 100%);
+  background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
 }
 
-.ef-hunch4-visual {
+.ef-hunch4-equation {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
-  position: relative;
+  flex-wrap: wrap;
 }
 
-.ef-hunch4-circle {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
+.ef-hunch4-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  padding: var(--spacing-xl);
+  background: white;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  min-width: 160px;
   text-align: center;
-  padding: var(--spacing-lg);
-  position: relative;
+  transition: all 200ms ease;
 }
 
-.ef-hunch4-circle--obs {
-  background: rgba(16, 185, 129, 0.15);
-  border: 2px solid #10B981;
-  margin-right: -40px;
-  z-index: 1;
+.ef-hunch4-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
 
-.ef-hunch4-circle--obs svg {
+.ef-hunch4-card__icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.ef-hunch4-card--obs {
+  border-color: #10B981;
+}
+
+.ef-hunch4-card--obs .ef-hunch4-card__icon {
+  background: #ECFDF5;
   color: #10B981;
 }
 
-.ef-hunch4-circle--memory {
-  background: rgba(139, 92, 246, 0.15);
-  border: 2px solid #8B5CF6;
-  margin-left: -40px;
-  z-index: 1;
+.ef-hunch4-card--memory {
+  border-color: #8B5CF6;
 }
 
-.ef-hunch4-circle--memory svg {
+.ef-hunch4-card--memory .ef-hunch4-card__icon {
+  background: #EDE9FE;
   color: #8B5CF6;
 }
 
-.ef-hunch4-circle span {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: var(--spacing-sm);
+.ef-hunch4-card--result {
+  border-color: #10B981;
+  background: white;
+  min-width: 180px;
+}
+
+.ef-hunch4-card--result .ef-hunch4-card__icon {
+  background: linear-gradient(135deg, #ECFDF5 0%, #EDE9FE 100%);
+  color: #10B981;
+}
+
+.ef-hunch4-card--result h4 {
   color: var(--color-text);
 }
 
-.ef-hunch4-circle p {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  margin-top: 4px;
+.ef-hunch4-card--result p {
+  color: var(--color-text-secondary);
 }
 
-.ef-hunch4-intersection {
-  position: absolute;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(135deg, #10B981 0%, #8B5CF6 100%);
-  border-radius: 50%;
-  color: white;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-}
-
-.ef-hunch4-intersection span {
-  font-size: 0.6875rem;
+.ef-hunch4-card h4 {
+  font-size: 1rem;
   font-weight: 600;
-  text-align: center;
-  margin-top: 4px;
+  margin-bottom: 4px;
+  color: var(--color-text);
+}
+
+.ef-hunch4-card p {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.ef-hunch4-operator {
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--color-text-muted);
 }
 
 .ef-hunch4-insight {
@@ -1664,20 +1677,17 @@
     transform: rotate(90deg);
   }
 
-  .ef-hunch4-visual {
-    flex-direction: column;
+  .ef-hunch4-equation {
     gap: var(--spacing-md);
   }
 
-  .ef-hunch4-circle {
-    margin: 0;
-    width: 160px;
-    height: 160px;
+  .ef-hunch4-card {
+    min-width: 140px;
+    padding: var(--spacing-lg);
   }
 
-  .ef-hunch4-intersection {
-    position: relative;
-    margin: calc(var(--spacing-md) * -1) 0;
+  .ef-hunch4-operator {
+    font-size: 1.5rem;
   }
 
   .ef-pilots-logos {

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { fadeInUp } from './constants'
 import { formatDuration, truncateString, getPromptText, extractLLMEvents } from './utils'
+import MemoryChatbot from './MemoryChatbot'
 import './Memory.css'
 
 /**
@@ -1124,6 +1125,12 @@ export default function Memory({ data, isAggregated = false, sessions = [] }) {
           )}
         </AnimatePresence>
       </div>
+      
+      {/* Memory Assistant Chatbot */}
+      <MemoryChatbot 
+        clusters={clusters} 
+        memoryTraces={memoryTraces} 
+      />
     </div>
   )
 }

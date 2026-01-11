@@ -544,22 +544,33 @@ function Hunch4Slide() {
           is the place to bet
         </motion.p>
 
-        <motion.div className="ef-hunch4-visual" variants={scaleIn}>
-          <div className="ef-hunch4-circle ef-hunch4-circle--obs">
-            <Eye size={32} />
-            <span>Observability</span>
+        <motion.div className="ef-hunch4-equation" variants={scaleIn}>
+          <div className="ef-hunch4-card ef-hunch4-card--obs">
+            <div className="ef-hunch4-card__icon">
+              <Eye size={28} />
+            </div>
+            <h4>Observability</h4>
             <p>See what agents do</p>
           </div>
           
-          <div className="ef-hunch4-intersection">
-            <Zap size={28} />
-            <span>Shepherd MemLake</span>
+          <div className="ef-hunch4-operator">+</div>
+          
+          <div className="ef-hunch4-card ef-hunch4-card--memory">
+            <div className="ef-hunch4-card__icon">
+              <Brain size={28} />
+            </div>
+            <h4>Memory</h4>
+            <p>Context that evolves</p>
           </div>
           
-          <div className="ef-hunch4-circle ef-hunch4-circle--memory">
-            <Brain size={32} />
-            <span>Memory</span>
-            <p>Context that evolves</p>
+          <div className="ef-hunch4-operator">=</div>
+          
+          <div className="ef-hunch4-card ef-hunch4-card--result">
+            <div className="ef-hunch4-card__icon">
+              <Zap size={28} />
+            </div>
+            <h4>Shepherd MemLake</h4>
+            <p>Trustworthy AI agents</p>
           </div>
         </motion.div>
 
@@ -591,7 +602,7 @@ function ComplianceSlide() {
           <div className="ef-compliance-domain">
             <div className="ef-compliance-domain__header">
               <Shield size={28} />
-              <h4>Fintech (Compliance)</h4>
+              <h4>Fintech</h4>
             </div>
             <p>Extensively spoken to stakeholders in fintech sector about their regulatory requirements.</p>
           </div>
@@ -639,6 +650,7 @@ function PilotsSlide() {
     { name: 'Fenmo.ai', logo: `${basePath}fenmoai_logo.jpeg` },
     { name: 'Intraintel.ai', logo: `${basePath}intraintel.jpeg` },
     { name: 'Verifast.ai', logo: `${basePath}verifast_tech_logo.jpeg` },
+    { name: 'Nesti', logo: `${basePath}nesti.jpg` },
   ]
 
   const painPoints = [
