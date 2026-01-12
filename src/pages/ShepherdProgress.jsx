@@ -137,11 +137,29 @@ const weeks = {
       tractionUpdates: 3,
       strategicInsights: 2
     }
+  },
+  week4: {
+    id: 'week4',
+    dateRange: 'January 5 – January 11, 2026',
+    shortDate: 'Jan 5–11',
+    slides: [
+      { id: 'cover', title: 'Progress' },
+      { id: 'highlight', title: 'Highlight' },
+      { id: 'dev-updates', title: 'Development' },
+      { id: 'traction', title: 'Traction' },
+      { id: 'strategic-update', title: 'Strategy' },
+      { id: 'whats-next', title: "What's Next" },
+    ],
+    stats: {
+      devUpdates: 1,
+      tractionUpdates: 3,
+      strategicInsights: 2
+    }
   }
 }
 
 // Order of weeks (newest first)
-const weekOrder = ['week3', 'week2', 'week1']
+const weekOrder = ['week4', 'week3', 'week2', 'week1']
 
 function WeekSelector({ currentWeek, onWeekChange }) {
   return (
@@ -2300,6 +2318,426 @@ function ReadyToRaiseSlide() {
 }
 
 // ========================================
+// WEEK 4 SPECIFIC SLIDES
+// ========================================
+
+// Cover Slide - Week 4
+function CoverSlideWeek4() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--cover"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.div className="pitch-cover__logo" variants={fadeInUp}>
+          <svg viewBox="0 0 32 32" className="pitch-cover__logo-icon">
+            <rect width="32" height="32" rx="6" fill="#111"/>
+            <path d="M8 12L16 8L24 12L16 16L8 12Z" stroke="white" strokeWidth="1.5" fill="none"/>
+            <path d="M8 16L16 20L24 16" stroke="white" strokeWidth="1.5" fill="none"/>
+            <path d="M8 20L16 24L24 20" stroke="white" strokeWidth="1.5" fill="none"/>
+          </svg>
+        </motion.div>
+        
+        <motion.h1 className="pitch-cover__title" variants={fadeInUp}>
+          Progress Report
+        </motion.h1>
+        
+        <motion.p className="pitch-cover__tagline" variants={fadeInUp}>
+          Building the observability layer for AI agents
+        </motion.p>
+
+        <motion.p className="pitch-cover__hook" variants={fadeInUp}>
+          January 5 – January 11, 2026
+        </motion.p>
+        
+        <motion.div className="pitch-cover__stats" variants={fadeInUp}>
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">1</span>
+            <span className="pitch-cover__stat-label">Dev Update</span>
+          </div>
+          <div className="pitch-cover__stat-divider" />
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">3</span>
+            <span className="pitch-cover__stat-label">Traction Updates</span>
+          </div>
+          <div className="pitch-cover__stat-divider" />
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">🏆</span>
+            <span className="pitch-cover__stat-label">EF Hack</span>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Highlight Slide - Week 4 (EF Hack + Shepherd Memory)
+function HighlightSlideWeek4() {
+  const basePath = import.meta.env.BASE_URL
+  
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--highlight"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>🏆 Highlight of the Week</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Participated in <span className="pitch-highlight-green">Entrepreneurs First Hack</span>
+        </motion.h2>
+        
+        <motion.div className="progress-highlight-content" variants={fadeInUp}>
+          <div className="progress-highlight-card progress-highlight-card--main">
+            <div className="progress-highlight-card__header">
+              <img src={`${basePath}ef.png`} alt="Entrepreneur First" className="progress-highlight-card__logo" />
+              <div>
+                <h3>EF Hackathon</h3>
+                <span className="progress-highlight-card__badge">Participated</span>
+              </div>
+            </div>
+            
+            <div className="progress-highlight-card__body">
+              <div className="progress-highlight-feature">
+                <Brain size={24} />
+                <div>
+                  <h4>Built Shepherd Memory</h4>
+                  <p>Observable memory for AI agents — combining traces with knowledge graphs for enhanced context and auditability.</p>
+                </div>
+              </div>
+              
+              <div className="progress-highlight-feature">
+                <Database size={24} />
+                <div>
+                  <h4>MemLake Architecture</h4>
+                  <p>Shepherd dumps traces → MemLake subscribes and creates knowledge graphs → Agentic pipelines query for enhanced context.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="progress-highlight-card__cta">
+              <Link to="/ef" className="btn btn--secondary">
+                <Play size={16} />
+                View EF Pitch Deck
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-highlight-summary" variants={fadeInUp}>
+          <Sparkles size={20} />
+          <p><strong>Key Insight:</strong> Memory + Observability = Trustworthy AI Agents</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Dev Updates Slide - Week 4
+function DevUpdatesSlideWeek4() {
+  const devUpdates = [
+    {
+      icon: <Terminal size={28} />,
+      title: 'Code Execution via MCP',
+      description: 'Worked on Code Execution capabilities using MCP to cater to Fenmo.ai\'s specific requirements. This enables agents to execute and test code directly through the MCP interface.',
+      status: 'testing',
+      highlight: true,
+      details: [
+        'Code execution sandbox integration',
+        'MCP-based code running interface',
+        'Testing in progress before shipping'
+      ]
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--dev-updates"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>This Week</motion.span>
+        
+        <motion.h2 className="pitch-slide__title pitch-slide__title--inline" variants={fadeInUp}>
+          <Code size={32} />
+          <span>Development Updates</span>
+        </motion.h2>
+
+        <motion.div className="progress-dev-grid progress-dev-grid--single" variants={fadeInUp}>
+          {devUpdates.map((update, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-dev-card ${update.highlight ? 'progress-dev-card--highlight' : ''}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.15 }}
+            >
+              <div className="progress-dev-card__header">
+                <div className="progress-dev-card__icon">{update.icon}</div>
+                <div className="progress-dev-card__title-section">
+                  <h3>{update.title}</h3>
+                  <span className={`progress-dev-card__status progress-dev-card__status--${update.status}`}>
+                    {update.status === 'testing' && <FlaskConical size={14} />}
+                    {update.status}
+                  </span>
+                </div>
+              </div>
+              <p className="progress-dev-card__desc">{update.description}</p>
+              {update.details && (
+                <ul className="progress-dev-card__details">
+                  {update.details.map((detail, j) => (
+                    <li key={j}>
+                      <CheckCircle size={14} />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-dev-summary" variants={fadeInUp}>
+          <p>
+            <strong>Key Focus:</strong> Building code execution capabilities to unlock new use cases 
+            for Fenmo.ai and other pilot customers.
+          </p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Traction Slide - Week 4
+function TractionSlideWeek4() {
+  const tractionUpdates = [
+    {
+      icon: <X size={24} />,
+      company: 'Supatest.ai',
+      title: 'Talks Didn\'t Progress',
+      description: 'Discussions with Supatest.ai didn\'t make it through. Moving on to other opportunities.',
+      status: 'closed',
+      statusLabel: 'Closed'
+    },
+    {
+      icon: <AlertCircle size={24} />,
+      company: 'QuickReply.ai',
+      title: 'No Requirement',
+      description: 'QuickReply.ai indicated they have no current requirement for observability tooling.',
+      status: 'closed',
+      statusLabel: 'No Fit'
+    },
+    {
+      icon: <Users size={24} />,
+      company: 'Cold Outreach',
+      title: '38 Companies, 53 People',
+      description: 'Extensive cold outreach campaign resulted in only 1 interaction — smallstep.ai, but they\'ve pivoted to building MCP so no longer in talks.',
+      status: 'low-conversion',
+      statusLabel: '~2%'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--traction"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>This Week</motion.span>
+        
+        <motion.h2 className="pitch-slide__title pitch-slide__title--inline" variants={fadeInUp}>
+          <TrendingUp size={32} />
+          <span>Traction Updates</span>
+        </motion.h2>
+
+        <motion.div className="progress-traction-grid progress-traction-grid--three" variants={fadeInUp}>
+          {tractionUpdates.map((update, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-traction-card progress-traction-card--muted`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <div className="progress-traction-card__header">
+                <div className="progress-traction-card__icon">{update.icon}</div>
+                <div className="progress-traction-card__company">{update.company}</div>
+                <span className={`progress-traction-card__status progress-traction-card__status--${update.status}`}>
+                  {update.statusLabel}
+                </span>
+              </div>
+              <h4 className="progress-traction-card__title">{update.title}</h4>
+              <p className="progress-traction-card__desc">{update.description}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-traction-summary progress-traction-summary--warning" variants={fadeInUp}>
+          <AlertTriangle size={20} />
+          <p>"Tough week for traction — time to rethink the approach."</p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Strategic Update Slide - Week 4
+function StrategicUpdateSlideWeek4() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--strategic"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Strategic Thinking</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          Recalibrating GTM Strategy
+        </motion.h2>
+
+        <motion.div className="progress-strategic-issues" variants={fadeInUp}>
+          <div className="progress-strategic-issue">
+            <div className="progress-strategic-issue__header">
+              <AlertTriangle size={24} />
+              <h4>GTM Challenge</h4>
+            </div>
+            <div className="progress-strategic-issue__content">
+              <p><strong>Cold outreach is not working super well.</strong></p>
+              <ul>
+                <li>38 companies contacted</li>
+                <li>53 people reached</li>
+                <li>Only 1 meaningful interaction</li>
+                <li>~2% conversion rate</li>
+              </ul>
+            </div>
+            <div className="progress-strategic-issue__action">
+              <Target size={18} />
+              <span><strong>Action:</strong> Planning to target Alumni Network over the coming week</span>
+            </div>
+          </div>
+
+          <div className="progress-strategic-issue">
+            <div className="progress-strategic-issue__header">
+              <AlertCircle size={24} />
+              <h4>ICP Mismatch</h4>
+            </div>
+            <div className="progress-strategic-issue__content">
+              <p><strong>Intraintel.ai not fitting ICP</strong></p>
+              <ul>
+                <li>Not producing enough traces</li>
+                <li>Volume insufficient to monetize</li>
+                <li>Need higher-volume use cases</li>
+              </ul>
+            </div>
+            <div className="progress-strategic-issue__action">
+              <Search size={18} />
+              <span><strong>Learning:</strong> Validate trace volume before committing to pilots</span>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-strategic-pivot" variants={fadeInUp}>
+          <Lightbulb size={24} />
+          <div>
+            <h4>Key Pivot</h4>
+            <p>Moving from cold outreach to <strong>warm introductions via Alumni Network</strong> — leveraging existing relationships for higher conversion.</p>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// What's Next Slide - Week 4
+function WhatsNextSlideWeek4() {
+  const nextItems = [
+    {
+      icon: <Rocket size={24} />,
+      title: 'Ship New Release of MCP',
+      description: 'Complete testing and ship the code execution feature',
+      priority: 'high'
+    },
+    {
+      icon: <Megaphone size={24} />,
+      title: 'Increase Outreach',
+      description: 'Focus on Alumni Network and warm introductions',
+      priority: 'high'
+    },
+    {
+      icon: <Target size={24} />,
+      title: 'Enhance GTM',
+      description: 'Refine positioning and target higher-volume use cases',
+      priority: 'high'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--next"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Looking Ahead</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          What's Next?
+        </motion.h2>
+        
+        <motion.div className="progress-next-grid" variants={fadeInUp}>
+          {nextItems.map((item, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-next-card progress-next-card--${item.priority}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <div className="progress-next-card__icon">{item.icon}</div>
+              <div className="progress-next-card__content">
+                <h4>{item.title}</h4>
+                <p>{item.description}</p>
+              </div>
+              <span className={`progress-next-card__priority progress-next-card__priority--${item.priority}`}>
+                {item.priority === 'high' && <Target size={14} />}
+                {item.priority}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-next-focus" variants={fadeInUp}>
+          <Zap size={24} />
+          <p><strong>Focus:</strong> Ship, Outreach, Refine — building momentum for the next phase</p>
+        </motion.div>
+
+        <motion.div className="progress-next-cta" variants={fadeInUp}>
+          <Link to="/pitch-deck" className="btn btn--secondary">
+            <ArrowLeft size={16} />
+            Back to Pitch Deck
+          </Link>
+          <Link to="/contact" className="btn btn--primary">
+            Get in Touch
+            <ArrowRight size={16} />
+          </Link>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ========================================
 // WEEK 1 SPECIFIC SLIDES (kept for reference)
 // ========================================
 
@@ -2440,6 +2878,19 @@ export default function ShepherdProgress() {
 
   const renderSlide = () => {
     const slideId = currentWeekData.slides[currentSlide]?.id
+
+    // Week 4 slides
+    if (currentWeek === 'week4') {
+      switch (slideId) {
+        case 'cover': return <CoverSlideWeek4 />
+        case 'highlight': return <HighlightSlideWeek4 />
+        case 'dev-updates': return <DevUpdatesSlideWeek4 />
+        case 'traction': return <TractionSlideWeek4 />
+        case 'strategic-update': return <StrategicUpdateSlideWeek4 />
+        case 'whats-next': return <WhatsNextSlideWeek4 />
+        default: return <CoverSlideWeek4 />
+      }
+    }
 
     // Week 3 slides
     if (currentWeek === 'week3') {
