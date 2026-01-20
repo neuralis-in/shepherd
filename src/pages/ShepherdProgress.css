@@ -3317,3 +3317,228 @@
     text-align: center;
   }
 }
+
+/* ========================================
+   WEEK 5 SPECIFIC STYLES
+   ======================================== */
+
+/* Strategic Belief Section */
+.progress-strategic-belief {
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+  margin-bottom: var(--spacing-xl);
+}
+
+.progress-strategic-belief__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.progress-strategic-belief__header svg {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.progress-strategic-belief__header h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.progress-strategic-belief__text {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.progress-strategic-belief__text strong {
+  color: white;
+}
+
+/* Strategic Hunches Section */
+.progress-strategic-hunches {
+  margin-bottom: var(--spacing-xl);
+}
+
+.progress-strategic-hunches__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text);
+}
+
+.progress-strategic-hunches__title svg {
+  color: var(--color-accent);
+}
+
+.progress-strategic-hunch {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+  transition: all 200ms ease;
+}
+
+.progress-strategic-hunch:hover {
+  border-color: var(--color-text-muted);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.progress-strategic-hunch__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-accent);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.progress-strategic-hunch__content {
+  flex: 1;
+}
+
+.progress-strategic-hunch__content h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--color-text);
+}
+
+.progress-strategic-hunch__content p {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.5;
+}
+
+.progress-strategic-hunch__insight {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-accent);
+}
+
+.progress-strategic-hunch__insight svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.progress-strategic-hunch__insight span {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.progress-strategic-hunch__insight--warning {
+  background: #FEF3C7;
+  border-left-color: #D97706;
+}
+
+.progress-strategic-hunch__insight--warning svg {
+  color: #D97706;
+}
+
+.progress-strategic-hunch__insight--warning span {
+  color: #92400E;
+}
+
+.progress-strategic-hunch__insight--important {
+  background: var(--color-bg-subtle);
+  border-left-color: var(--color-accent);
+}
+
+.progress-strategic-hunch__insight--important svg {
+  color: var(--color-accent);
+}
+
+.progress-strategic-hunch__insight--important span {
+  color: var(--color-text);
+}
+
+/* Strategic Question Section */
+.progress-strategic-question {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+}
+
+.progress-strategic-question__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.progress-strategic-question__icon svg {
+  color: white;
+}
+
+.progress-strategic-question__content h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.progress-strategic-question__content p {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+/* Responsive adjustments for Week 5 */
+@media (max-width: 768px) {
+  .progress-strategic-belief__text {
+    font-size: 1.125rem;
+  }
+
+  .progress-strategic-hunch {
+    flex-direction: column;
+  }
+
+  .progress-strategic-hunch__number {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .progress-strategic-question {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .progress-strategic-question__icon {
+    margin-bottom: var(--spacing-md);
+  }
+}

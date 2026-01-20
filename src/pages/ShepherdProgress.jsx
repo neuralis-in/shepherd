@@ -155,11 +155,26 @@ const weeks = {
       tractionUpdates: 3,
       strategicInsights: 2
     }
+  },
+  week5: {
+    id: 'week5',
+    dateRange: 'January 12 – January 18, 2026',
+    shortDate: 'Jan 12–18',
+    slides: [
+      { id: 'cover', title: 'Progress' },
+      { id: 'dev-updates', title: 'Development' },
+      { id: 'strategic-thinking', title: 'Strategy' },
+      { id: 'whats-next', title: "What's Next" },
+    ],
+    stats: {
+      devUpdates: 1,
+      strategicInsights: 4
+    }
   }
 }
 
 // Order of weeks (newest first)
-const weekOrder = ['week4', 'week3', 'week2', 'week1']
+const weekOrder = ['week5', 'week4', 'week3', 'week2', 'week1']
 
 function WeekSelector({ currentWeek, onWeekChange }) {
   return (
@@ -2738,6 +2753,302 @@ function WhatsNextSlideWeek4() {
 }
 
 // ========================================
+// WEEK 5 SPECIFIC SLIDES
+// ========================================
+
+// Cover Slide - Week 5
+function CoverSlideWeek5() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--cover"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.div className="pitch-cover__logo" variants={fadeInUp}>
+          <svg viewBox="0 0 32 32" className="pitch-cover__logo-icon">
+            <rect width="32" height="32" rx="6" fill="#111"/>
+            <path d="M8 12L16 8L24 12L16 16L8 12Z" stroke="white" strokeWidth="1.5" fill="none"/>
+            <path d="M8 16L16 20L24 16" stroke="white" strokeWidth="1.5" fill="none"/>
+            <path d="M8 20L16 24L24 20" stroke="white" strokeWidth="1.5" fill="none"/>
+          </svg>
+        </motion.div>
+        
+        <motion.h1 className="pitch-cover__title" variants={fadeInUp}>
+          Progress Report
+        </motion.h1>
+        
+        <motion.p className="pitch-cover__tagline" variants={fadeInUp}>
+          Building the observability layer for AI agents
+        </motion.p>
+
+        <motion.p className="pitch-cover__hook" variants={fadeInUp}>
+          January 12 – January 18, 2026
+        </motion.p>
+        
+        <motion.div className="pitch-cover__stats" variants={fadeInUp}>
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">1</span>
+            <span className="pitch-cover__stat-label">Dev Update</span>
+          </div>
+          <div className="pitch-cover__stat-divider" />
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">4</span>
+            <span className="pitch-cover__stat-label">Strategic Insights</span>
+          </div>
+          <div className="pitch-cover__stat-divider" />
+          <div className="pitch-cover__stat">
+            <span className="pitch-cover__stat-value">🚀</span>
+            <span className="pitch-cover__stat-label">MCP Shipped</span>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Dev Updates Slide - Week 5
+function DevUpdatesSlideWeek5() {
+  const devUpdates = [
+    {
+      icon: <Plug size={28} />,
+      title: 'MCP with Code Execution Shipped',
+      description: 'Rolled out MCP with code execution capabilities as requested by FenmoAI. This enables agents to execute and test code directly through the MCP interface.',
+      status: 'shipped',
+      highlight: true,
+      details: [
+        'Code execution sandbox fully integrated',
+        'MCP-based code running interface live',
+        'Shipped per FenmoAI requirements'
+      ]
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--dev-updates"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>This Week</motion.span>
+        
+        <motion.h2 className="pitch-slide__title pitch-slide__title--inline" variants={fadeInUp}>
+          <Code size={32} />
+          <span>Development Updates</span>
+        </motion.h2>
+
+        <motion.div className="progress-dev-grid progress-dev-grid--single" variants={fadeInUp}>
+          {devUpdates.map((update, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-dev-card ${update.highlight ? 'progress-dev-card--highlight' : ''}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.15 }}
+            >
+              <div className="progress-dev-card__header">
+                <div className="progress-dev-card__icon">{update.icon}</div>
+                <div className="progress-dev-card__title-section">
+                  <h3>{update.title}</h3>
+                  <span className={`progress-dev-card__status progress-dev-card__status--${update.status}`}>
+                    {update.status === 'shipped' && <Rocket size={14} />}
+                    {update.status}
+                  </span>
+                </div>
+              </div>
+              <p className="progress-dev-card__desc">{update.description}</p>
+              {update.details && (
+                <ul className="progress-dev-card__details">
+                  {update.details.map((detail, j) => (
+                    <li key={j}>
+                      <CheckCircle size={14} />
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-dev-summary" variants={fadeInUp}>
+          <p>
+            <strong>Key Delivery:</strong> MCP code execution feature shipped to FenmoAI, 
+            unlocking new use cases for their agentic workflows.
+          </p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Strategic Thinking Slide - Week 5
+function StrategicThinkingSlideWeek5() {
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--strategic"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Strategic Thinking</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          The Future of Shipping Code
+        </motion.h2>
+
+        <motion.div className="progress-strategic-belief" variants={fadeInUp}>
+          <div className="progress-strategic-belief__header">
+            <Sparkles size={24} />
+            <h4>Core Belief</h4>
+          </div>
+          <p className="progress-strategic-belief__text">
+            <strong>5 years from now,</strong> shipping code will be similar to flying aircraft — 
+            ship MVP and autonomous agents will observe, fix/improve, test and deploy.
+          </p>
+        </motion.div>
+
+        <motion.div className="progress-strategic-hunches" variants={fadeInUp}>
+          <h4 className="progress-strategic-hunches__title">
+            <Brain size={20} />
+            Hunches & Analysis
+          </h4>
+          
+          <div className="progress-strategic-hunch">
+            <div className="progress-strategic-hunch__number">1</div>
+            <div className="progress-strategic-hunch__content">
+              <h5>Human-in-Loop Analysis Won't Scale</h5>
+              <p>Too much human in loop analysis will prevent the belief from coming true.</p>
+              <div className="progress-strategic-hunch__insight">
+                <Lightbulb size={16} />
+                <span><strong>Insight:</strong> Observability is the only place where we need human in loop (pilots) to guide. Shepherd MCP cuts it — but do we need to cut it?</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="progress-strategic-hunch">
+            <div className="progress-strategic-hunch__number">2</div>
+            <div className="progress-strategic-hunch__content">
+              <h5>Observability Workforce Value</h5>
+              <p>How much value is added by reducing observability in workforce?</p>
+              <div className="progress-strategic-hunch__insight progress-strategic-hunch__insight--warning">
+                <AlertTriangle size={16} />
+                <span><strong>Finding:</strong> Not significant — only ~4.7% of engineering headcount is in developer productivity/observability teams. SRE ratio is 1:10 (up to 1:50 in automated environments). Risk/Value ratio is too high.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="progress-strategic-hunch">
+            <div className="progress-strategic-hunch__number">3</div>
+            <div className="progress-strategic-hunch__content">
+              <h5>Speed is Not a Moat</h5>
+              <p>Reducing HIL Analysis is a good feature, but not a defensible moat.</p>
+              <div className="progress-strategic-hunch__insight progress-strategic-hunch__insight--important">
+                <Target size={16} />
+                <span><strong>Key Question:</strong> What can be a technical moat? From SupatestAI learned that isolated unit evals don't give complete picture — maybe reinvent evals with trajectory?</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div className="progress-strategic-question" variants={fadeInUp}>
+          <div className="progress-strategic-question__icon">
+            <Search size={28} />
+          </div>
+          <div className="progress-strategic-question__content">
+            <h4>Next Big Question</h4>
+            <p><strong>What is Shepherd's Technical Moat?</strong></p>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// What's Next Slide - Week 5
+function WhatsNextSlideWeek5() {
+  const nextItems = [
+    {
+      icon: <Users size={24} />,
+      title: 'Alumni Network Outreach',
+      description: 'Leverage warm introductions through alumni connections for higher conversion',
+      priority: 'high'
+    },
+    {
+      icon: <Megaphone size={24} />,
+      title: 'Cold Outreach (Continued)',
+      description: 'Continue cold outreach in parallel with warm introductions',
+      priority: 'medium'
+    },
+    {
+      icon: <Brain size={24} />,
+      title: 'Technical Moat Research',
+      description: 'Deep dive into potential technical differentiators — trajectory evals, reinventing evaluations',
+      priority: 'high'
+    }
+  ]
+
+  return (
+    <motion.div 
+      className="pitch-slide pitch-slide--next"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <div className="pitch-slide__content">
+        <motion.span className="pitch-slide__label" variants={fadeInUp}>Looking Ahead</motion.span>
+        
+        <motion.h2 className="pitch-slide__title" variants={fadeInUp}>
+          What's Next?
+        </motion.h2>
+        
+        <motion.div className="progress-next-grid" variants={fadeInUp}>
+          {nextItems.map((item, i) => (
+            <motion.div 
+              key={i}
+              className={`progress-next-card progress-next-card--${item.priority}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <div className="progress-next-card__icon">{item.icon}</div>
+              <div className="progress-next-card__content">
+                <h4>{item.title}</h4>
+                <p>{item.description}</p>
+              </div>
+              <span className={`progress-next-card__priority progress-next-card__priority--${item.priority}`}>
+                {item.priority === 'high' && <Target size={14} />}
+                {item.priority}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div className="progress-next-focus" variants={fadeInUp}>
+          <Zap size={24} />
+          <p><strong>Focus:</strong> Outreach + Technical Moat — finding product-market fit through both distribution and differentiation</p>
+        </motion.div>
+
+        <motion.div className="progress-next-cta" variants={fadeInUp}>
+          <Link to="/pitch-deck" className="btn btn--secondary">
+            <ArrowLeft size={16} />
+            Back to Pitch Deck
+          </Link>
+          <Link to="/contact" className="btn btn--primary">
+            Get in Touch
+            <ArrowRight size={16} />
+          </Link>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ========================================
 // WEEK 1 SPECIFIC SLIDES (kept for reference)
 // ========================================
 
@@ -2878,6 +3189,17 @@ export default function ShepherdProgress() {
 
   const renderSlide = () => {
     const slideId = currentWeekData.slides[currentSlide]?.id
+
+    // Week 5 slides
+    if (currentWeek === 'week5') {
+      switch (slideId) {
+        case 'cover': return <CoverSlideWeek5 />
+        case 'dev-updates': return <DevUpdatesSlideWeek5 />
+        case 'strategic-thinking': return <StrategicThinkingSlideWeek5 />
+        case 'whats-next': return <WhatsNextSlideWeek5 />
+        default: return <CoverSlideWeek5 />
+      }
+    }
 
     // Week 4 slides
     if (currentWeek === 'week4') {
